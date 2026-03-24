@@ -85,12 +85,18 @@ export default function Stage5_Memory({
   };
 
   useEffect(() => {
+    document.documentElement.style.cursor = "auto";
+    document.body.style.cursor = "auto";
+
     return () => {
       mountedRef.current = false;
       clearScheduledTimeouts();
       if (audioContextRef.current) {
         void audioContextRef.current.close();
       }
+
+      document.documentElement.style.cursor = "";
+      document.body.style.cursor = "";
     };
   }, []);
 
