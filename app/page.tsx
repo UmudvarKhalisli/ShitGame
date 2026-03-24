@@ -54,8 +54,18 @@ function StageRouter() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("admin") === "1") {
+      setShowAdminLogin(true);
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "u") {
+      const isPrimaryCombo =
+        event.ctrlKey && event.shiftKey && (event.key.toLowerCase() === "u" || event.code === "KeyU");
+      const isFallbackCombo =
+        event.ctrlKey && event.altKey && (event.key.toLowerCase() === "u" || event.code === "KeyU");
+
+      if (isPrimaryCombo || isFallbackCombo) {
         event.preventDefault();
         setShowAdminLogin((prev) => !prev);
       }
