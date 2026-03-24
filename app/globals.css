@@ -13,6 +13,11 @@ body {
   cursor: none;
 }
 
+.stage5-cursor-visible,
+.stage5-cursor-visible * {
+  cursor: auto !important;
+}
+
 .roaster-wink {
   animation: roaster-wink 0.45s ease-in-out infinite;
 }

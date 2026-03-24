@@ -360,11 +360,14 @@ function ChaosApp() {
         ? "drunk-level-2"
         : "drunk-level-3";
   const isEffectActive = gameState.isDrunkBrowserActive && gameState.sobriety < 100;
+  const isStageFive = gameState.currentStage === 5;
 
   return (
     <>
       <main
         className={`mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center p-6 ${
+          isStageFive ? "stage5-cursor-visible" : ""
+        } ${
           isEffectActive ? `drunk-browser-active ${intensityClass}` : ""
         }`}
       >
