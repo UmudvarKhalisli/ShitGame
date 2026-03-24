@@ -1,2 +1,0 @@
-[    6353ms] [ERROR] WebSocket connection to 'ws://localhost:3002/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/components/react-dev-overlay/pages/websocket.js:84
-[   13689ms] [ERROR] WebSocket connection to 'ws://localhost:3002/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/components/react-dev-overlay/pages/websocket.js:84
