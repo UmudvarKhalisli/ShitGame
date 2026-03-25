@@ -39,7 +39,40 @@ function StageRouter() {
   const [adminKeyInput, setAdminKeyInput] = useState("");
   const [adminError, setAdminError] = useState("");
   const [isAdminLoading, setIsAdminLoading] = useState(false);
+  const [currentStageAttempts, setCurrentStageAttempts] = useState(0);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const rapidClickRef = useRef({ count: 0, lastClickAt: 0 });
+
+  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7, { soft: string; hard: string }> = {
+    1: {
+      soft: "Düyməyə yox, hərəkət ritminə fikir ver. Eyni qayda ilə həmişə qaçmır.",
+      hard: "Düymə qaçanda bir tərəfi sıxışdır və kənara qaçış yolunu bağla.",
+    },
+    2: {
+      soft: "Bəzən ən sadə cavab ən gec qəbul olunur. Tələsmə, ardıcıl yoxla.",
+      hard: "Adı bir dəfə yox, tam eyni şəkildə yenidən daxil et; boşluq və böyük-kiçik hərf fərqinə bax.",
+    },
+    3: {
+      soft: "Burada məqsəd razılaşmaq deyil, düzgün anda səbir göstərməkdir.",
+      hard: "Şərtləri sonuna qədər sürüşdür, sonra checkbox və təsdiqi ardıcıllıqla et.",
+    },
+    4: {
+      soft: "Popup-lara qarşı güc yox, ardıcıllıq işləyir.",
+      hard: "Əvvəl diqqəti yayındıran pəncərələri bağla, əsas submit düyməsinə ən sonda qayıt.",
+    },
+    5: {
+      soft: "Rənglər aldadır. Mərkəz nöqtə düymənin kimliyidir.",
+      hard: "Yalnız düymə indeksini yadda saxla (yerini/rəngini yox). 3→4→5 ardıcıllığına fokuslan.",
+    },
+    6: {
+      soft: "Sual məzmununa inan, vizuala yox. Düz cavab var.",
+      hard: "Q2-də mövqeyə yox, dəyərə bax. Q5-də ən böyük və sol-mərkəzdə olanı seç.",
+    },
+    7: {
+      soft: "Qaydanı gör, sonra klik et. Hər raund ayrı oyun kimidir.",
+      hard: "R1 normal, R2 tərsinə, R3 təkrarlananlar, R4 ilk+son, R5 istənilən 3 simvol.",
+    },
+  };
 
   useEffect(() => {
     const checkAdminSession = async () => {
@@ -90,6 +123,8 @@ function StageRouter() {
   useEffect(() => {
     setIsStageReadyToAdvance(false);
     setGateMessage("");
+    setCurrentStageAttempts(0);
+    setIsHelpOpen(false);
     rapidClickRef.current = { count: 0, lastClickAt: 0 };
   }, [gameState.currentStage]);
 
@@ -98,6 +133,11 @@ function StageRouter() {
   const soberCompleted = gameState.sobriety >= 100;
   const stageNumber =
     gameState.currentStage === "complete" ? 7 : Number(gameState.currentStage);
+
+  const registerStageAttempt = () => {
+    incrementAttempts();
+    setCurrentStageAttempts((prev) => prev + 1);
+  };
 
   const handleStageComplete = () => {
     setIsStageReadyToAdvance(true);
@@ -111,7 +151,7 @@ function StageRouter() {
 
     if (!isStageReadyToAdvance) {
       setGateMessage("Hələ tamamlamamısan 😅 Əvvəl bu mərhələni bitir, sonra oxu sıx.");
-      incrementAttempts();
+      registerStageAttempt();
       return;
     }
 
@@ -192,29 +232,37 @@ function StageRouter() {
     setGateMessage("Admin test rejimi: bu mərhələ tamamlandı kimi işarələndi.");
   };
 
+  const handleStageFail = () => {
+    registerStageAttempt();
+  };
+
   let stageNode: React.ReactNode;
 
   if (gameState.currentStage === "complete") {
     stageNode = <FakeLeaderboard playerName={gameState.playerName} attempts={gameState.attempts} />;
   } else if (gameState.currentStage === 1) {
-    stageNode = <Stage1_Welcome onFail={incrementAttempts} onComplete={handleStageComplete} />;
+    stageNode = <Stage1_Welcome onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 2) {
     stageNode = gameState.isMicRequestCompleted ? (
-      <Stage2_Name onFail={incrementAttempts} onComplete={handleStageComplete} />
+      <Stage2_Name onFail={handleStageFail} onComplete={handleStageComplete} />
     ) : (
       <FakeMicRequest onComplete={completeMicRequest} />
     );
   } else if (gameState.currentStage === 3) {
-    stageNode = <Stage3_Terms onFail={incrementAttempts} onComplete={handleStageComplete} />;
+    stageNode = <Stage3_Terms onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 4) {
-    stageNode = <Stage4_Submit onFail={incrementAttempts} onComplete={handleStageComplete} />;
+    stageNode = <Stage4_Submit onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 5) {
-    stageNode = <Stage5_Memory onFail={incrementAttempts} onComplete={handleStageComplete} />;
+    stageNode = <Stage5_Memory onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 6) {
-    stageNode = <Stage6_Quiz onFail={incrementAttempts} onComplete={handleStageComplete} />;
+    stageNode = <Stage6_Quiz onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else {
-    stageNode = <Stage7_BossRound onFail={incrementAttempts} onComplete={advanceStage} />;
+    stageNode = <Stage7_BossRound onFail={handleStageFail} onComplete={advanceStage} />;
   }
+
+  const activeStageHint =
+    gameState.currentStage === "complete" ? null : stageHintMap[gameState.currentStage];
+  const isHardHintUnlocked = currentStageAttempts >= 20;
 
   return (
     <div className="w-full max-w-3xl space-y-6">
@@ -352,6 +400,43 @@ function StageRouter() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {gameState.currentStage !== "complete" && activeStageHint && (
+        <div className="fixed right-4 top-1/2 z-[118] -translate-y-1/2">
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsHelpOpen((prev) => !prev)}
+              className="rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-2 text-sm font-bold text-zinc-100 shadow-lg transition hover:bg-zinc-800"
+            >
+              Kömək
+            </button>
+
+            <AnimatePresence>
+              {isHelpOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-[290px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 text-sm text-zinc-200 shadow-xl"
+                >
+                  <p className="font-semibold text-zinc-100">Stage {stageNumber} kömək paneli</p>
+                  <p className="mt-1 text-xs text-zinc-400">Bu stage cəhd sayı: {currentStageAttempts}</p>
+                  <p className="mt-2 text-amber-300">
+                    {isHardHintUnlocked ? activeStageHint.hard : activeStageHint.soft}
+                  </p>
+                  {!isHardHintUnlocked && (
+                    <p className="mt-2 text-[11px] text-zinc-500">
+                      Tam ipucu {20 - currentStageAttempts} cəhddən sonra açılacaq.
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
