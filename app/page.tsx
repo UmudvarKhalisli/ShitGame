@@ -136,7 +136,6 @@ function StageRouter() {
   const soberCompleted = gameState.sobriety >= 100;
   const stageNumber =
     gameState.currentStage === "complete" ? 8 : Number(gameState.currentStage);
-  const stressScore = Math.min(100, Math.max(0, gameState.attempts * 9));
 
   const registerStageAttempt = () => {
     incrementAttempts();
@@ -271,35 +270,9 @@ function StageRouter() {
   const isHardHintUnlocked = currentStageAttempts >= 20;
 
   return (
-    <div className="w-full max-w-4xl space-y-6 pt-16">
-      <div className="fixed left-0 right-0 top-0 z-50 h-[52px] border-b border-[rgba(124,58,237,0.2)] bg-[rgba(3,3,10,0.85)] px-6 backdrop-blur-[20px]">
-        <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between font-hud">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">Stage</p>
-            <p className="font-heading text-[22px] leading-none text-[var(--accent-cyan)]">
-              {String(stageNumber).padStart(2, "0")} / 08
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">ƏSƏB XAL</p>
-            <div className="h-[6px] w-[160px] overflow-hidden rounded-[3px] bg-white/10">
-              <div
-                className="h-full rounded-[3px]"
-                style={{
-                  width: `${stressScore}%`,
-                  background: "linear-gradient(90deg, #10B981, #F97316, #EF4444)",
-                  boxShadow: "0 0 10px rgba(239,68,68,0.5)",
-                }}
-              />
-            </div>
-          </div>
-
-          <div className={`flex items-center gap-2 text-[18px] text-[var(--accent-red)] ${gameState.attempts > 5 ? "hud-blink" : ""}`}>
-            <span>💀</span>
-            <span>{gameState.attempts}</span>
-          </div>
-        </div>
+    <div className="w-full max-w-3xl space-y-6">
+      <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
+        Stage {stageNumber}/8 | Cəhd: {gameState.attempts} | 😤
       </div>
 
       {(showAdminLogin || isAdmin) && (
@@ -383,11 +356,10 @@ function StageRouter() {
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={String(gameState.currentStage)}
-          initial={{ opacity: 0, filter: "blur(8px)", scale: 1.05 }}
-          animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
-          exit={{ opacity: 0, filter: "blur(8px)", scale: 0.95 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="stage-enter-glitch"
+          initial={{ x: 90, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: -90, opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
         >
           {stageNode}
         </motion.div>
@@ -398,7 +370,7 @@ function StageRouter() {
           <button
             type="button"
             onClick={handleNextStageArrow}
-            className="btn-chaos w-full"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-lg font-black text-zinc-100 transition hover:bg-zinc-800"
           >
             Növbəti mərhələ →
           </button>
@@ -494,6 +466,8 @@ function ChaosApp() {
     <>
       <main
         className={`mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center p-6 ${
+          isPlainVisualStage ? "stage5-cursor-visible" : ""
+        } ${
           isEffectActive ? `drunk-browser-active ${intensityClass}` : ""
         }`}
       >

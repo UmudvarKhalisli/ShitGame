@@ -164,7 +164,7 @@ export default function RoasterWidget() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6 }}
               transition={{ duration: 0.2 }}
-              className="max-w-[220px] rounded-[12px_12px_0_12px] border border-[rgba(124,58,237,0.4)] bg-[var(--bg-elevated)] px-4 py-3 font-hud text-xs text-[var(--accent-bright)] shadow-[var(--glow-purple)]"
+              className="max-w-[260px] rounded-2xl border border-zinc-700 bg-zinc-900/95 px-4 py-3 text-sm font-medium text-zinc-100 shadow-xl"
             >
               {message}
             </motion.div>
@@ -178,7 +178,7 @@ export default function RoasterWidget() {
           onMouseLeave={() => setIsHovering(false)}
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 2.3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-          className="grid h-12 w-12 place-items-center rounded-full border border-[var(--accent-primary)] bg-[var(--bg-elevated)] text-2xl shadow-[var(--glow-purple)]"
+          className="h-14 w-14 rounded-full border border-rose-400/40 bg-gradient-to-br from-zinc-800 to-zinc-900 text-2xl shadow-lg"
         >
           <span className={isHovering ? "inline-block roaster-wink" : "inline-block"}>
             {isHovering ? "😉" : "😈"}
