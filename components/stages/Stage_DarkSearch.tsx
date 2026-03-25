@@ -639,7 +639,6 @@ export default function Stage_DarkSearch({
   }, []);
 
   useEffect(() => {
-    audio.startAmbient();
     stageStartRef.current = Date.now();
 
     const intervalId = window.setInterval(() => {
@@ -648,9 +647,8 @@ export default function Stage_DarkSearch({
 
     return () => {
       window.clearInterval(intervalId);
-      audio.stopAmbient();
     };
-  }, [audio]);
+  }, []);
 
   useEffect(() => {
     const loopFlicker = () => {
@@ -658,7 +656,6 @@ export default function Stage_DarkSearch({
       const timeoutId = window.setTimeout(() => {
         setFlickerActive(true);
         setFlashlightRadius(20);
-        audio.playFlickerCrackle();
 
         const restoreId = window.setTimeout(() => {
           setFlickerActive(false);
@@ -674,7 +671,7 @@ export default function Stage_DarkSearch({
 
     const cleanup = loopFlicker();
     return cleanup;
-  }, [audio]);
+  }, []);
 
   useAnimationFrame((time) => {
     if (elapsedSeconds < 45) {
@@ -751,7 +748,6 @@ export default function Stage_DarkSearch({
       setFlashAllLetters(true);
       setShowVictory(true);
       recordSuccess();
-      audio.playVictory();
 
       const definition = WORD_DEFINITIONS[target] ?? `${target}: Qaranlıqda tapılan söz. Hörmət!`;
       const foundCount = wordIndex + 1;
