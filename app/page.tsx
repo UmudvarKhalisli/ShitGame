@@ -282,7 +282,7 @@ function StageRouter() {
         </div>
       )}
 
-      {gameState.isDrunkBrowserActive && (
+      {gameState.isDrunkBrowserActive && gameState.currentStage !== 5 && gameState.currentStage !== 7 && (
         <div className="fixed left-4 top-4 z-[110] w-[220px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 shadow-xl backdrop-blur">
           <p className="mb-2 text-xs font-semibold text-zinc-100">🍺 Ayıqlıq:</p>
           <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
@@ -365,14 +365,15 @@ function ChaosApp() {
       : gameState.chaosLevel === 2
         ? "drunk-level-2"
         : "drunk-level-3";
-  const isEffectActive = gameState.isDrunkBrowserActive && gameState.sobriety < 100;
-  const isStageFive = gameState.currentStage === 5;
+  const isPlainVisualStage = gameState.currentStage === 5 || gameState.currentStage === 7;
+  const isEffectActive =
+    gameState.isDrunkBrowserActive && gameState.sobriety < 100 && !isPlainVisualStage;
 
   return (
     <>
       <main
         className={`mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center p-6 ${
-          isStageFive ? "stage5-cursor-visible" : ""
+          isPlainVisualStage ? "stage5-cursor-visible" : ""
         } ${
           isEffectActive ? `drunk-browser-active ${intensityClass}` : ""
         }`}
