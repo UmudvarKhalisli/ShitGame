@@ -19,6 +19,8 @@ type LetterNode = {
   vy: number;
 };
 
+const TOTAL_WORDS_PER_STAGE = 4;
+
 const SHORT_WORDS = ["KOD", "BUG", "OYN", "TƏLƏ", "DƏLI"] as const;
 const MEDIUM_WORDS = ["CHAOS", "ƏSƏB", "OYUN", "GIZLI", "SIRR"] as const;
 const LONG_WORDS = ["QARANLIQ", "XAOSLAND", "DARKMODE"] as const;
@@ -39,7 +41,7 @@ const STORAGE_KEY = "dark-search-used-words-v1";
 const EDGE_PADDING = 80;
 const MIN_LETTER_DISTANCE = 150;
 
-type WordPick = { word: string; difficulty: Difficulty; badge: string };
+type WordPick = { word: string; difficulty: Difficulty; badge: string; tier: 0 | 1 | 2 };
 
 type MousePosition = { x: number; y: number };
 
@@ -62,16 +64,59 @@ function safeUpper(input: string) {
   return input.toLocaleUpperCase("az-AZ").trim();
 }
 
-function pickWord(playCount: number): WordPick {
+function tierMeta(tier: 0 | 1 | 2): { difficulty: Difficulty; badge: string; bucket: "short" | "medium" | "hard"; pool: string[] } {
+  if (tier === 0) {
+    return {
+      difficulty: "easy",
+      badge: "🟢 Asan",
+      bucket: "short",
+      pool: [...SHORT_WORDS],
+    };
+  }
+
+  if (tier === 1) {
+    return {
+      difficulty: "medium",
+      badge: "🟡 Orta",
+      bucket: "medium",
+      pool: [...MEDIUM_WORDS],
+    };
+  }
+
+  return {
+    difficulty: "hard",
+    badge: "🔴 Çətin",
+    bucket: "hard",
+    pool: [...LONG_WORDS],
+  };
+}
+
+function baseTierFromPlayCount(playCount: number): 0 | 1 | 2 {
   if (playCount <= 0) {
-    return { word: pickFromPool([...SHORT_WORDS], "short"), difficulty: "easy", badge: "🟢 Asan" };
+    return 0;
   }
-
   if (playCount === 1) {
-    return { word: pickFromPool([...MEDIUM_WORDS], "medium"), difficulty: "medium", badge: "🟡 Orta" };
+    return 1;
   }
+  return 2;
+}
 
-  return { word: pickFromPool([...LONG_WORDS], "hard"), difficulty: "hard", badge: "🔴 Çətin" };
+function tierForWordIndex(baseTier: 0 | 1 | 2, wordIndex: number): 0 | 1 | 2 {
+  const nudges = [0, 0, 1, 2] as const;
+  return Math.min(2, baseTier + nudges[wordIndex]) as 0 | 1 | 2;
+}
+
+function pickWordForRound(playCount: number, wordIndex: number): WordPick {
+  const baseTier = baseTierFromPlayCount(playCount);
+  const tier = tierForWordIndex(baseTier, wordIndex);
+  const meta = tierMeta(tier);
+
+  return {
+    word: pickFromPool(meta.pool, meta.bucket),
+    difficulty: meta.difficulty,
+    badge: meta.badge,
+    tier,
+  };
 }
 
 function pickFromPool(pool: string[], bucket: "short" | "medium" | "hard") {
@@ -221,7 +266,6 @@ function useSpookyAudio() {
   const humOscRef = useRef<OscillatorNode | null>(null);
   const humGainRef = useRef<GainNode | null>(null);
   const pingTimeoutRef = useRef<number | null>(null);
-  const lastSwooshRef = useRef(0);
 
   const getCtx = useCallback(() => {
     if (audioContextRef.current) {
@@ -361,17 +405,21 @@ function useSpookyAudio() {
     playNoiseBurst(0.2, 0.02);
   }, [playNoiseBurst]);
 
-  const playCursorSwoosh = useCallback(
-    (speed: number) => {
-      const now = Date.now();
-      if (speed < 1.6 || now - lastSwooshRef.current < 120) {
-        return;
-      }
+  const playLetterRevealTone = useCallback(
+    (frequency: number) => {
+      const harmonicSteps = [0, 3, 7, 10] as const;
+      const firstStep = harmonicSteps[Math.floor(Math.random() * harmonicSteps.length)];
+      const secondStep = harmonicSteps[Math.floor(Math.random() * harmonicSteps.length)];
 
-      lastSwooshRef.current = now;
-      playNoiseBurst(0.06, 0.02);
+      const first = frequency * Math.pow(2, firstStep / 12);
+      const second = frequency * Math.pow(2, secondStep / 12);
+
+      playTone(first, 0.08, 0.024, "sine");
+      window.setTimeout(() => {
+        playTone(second, 0.11, 0.022, "triangle");
+      }, 45);
     },
-    [playNoiseBurst],
+    [playTone],
   );
 
   const playVictory = useCallback(() => {
@@ -384,7 +432,7 @@ function useSpookyAudio() {
     startAmbient,
     stopAmbient,
     playFlickerCrackle,
-    playCursorSwoosh,
+    playLetterRevealTone,
     playVictory,
   };
 }
@@ -529,7 +577,7 @@ export default function Stage_DarkSearch({
     incrementDarkSearchPlay,
   } = useChaosController();
 
-  const [wordPick, setWordPick] = useState<WordPick>({ word: "KOD", difficulty: "easy", badge: "🟢 Asan" });
+  const [wordPick, setWordPick] = useState<WordPick>({ word: "KOD", difficulty: "easy", badge: "🟢 Asan", tier: 0 });
   const [mouse, setMouse] = useState<MousePosition>({ x: 640, y: 360 });
   const [thiefPos, setThiefPos] = useState<MousePosition>({ x: 0, y: 0 });
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -544,10 +592,11 @@ export default function Stage_DarkSearch({
   const [hintLetterId, setHintLetterId] = useState<string | null>(null);
   const [flashAllLetters, setFlashAllLetters] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
   const initialPlayCountRef = useRef<number | null>(null);
 
   const stageStartRef = useRef<number>(Date.now());
-  const lastMouseRef = useRef<MousePosition>({ x: 0, y: 0 });
+  const discoveredIdsRef = useRef<Set<string>>(new Set());
   const triggered60Ref = useRef(false);
   const triggered120Ref = useRef(false);
   const triggered180Ref = useRef(false);
@@ -559,25 +608,35 @@ export default function Stage_DarkSearch({
   }
 
   useEffect(() => {
-    const nextPick = pickWord(initialPlayCountRef.current ?? 0);
-    setWordPick(nextPick);
     incrementDarkSearchPlay();
   }, [incrementDarkSearchPlay]);
+
+  useEffect(() => {
+    const nextPick = pickWordForRound(initialPlayCountRef.current ?? 0, wordIndex);
+    setWordPick(nextPick);
+  }, [wordIndex]);
+
+  useEffect(() => {
+    setInputValue("");
+    setFeedback("idle");
+    setPanelMessage("");
+    setWrongAttempts(0);
+    setFakeChars([]);
+    setDiscoveredIds(new Set());
+    discoveredIdsRef.current = new Set();
+    setHintLetterId(null);
+  }, [wordPick.word]);
 
   const { letters, realLetters, fakeLetters, viewport } = useLetterPositions(wordPick.word, fakeChars);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      const next = { x: event.clientX, y: event.clientY };
-      const delta = distance(next.x, next.y, lastMouseRef.current.x, lastMouseRef.current.y);
-      lastMouseRef.current = next;
-      setMouse(next);
-      audio.playCursorSwoosh(delta);
+      setMouse({ x: event.clientX, y: event.clientY });
     };
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [audio]);
+  }, []);
 
   useEffect(() => {
     audio.startAmbient();
@@ -638,12 +697,22 @@ export default function Stage_DarkSearch({
       return;
     }
 
+    const newlyDiscovered = discoveredNow.filter((id) => !discoveredIdsRef.current.has(id));
+    if (newlyDiscovered.length > 0) {
+      const first = realLetters.find((letter) => letter.id === newlyDiscovered[0]);
+      if (first) {
+        const tone = 420 + (first.char.charCodeAt(0) % 7) * 28;
+        audio.playLetterRevealTone(tone);
+      }
+    }
+
     setDiscoveredIds((prev) => {
       const next = new Set(prev);
       discoveredNow.forEach((id) => next.add(id));
+      discoveredIdsRef.current = next;
       return next;
     });
-  }, [mouse, realLetters]);
+  }, [audio, mouse, realLetters]);
 
   useEffect(() => {
     if (elapsedSeconds >= 60 && !triggered60Ref.current) {
@@ -685,11 +754,25 @@ export default function Stage_DarkSearch({
       audio.playVictory();
 
       const definition = WORD_DEFINITIONS[target] ?? `${target}: Qaranlıqda tapılan söz. Hörmət!`;
-      setPanelMessage(`🎉 TAP! '${wordPick.word}' sözünü tapdın! • ${definition}`);
+      const foundCount = wordIndex + 1;
+
+      if (foundCount >= TOTAL_WORDS_PER_STAGE) {
+        setPanelMessage(`🎉 TAP! '${wordPick.word}' sözünü tapdın! • ${definition}`);
+        window.setTimeout(() => {
+          onComplete();
+        }, 2000);
+        return;
+      }
+
+      setPanelMessage(
+        `🎉 ${foundCount}/${TOTAL_WORDS_PER_STAGE} tamamlandı! '${wordPick.word}' • ${definition} • Növbəti söz gəlir...`,
+      );
 
       window.setTimeout(() => {
-        onComplete();
-      }, 2000);
+        setShowVictory(false);
+        setFlashAllLetters(false);
+        setWordIndex((prev) => prev + 1);
+      }, 1500);
 
       return;
     }
@@ -723,6 +806,10 @@ export default function Stage_DarkSearch({
 
       <div className="absolute left-4 top-4 z-[121] rounded-lg border border-zinc-700 bg-zinc-900/75 px-3 py-2 text-xs font-semibold text-zinc-100">
         {wordPick.badge}
+      </div>
+
+      <div className="absolute right-4 top-4 z-[121] rounded-lg border border-zinc-700 bg-zinc-900/75 px-3 py-2 text-xs font-semibold text-zinc-100">
+        Söz {wordIndex + 1}/{TOTAL_WORDS_PER_STAGE}
       </div>
 
       <div className="absolute left-1/2 top-5 z-[121] -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-900/75 px-3 py-2 text-xs font-semibold text-zinc-100">

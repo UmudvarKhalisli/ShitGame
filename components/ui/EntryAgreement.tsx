@@ -93,7 +93,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
   return (
     <AnimatePresence>
       <motion.div
-        className="entry-cursor-visible fixed inset-0 z-[120] bg-black/80 backdrop-blur-md"
+        className="entry-cursor-visible fixed inset-0 z-[120] bg-[#050508] backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -146,7 +146,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
+              className="h-[min(50vh,460px)] overflow-y-auto overscroll-contain rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
             >
               <ol className="space-y-5">
                 {clauses.map((clause, index) => (
@@ -158,22 +158,22 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
                   </li>
                 ))}
               </ol>
+            </div>
 
-              <div className="mt-6 rounded-lg border border-zinc-700 bg-zinc-950/80 p-4">
-                <label className="mb-2 block text-sm font-semibold text-zinc-100">Ad və Soyad:</label>
-                <input
-                  value={fullName}
-                  onChange={(event) => {
-                    setFullName(event.target.value);
-                    if (nameError) {
-                      setNameError("");
-                    }
-                  }}
-                  placeholder="Ad və soyadınızı yazın"
-                  className="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100 outline-none focus:border-zinc-400"
-                />
-                {nameError && <p className="mt-2 text-xs text-rose-400">{nameError}</p>}
-              </div>
+            <div className="rounded-lg border border-zinc-700 bg-zinc-950/80 p-4">
+              <label className="mb-2 block text-sm font-semibold text-zinc-100">Ad və Soyad:</label>
+              <input
+                value={fullName}
+                onChange={(event) => {
+                  setFullName(event.target.value);
+                  if (nameError) {
+                    setNameError("");
+                  }
+                }}
+                placeholder="Ad və soyadınızı yazın"
+                className="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100 outline-none focus:border-zinc-400"
+              />
+              {nameError && <p className="mt-2 text-xs text-rose-400">{nameError}</p>}
             </div>
 
             <div className="space-y-3">
