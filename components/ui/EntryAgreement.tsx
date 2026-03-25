@@ -93,11 +93,29 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+        className="entry-cursor-visible fixed inset-0 z-[120] bg-black/80 backdrop-blur-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <motion.div
+            className="absolute left-[12%] top-[20%] h-28 w-28 rounded-full bg-cyan-400/10 blur-2xl"
+            animate={{ x: [0, 16, 0], y: [0, -12, 0] }}
+            transition={{ duration: 10, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute right-[14%] top-[34%] h-24 w-24 rounded-full bg-rose-400/10 blur-2xl"
+            animate={{ x: [0, -14, 0], y: [0, 10, 0] }}
+            transition={{ duration: 11, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[18%] left-[38%] h-20 w-20 rounded-full bg-violet-400/10 blur-2xl"
+            animate={{ x: [0, 12, 0], y: [0, -10, 0] }}
+            transition={{ duration: 9, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          />
+        </div>
+
         <motion.div
           initial={{ scale: 1 }}
           animate={
@@ -108,7 +126,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
               : { scale: 1 }
           }
           transition={{ duration: 0.7, ease: "easeInOut" }}
-          className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
+          className="relative h-screen w-screen overflow-hidden border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
         >
           <div className="pointer-events-none absolute inset-0 opacity-10">
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-22deg] text-[28px] font-black tracking-[0.2em] text-rose-400">
@@ -118,7 +136,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
 
           {isDramaticExit && <div className="pointer-events-none absolute inset-0 bg-red-500/40" />}
 
-          <div className="relative z-10 space-y-5 p-6 sm:p-8">
+          <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col space-y-5 p-6 sm:p-8">
             <header className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-4">
               <h2 className="text-center text-lg font-extrabold text-rose-300 sm:text-xl">
                 ⚠ DİQQƏT: PSİXOLOJİ SAĞLAMLIQ VƏ CİHAZ TƏHLÜKƏSİZLİYİ XƏBƏRDARLIĞI
@@ -128,7 +146,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className="max-h-80 overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
+              className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
             >
               <ol className="space-y-5">
                 {clauses.map((clause, index) => (

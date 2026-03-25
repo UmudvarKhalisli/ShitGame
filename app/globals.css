@@ -18,6 +18,11 @@ body {
   cursor: auto !important;
 }
 
+.entry-cursor-visible,
+.entry-cursor-visible * {
+  cursor: auto !important;
+}
+
 .roaster-wink {
   animation: roaster-wink 0.45s ease-in-out infinite;
 }

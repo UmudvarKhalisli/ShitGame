@@ -25,7 +25,7 @@ const mistakeRoasts = [
 
 const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7, string> = {
   1: "Düymə qaçır, sən də qaçırsan 🏃",
-  2: "Adını da unudubsan görəsən",
+  2: "Adını da unudubsan görəsən • siçan itə bilər ;) (bug deyil)",
   3: "99%... 99%... hələ 99%... tanış gəlir?",
   4: "Popup bağlamaq istəyirsən? Çox şirin arzudur",
   5: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
