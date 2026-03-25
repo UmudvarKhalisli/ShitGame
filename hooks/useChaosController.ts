@@ -13,7 +13,7 @@ import {
 } from "react";
 
 export interface ChaosState {
-  currentStage: "agreement" | 1 | 2 | 2.5 | 3 | 4 | 5 | 6 | 7 | "complete";
+  currentStage: "agreement" | 1 | 2 | 2.5 | 3 | 4 | 5 | 6 | 7 | 8 | "complete";
   playerName: string;
 
   attempts: number;
@@ -38,6 +38,7 @@ export interface ChaosState {
   memoryRound: number;
   quizQuestion: number;
   bossRound: number;
+  darkSearchPlays: number;
   roasterMode: "normal" | "aggressive";
   isQuizColorSwapActive: boolean;
 }
@@ -70,6 +71,7 @@ interface ChaosControllerContextValue {
   setMemoryRound: (round: number) => void;
   setQuizQuestion: (question: number) => void;
   setBossRound: (round: number) => void;
+  incrementDarkSearchPlay: () => void;
   setRoasterAggressive: () => void;
   calculateFinalScore: () => FinalScore;
   setPlayerName: (name: string) => void;
@@ -110,6 +112,7 @@ const defaultState: ChaosState = {
   memoryRound: 1,
   quizQuestion: 1,
   bossRound: 1,
+  darkSearchPlays: 0,
   roasterMode: "normal",
   isQuizColorSwapActive: false,
 };
@@ -166,6 +169,10 @@ function nextStage(stage: ChaosState["currentStage"]): ChaosState["currentStage"
   }
 
   if (stage === 7) {
+    return 8;
+  }
+
+  if (stage === 8) {
     return "complete";
   }
 
@@ -245,6 +252,19 @@ function applyStageChaos(prev: ChaosState, stage: ChaosState["currentStage"]): C
     return {
       ...prev,
       currentStage: stage,
+      isInverseMouse: false,
+      isDrunkMode: false,
+      isBSODActive: false,
+      drunkLevel: 1,
+      roasterMode: "normal",
+      isQuizColorSwapActive: false,
+    };
+  }
+
+  if (stage === 6) {
+    return {
+      ...prev,
+      currentStage: stage,
       memoryRound: Math.max(1, Math.min(4, prev.memoryRound)),
       isDrunkMode: prev.memoryRound >= 3,
       drunkLevel: 1,
@@ -253,7 +273,7 @@ function applyStageChaos(prev: ChaosState, stage: ChaosState["currentStage"]): C
     };
   }
 
-  if (stage === 6) {
+  if (stage === 7) {
     return {
       ...prev,
       currentStage: stage,
@@ -265,7 +285,7 @@ function applyStageChaos(prev: ChaosState, stage: ChaosState["currentStage"]): C
     };
   }
 
-  if (stage === 7) {
+  if (stage === 8) {
     return {
       ...prev,
       currentStage: stage,
@@ -472,7 +492,7 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       const nextRound = Math.max(1, Math.min(4, Math.floor(round)));
       return {
         ...prev,
-        currentStage: 5,
+        currentStage: 6,
         memoryRound: nextRound,
         isDrunkMode: nextRound >= 3,
         drunkLevel: 1,
@@ -490,7 +510,7 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       const nextQuestion = Math.max(1, Math.min(5, Math.floor(question)));
       return {
         ...prev,
-        currentStage: 6,
+        currentStage: 7,
         quizQuestion: nextQuestion,
         isDrunkMode: false,
         drunkLevel: 1,
@@ -508,7 +528,7 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       const nextRound = Math.max(1, Math.min(5, Math.floor(round)));
       return {
         ...prev,
-        currentStage: 7,
+        currentStage: 8,
         bossRound: nextRound,
         isDrunkMode: true,
         drunkLevel: 2,
@@ -524,6 +544,13 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({
       ...prev,
       roasterMode: "aggressive",
+    }));
+  }, []);
+
+  const incrementDarkSearchPlay = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      darkSearchPlays: prev.darkSearchPlays + 1,
     }));
   }, []);
 
@@ -601,6 +628,7 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       setMemoryRound,
       setQuizQuestion,
       setBossRound,
+      incrementDarkSearchPlay,
       setRoasterAggressive,
       calculateFinalScore,
       setPlayerName,
@@ -619,6 +647,7 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       setMemoryRound,
       setQuizQuestion,
       setBossRound,
+      incrementDarkSearchPlay,
       setRoasterAggressive,
       calculateFinalScore,
       setPlayerName,

@@ -6,6 +6,7 @@ import Stage1_Welcome from "@/components/stages/Stage1_Welcome";
 import Stage2_Name from "@/components/stages/Stage2_Name";
 import Stage3_Terms from "@/components/stages/Stage3_Terms";
 import Stage4_Submit from "@/components/stages/Stage4_Submit";
+import Stage_DarkSearch from "@/components/stages/Stage_DarkSearch";
 import Stage5_Memory from "@/components/stages/Stage5_Memory";
 import Stage6_Quiz from "@/components/stages/Stage6_Quiz";
 import Stage7_BossRound from "@/components/stages/Stage7_BossRound";
@@ -43,7 +44,7 @@ function StageRouter() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const rapidClickRef = useRef({ count: 0, lastClickAt: 0 });
 
-  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7, { soft: string; hard: string }> = {
+  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, { soft: string; hard: string }> = {
     1: {
       soft: "Düyməyə yox, hərəkət ritminə fikir ver. Eyni qayda ilə həmişə qaçmır.",
       hard: "Düymə qaçanda bir tərəfi sıxışdır və kənara qaçış yolunu bağla.",
@@ -61,14 +62,18 @@ function StageRouter() {
       hard: "Əvvəl diqqəti yayındıran pəncərələri bağla, əsas submit düyməsinə ən sonda qayıt.",
     },
     5: {
+      soft: "Qaranlıqda hərfləri ovla. Söz görünmür, hərf görünür.",
+      hard: "Fənəri hərflərə yaxın tut, əvvəlcə hərfləri topla, sonra sözü yığ.",
+    },
+    6: {
       soft: "Rənglər aldadır. Mərkəz nöqtə düymənin kimliyidir.",
       hard: "Yalnız düymə indeksini yadda saxla (yerini/rəngini yox). 3→4→5 ardıcıllığına fokuslan.",
     },
-    6: {
+    7: {
       soft: "Sual məzmununa inan, vizuala yox. Düz cavab var.",
       hard: "Q2-də mövqeyə yox, dəyərə bax. Q5-də ən böyük və sol-mərkəzdə olanı seç.",
     },
-    7: {
+    8: {
       soft: "Qaydanı gör, sonra klik et. Hər raund ayrı oyun kimidir.",
       hard: "R1 normal, R2 tərsinə, R3 təkrarlananlar, R4 ilk+son, R5 istənilən 3 simvol.",
     },
@@ -129,10 +134,10 @@ function StageRouter() {
   }, [gameState.currentStage]);
 
   const currentStageLabel =
-    gameState.currentStage === "complete" ? "7" : String(gameState.currentStage);
+    gameState.currentStage === "complete" ? "8" : String(gameState.currentStage);
   const soberCompleted = gameState.sobriety >= 100;
   const stageNumber =
-    gameState.currentStage === "complete" ? 7 : Number(gameState.currentStage);
+    gameState.currentStage === "complete" ? 8 : Number(gameState.currentStage);
 
   const registerStageAttempt = () => {
     incrementAttempts();
@@ -219,7 +224,7 @@ function StageRouter() {
     setIsAdmin(false);
   };
 
-  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | "complete") => {
+  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | "complete") => {
     acceptEntry();
     completeMicRequest();
     setStage(stage);
@@ -253,8 +258,10 @@ function StageRouter() {
   } else if (gameState.currentStage === 4) {
     stageNode = <Stage4_Submit onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 5) {
-    stageNode = <Stage5_Memory onFail={handleStageFail} onComplete={handleStageComplete} />;
+    stageNode = <Stage_DarkSearch onFail={handleStageFail} onComplete={advanceStage} />;
   } else if (gameState.currentStage === 6) {
+    stageNode = <Stage5_Memory onFail={handleStageFail} onComplete={handleStageComplete} />;
+  } else if (gameState.currentStage === 7) {
     stageNode = <Stage6_Quiz onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else {
     stageNode = <Stage7_BossRound onFail={handleStageFail} onComplete={advanceStage} />;
@@ -267,7 +274,7 @@ function StageRouter() {
   return (
     <div className="w-full max-w-3xl space-y-6">
       <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
-        Stage {currentStageLabel}/7 | Cəhd: {gameState.attempts} | 😤
+        Stage {currentStageLabel}/8 | Cəhd: {gameState.attempts} | 😤
       </div>
 
       {(showAdminLogin || isAdmin) && (
@@ -306,11 +313,11 @@ function StageRouter() {
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, "complete"].map((stage) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, "complete"].map((stage) => (
                   <button
                     key={String(stage)}
                     type="button"
-                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | "complete")}
+                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | "complete")}
                     className="rounded-md border border-zinc-600 bg-zinc-950 px-2 py-2 text-xs font-bold hover:bg-zinc-800"
                   >
                     {stage === "complete" ? "Leaderboard" : `Stage ${stage}`}
@@ -330,7 +337,10 @@ function StageRouter() {
         </div>
       )}
 
-      {gameState.isDrunkBrowserActive && gameState.currentStage !== 5 && gameState.currentStage !== 7 && (
+      {gameState.isDrunkBrowserActive &&
+        gameState.currentStage !== 5 &&
+        gameState.currentStage !== 6 &&
+        gameState.currentStage !== 8 && (
         <div className="fixed left-4 top-4 z-[110] w-[220px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 shadow-xl backdrop-blur">
           <p className="mb-2 text-xs font-semibold text-zinc-100">🍺 Ayıqlıq:</p>
           <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
@@ -450,7 +460,7 @@ function ChaosApp() {
       : gameState.chaosLevel === 2
         ? "drunk-level-2"
         : "drunk-level-3";
-  const isPlainVisualStage = gameState.currentStage === 5 || gameState.currentStage === 7;
+  const isPlainVisualStage = gameState.currentStage === 6 || gameState.currentStage === 8;
   const isEffectActive =
     gameState.isDrunkBrowserActive && gameState.sobriety < 100 && !isPlainVisualStage;
 

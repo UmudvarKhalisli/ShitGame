@@ -450,7 +450,7 @@ export default function Stage7_BossRound({
       </AnimatePresence>
 
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-black text-zinc-100">Stage 7: Üç Qaydanın Oyunu</h1>
+        <h1 className="text-3xl font-black text-zinc-100">Stage 8: Üç Qaydanın Oyunu</h1>
         <p className="text-sm font-semibold text-zinc-300">{currentRound.title}</p>
         <p className="text-sm text-amber-300">{currentRound.subtitle}</p>
         <p className="text-sm font-semibold text-fuchsia-300">{statusText}</p>

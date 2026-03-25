@@ -23,14 +23,15 @@ const mistakeRoasts = [
   "Siçanı sındırdın, yoxsa beynini?",
 ];
 
-const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7, string> = {
+const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, string> = {
   1: "Düymə qaçır, sən də qaçırsan 🏃",
   2: "Adını da unudubsan görəsən • siçan itə bilər ;) (bug deyil)",
   3: "99%... 99%... hələ 99%... tanış gəlir?",
   4: "Popup bağlamaq istəyirsən? Çox şirin arzudur",
-  5: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
-  6: "Məntiq var, amma beynin artıq ona inanmır",
-  7: "Boss fight-a çatdın. İndi beyin səni test edir",
+  5: "Qaranlıq oyunu başladı. İşıq var, amma etibar yoxdur",
+  6: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
+  7: "Məntiq var, amma beynin artıq ona inanmır",
+  8: "Boss fight-a çatdın. İndi beyin səni test edir",
 };
 
 const NORMAL_ROAST_COOLDOWN_MS = 8000;
