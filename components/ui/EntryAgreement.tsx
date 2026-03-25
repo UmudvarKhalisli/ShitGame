@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const clauses = [
   {
@@ -85,15 +85,10 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
 
   const actionText = !isUnlocked ? "HƏYATIMI RİSKƏ ATIRAM" : "Əminsən?";
 
-  const stampText = useMemo(
-    () => "ƏSƏB BÖLMƏSİ MMC • RƏSMİ XƏBƏRDARLIQ • TƏSDİQLƏNİB",
-    [],
-  );
-
   return (
     <AnimatePresence>
       <motion.div
-        className="entry-cursor-visible fixed inset-0 z-[120] bg-[#050508] backdrop-blur-sm"
+        className="fixed inset-0 z-[120] bg-[#050508] backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -126,15 +121,15 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
               : { scale: 1 }
           }
           transition={{ duration: 0.7, ease: "easeInOut" }}
-          className="relative h-screen w-screen overflow-hidden border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
+          className="chaos-card relative h-screen w-screen overflow-hidden bg-[var(--bg-surface)]"
         >
-          <div className="pointer-events-none absolute inset-0 opacity-10">
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-22deg] text-[28px] font-black tracking-[0.2em] text-rose-400">
-              {stampText}
-            </div>
-          </div>
+          <div className="official-watermark">OFFICIAL DOCUMENT</div>
 
           {isDramaticExit && <div className="pointer-events-none absolute inset-0 bg-red-500/40" />}
+
+          <div className="absolute right-8 top-8 z-20">
+            <div className="official-stamp whitespace-pre-line">TƏSDİQLƏNİB{"\n"}2025{"\n"}RƏSMİ</div>
+          </div>
 
           <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col space-y-5 p-6 sm:p-8">
             <header className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-4">
@@ -143,21 +138,32 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
               </h2>
             </header>
 
-            <div
-              ref={scrollRef}
-              onScroll={handleScroll}
-              className="h-[min(50vh,460px)] overflow-y-auto overscroll-contain rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
-            >
-              <ol className="space-y-5">
-                {clauses.map((clause, index) => (
-                  <li key={clause.title}>
-                    <h3 className="mb-2 text-base font-bold text-zinc-100">
-                      {index + 1}. {clause.title}
-                    </h3>
-                    <p>{clause.text}</p>
-                  </li>
-                ))}
-              </ol>
+            <div className="relative">
+              <div className="absolute -right-5 top-0 h-full">
+                <div className="agreement-vertical-meter h-full">
+                  <div
+                    className="agreement-vertical-fill"
+                    style={{ height: `${unlockProgress}%`, marginTop: `${100 - unlockProgress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="h-[min(50vh,460px)] overflow-y-auto overscroll-contain rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
+              >
+                <ol className="space-y-5">
+                  {clauses.map((clause, index) => (
+                    <li key={clause.title}>
+                      <h3 className="mb-2 text-base font-bold text-zinc-100">
+                        {index + 1}. {clause.title}
+                      </h3>
+                      <p>{clause.text}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
 
             <div className="rounded-lg border border-zinc-700 bg-zinc-950/80 p-4">
@@ -183,16 +189,14 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
                   style={{ width: `${unlockProgress}%` }}
                 />
               </div>
-              <p className="text-xs text-zinc-400">
-                Oxuma tamamlanması (qeyri-rəsmi): {unlockProgress}% • Minimum 300% scroll tələb olunur.
-              </p>
+              <p className="text-xs text-zinc-400">Minimum 300% scroll tələb olunur.</p>
             </div>
 
             <button
               type="button"
               disabled={!canSubmit}
               onClick={handleAccept}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-extrabold tracking-wide text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+              className="btn-danger flex w-full items-center justify-center gap-2 disabled:opacity-40"
             >
               {isSigning ? (
                 <>
