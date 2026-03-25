@@ -13,7 +13,7 @@ import {
 } from "react";
 
 export interface ChaosState {
-  currentStage: "agreement" | 1 | 2 | 2.5 | 3 | 4 | "complete";
+  currentStage: "agreement" | 1 | 2 | 2.5 | 3 | 4 | 5 | 6 | 7 | "complete";
   playerName: string;
 
   attempts: number;
@@ -34,6 +34,12 @@ export interface ChaosState {
 
   showSocialThreat: boolean;
   showBSOD: boolean;
+
+  memoryRound: number;
+  quizQuestion: number;
+  bossRound: number;
+  roasterMode: "normal" | "aggressive";
+  isQuizColorSwapActive: boolean;
 }
 
 interface FinalScore {
@@ -47,6 +53,10 @@ interface FinalScore {
   shownThreatCount: number;
   sobrietyPercent: number;
   completed: boolean;
+  memoryRoundsCompleted: number;
+  quizCorrectAnswers: number;
+  bossRoundsCompleted: number;
+  totalTimeSeconds: number;
 }
 
 interface ChaosControllerContextValue {
@@ -57,6 +67,10 @@ interface ChaosControllerContextValue {
   triggerBSOD: () => void;
   triggerSocialThreat: () => void;
   updateSobriety: (amount: number) => void;
+  setMemoryRound: (round: number) => void;
+  setQuizQuestion: (question: number) => void;
+  setBossRound: (round: number) => void;
+  setRoasterAggressive: () => void;
   calculateFinalScore: () => FinalScore;
   setPlayerName: (name: string) => void;
   closeSocialThreat: () => void;
@@ -65,7 +79,8 @@ interface ChaosControllerContextValue {
 }
 
 const MAX_STRESS = 100;
-const ROAST_COOLDOWN_MS = 8_000;
+const NORMAL_ROAST_COOLDOWN_MS = 8_000;
+const AGGRESSIVE_ROAST_COOLDOWN_MS = 5_000;
 const IDLE_STRESS_STEP_MS = 10_000;
 const TOTAL_THREATS = 5;
 
@@ -91,6 +106,12 @@ const defaultState: ChaosState = {
 
   showSocialThreat: false,
   showBSOD: false,
+
+  memoryRound: 1,
+  quizQuestion: 1,
+  bossRound: 1,
+  roasterMode: "normal",
+  isQuizColorSwapActive: false,
 };
 
 const ChaosControllerContext = createContext<ChaosControllerContextValue | null>(null);
@@ -133,6 +154,18 @@ function nextStage(stage: ChaosState["currentStage"]): ChaosState["currentStage"
   }
 
   if (stage === 4) {
+    return 5;
+  }
+
+  if (stage === 5) {
+    return 6;
+  }
+
+  if (stage === 6) {
+    return 7;
+  }
+
+  if (stage === 7) {
     return "complete";
   }
 
@@ -208,6 +241,42 @@ function applyStageChaos(prev: ChaosState, stage: ChaosState["currentStage"]): C
     };
   }
 
+  if (stage === 5) {
+    return {
+      ...prev,
+      currentStage: stage,
+      memoryRound: Math.max(1, Math.min(4, prev.memoryRound)),
+      isDrunkMode: prev.memoryRound >= 3,
+      drunkLevel: 1,
+      roasterMode: "normal",
+      isQuizColorSwapActive: false,
+    };
+  }
+
+  if (stage === 6) {
+    return {
+      ...prev,
+      currentStage: stage,
+      isDrunkMode: false,
+      drunkLevel: 1,
+      roasterMode: "normal",
+      isQuizColorSwapActive: true,
+      quizQuestion: Math.max(1, Math.min(5, prev.quizQuestion)),
+    };
+  }
+
+  if (stage === 7) {
+    return {
+      ...prev,
+      currentStage: stage,
+      isDrunkMode: true,
+      drunkLevel: 2,
+      roasterMode: "aggressive",
+      isQuizColorSwapActive: false,
+      bossRound: Math.max(1, Math.min(5, prev.bossRound)),
+    };
+  }
+
   return {
     ...prev,
     currentStage: "complete",
@@ -217,6 +286,8 @@ function applyStageChaos(prev: ChaosState, stage: ChaosState["currentStage"]): C
     drunkLevel: 1,
     showSocialThreat: false,
     showBSOD: false,
+    roasterMode: "normal",
+    isQuizColorSwapActive: false,
   };
 }
 
@@ -349,7 +420,12 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
         idleStartTime: now,
       };
 
-      if (now - prev.lastRoastTime >= ROAST_COOLDOWN_MS) {
+      const roastCooldown =
+        prev.roasterMode === "aggressive"
+          ? AGGRESSIVE_ROAST_COOLDOWN_MS
+          : NORMAL_ROAST_COOLDOWN_MS;
+
+      if (now - prev.lastRoastTime >= roastCooldown) {
         nextState.lastRoastTime = now;
       }
 
@@ -388,6 +464,67 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
     }));
 
     idleStepsAwardedRef.current = 0;
+  }, []);
+
+  const setMemoryRound = useCallback((round: number) => {
+    const now = Date.now();
+    setState((prev) => {
+      const nextRound = Math.max(1, Math.min(4, Math.floor(round)));
+      return {
+        ...prev,
+        currentStage: 5,
+        memoryRound: nextRound,
+        isDrunkMode: nextRound >= 3,
+        drunkLevel: 1,
+        roasterMode: "normal",
+        isQuizColorSwapActive: false,
+        startTime: prev.startTime === 0 ? now : prev.startTime,
+        idleStartTime: now,
+      };
+    });
+  }, []);
+
+  const setQuizQuestion = useCallback((question: number) => {
+    const now = Date.now();
+    setState((prev) => {
+      const nextQuestion = Math.max(1, Math.min(5, Math.floor(question)));
+      return {
+        ...prev,
+        currentStage: 6,
+        quizQuestion: nextQuestion,
+        isDrunkMode: false,
+        drunkLevel: 1,
+        roasterMode: "normal",
+        isQuizColorSwapActive: true,
+        startTime: prev.startTime === 0 ? now : prev.startTime,
+        idleStartTime: now,
+      };
+    });
+  }, []);
+
+  const setBossRound = useCallback((round: number) => {
+    const now = Date.now();
+    setState((prev) => {
+      const nextRound = Math.max(1, Math.min(5, Math.floor(round)));
+      return {
+        ...prev,
+        currentStage: 7,
+        bossRound: nextRound,
+        isDrunkMode: true,
+        drunkLevel: 2,
+        roasterMode: "aggressive",
+        isQuizColorSwapActive: false,
+        startTime: prev.startTime === 0 ? now : prev.startTime,
+        idleStartTime: now,
+      };
+    });
+  }, []);
+
+  const setRoasterAggressive = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      roasterMode: "aggressive",
+    }));
   }, []);
 
   const advanceStage = useCallback(() => {
@@ -445,6 +582,10 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       shownThreatCount: state.shownThreats.length,
       sobrietyPercent: state.sobrietyPercent,
       completed: state.currentStage === "complete",
+      memoryRoundsCompleted: Math.max(0, Math.min(4, state.memoryRound)),
+      quizCorrectAnswers: Math.max(0, Math.min(5, state.quizQuestion)),
+      bossRoundsCompleted: Math.max(0, Math.min(5, state.bossRound)),
+      totalTimeSeconds: elapsedMs / 1000,
     };
   }, [state]);
 
@@ -457,6 +598,10 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       triggerBSOD,
       triggerSocialThreat,
       updateSobriety,
+      setMemoryRound,
+      setQuizQuestion,
+      setBossRound,
+      setRoasterAggressive,
       calculateFinalScore,
       setPlayerName,
       closeSocialThreat,
@@ -471,6 +616,10 @@ export function ChaosControllerProvider({ children }: { children: ReactNode }) {
       triggerBSOD,
       triggerSocialThreat,
       updateSobriety,
+      setMemoryRound,
+      setQuizQuestion,
+      setBossRound,
+      setRoasterAggressive,
       calculateFinalScore,
       setPlayerName,
       closeSocialThreat,

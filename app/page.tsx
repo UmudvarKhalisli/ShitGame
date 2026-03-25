@@ -7,6 +7,8 @@ import Stage2_Name from "@/components/stages/Stage2_Name";
 import Stage3_Terms from "@/components/stages/Stage3_Terms";
 import Stage4_Submit from "@/components/stages/Stage4_Submit";
 import Stage5_Memory from "@/components/stages/Stage5_Memory";
+import Stage6_Quiz from "@/components/stages/Stage6_Quiz";
+import Stage7_BossRound from "@/components/stages/Stage7_BossRound";
 import EntryAgreement from "@/components/ui/EntryAgreement";
 import FakeBSOD from "@/components/ui/FakeBSOD";
 import FakeLeaderboard from "@/components/ui/FakeLeaderboard";
@@ -92,10 +94,10 @@ function StageRouter() {
   }, [gameState.currentStage]);
 
   const currentStageLabel =
-    gameState.currentStage === "complete" ? "5" : String(gameState.currentStage);
+    gameState.currentStage === "complete" ? "7" : String(gameState.currentStage);
   const soberCompleted = gameState.sobriety >= 100;
   const stageNumber =
-    gameState.currentStage === "complete" ? 5 : Number(gameState.currentStage);
+    gameState.currentStage === "complete" ? 7 : Number(gameState.currentStage);
 
   const handleStageComplete = () => {
     setIsStageReadyToAdvance(true);
@@ -177,7 +179,7 @@ function StageRouter() {
     setIsAdmin(false);
   };
 
-  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | "complete") => {
+  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | "complete") => {
     acceptEntry();
     completeMicRequest();
     setStage(stage);
@@ -206,14 +208,18 @@ function StageRouter() {
     stageNode = <Stage3_Terms onFail={incrementAttempts} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 4) {
     stageNode = <Stage4_Submit onFail={incrementAttempts} onComplete={handleStageComplete} />;
-  } else {
+  } else if (gameState.currentStage === 5) {
     stageNode = <Stage5_Memory onFail={incrementAttempts} onComplete={handleStageComplete} />;
+  } else if (gameState.currentStage === 6) {
+    stageNode = <Stage6_Quiz onFail={incrementAttempts} onComplete={handleStageComplete} />;
+  } else {
+    stageNode = <Stage7_BossRound onFail={incrementAttempts} onComplete={advanceStage} />;
   }
 
   return (
     <div className="w-full max-w-3xl space-y-6">
       <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
-        Stage {currentStageLabel}/5 | Cəhd: {gameState.attempts} | 😤
+        Stage {currentStageLabel}/7 | Cəhd: {gameState.attempts} | 😤
       </div>
 
       {(showAdminLogin || isAdmin) && (
@@ -252,11 +258,11 @@ function StageRouter() {
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, "complete"].map((stage) => (
+                {[1, 2, 3, 4, 5, 6, 7, "complete"].map((stage) => (
                   <button
                     key={String(stage)}
                     type="button"
-                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | "complete")}
+                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | "complete")}
                     className="rounded-md border border-zinc-600 bg-zinc-950 px-2 py-2 text-xs font-bold hover:bg-zinc-800"
                   >
                     {stage === "complete" ? "Leaderboard" : `Stage ${stage}`}

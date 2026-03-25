@@ -4,6 +4,8 @@ import confetti from "canvas-confetti";
 import { animate, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
+import { useChaosController } from "@/hooks/useChaosController";
+
 type LeaderboardEntry = {
   rank: number;
   name: string;
@@ -31,6 +33,9 @@ export default function FakeLeaderboard({
   playerName: string;
   attempts: number;
 }) {
+  const { calculateFinalScore } = useChaosController();
+  const finalScore = calculateFinalScore();
+
   const safeName = playerName || "Anonim Qəhrəman";
   const playerRank = useMemo(
     () => 999998 + Math.floor(Math.random() * 6),
@@ -38,11 +43,11 @@ export default function FakeLeaderboard({
   );
 
   const actualTime = useMemo(() => {
-    const totalSeconds = Math.max(9, attempts * 37 + 58);
+    const totalSeconds = Math.max(9, Math.floor(finalScore.totalTimeSeconds));
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${String(seconds).padStart(2, "0")}`;
-  }, [attempts]);
+  }, [finalScore.totalTimeSeconds]);
 
   const leaderboardRows = useMemo<LeaderboardEntry[]>(
     () => [
@@ -150,6 +155,19 @@ export default function FakeLeaderboard({
         <div className="rounded-xl border border-zinc-700 bg-zinc-800/70 p-4 text-sm text-zinc-200">
           Tökülən saç teli: <span className="font-bold text-zinc-100">{displayHairLoss}</span>
         </div>
+      </div>
+
+      <div className="space-y-2 rounded-xl border border-zinc-700 bg-zinc-800/50 p-4 text-sm text-zinc-200">
+        <p>
+          Yadda saxlama gücü: <span className="font-bold text-zinc-100">{finalScore.memoryRoundsCompleted * 25}%</span>
+        </p>
+        <p>
+          Məntiqi düşüncə: <span className="font-bold text-zinc-100">{finalScore.quizCorrectAnswers * 20}%</span>{" "}
+          <span className="text-zinc-400">(Ortalama: 94%)</span>
+        </p>
+        <p>
+          Boss döyüşü: <span className="font-bold text-zinc-100">{finalScore.bossRoundsCompleted}/5 raund</span>
+        </p>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-zinc-700">

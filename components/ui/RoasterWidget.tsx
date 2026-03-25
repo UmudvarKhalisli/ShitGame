@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { chaosController } from "@/hooks/chaosController";
+import { useChaosController } from "@/hooks/useChaosController";
 import { useChaosState } from "@/hooks/useChaosState";
 
 const idleRoasts = [
@@ -22,20 +23,26 @@ const mistakeRoasts = [
   "Siçanı sındırdın, yoxsa beynini?",
 ];
 
-const stageRoasts: Record<1 | 2 | 3 | 4 | 5, string> = {
+const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7, string> = {
   1: "Düymə qaçır, sən də qaçırsan 🏃",
   2: "Adını da unudubsan görəsən",
   3: "99%... 99%... hələ 99%... tanış gəlir?",
   4: "Popup bağlamaq istəyirsən? Çox şirin arzudur",
   5: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
+  6: "Məntiq var, amma beynin artıq ona inanmır",
+  7: "Boss fight-a çatdın. İndi beyin səni test edir",
 };
 
-const ROAST_COOLDOWN_MS = 8000;
+const NORMAL_ROAST_COOLDOWN_MS = 8000;
+const AGGRESSIVE_ROAST_COOLDOWN_MS = 5000;
 const ROAST_VISIBILITY_MS = 4000;
 const IDLE_TRIGGER_MS = 10000;
 
 export default function RoasterWidget() {
   const { gameState } = useChaosState();
+  const {
+    state: { roasterMode },
+  } = useChaosController();
 
   const [idleTime, setIdleTime] = useState(0);
   const [message, setMessage] = useState("");
@@ -56,7 +63,10 @@ export default function RoasterWidget() {
 
   const showRoast = useCallback((text: string) => {
     const now = Date.now();
-    if (now - lastRoastAtRef.current < ROAST_COOLDOWN_MS) {
+    const cooldownMs =
+      roasterMode === "aggressive" ? AGGRESSIVE_ROAST_COOLDOWN_MS : NORMAL_ROAST_COOLDOWN_MS;
+
+    if (now - lastRoastAtRef.current < cooldownMs) {
       return false;
     }
 
@@ -69,7 +79,7 @@ export default function RoasterWidget() {
     }, ROAST_VISIBILITY_MS);
 
     return true;
-  }, [clearHideTimer]);
+  }, [clearHideTimer, roasterMode]);
 
   useEffect(() => {
     const onInteraction = () => {

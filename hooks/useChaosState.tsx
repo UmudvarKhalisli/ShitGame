@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { chaosController } from "@/hooks/chaosController";
 
 export interface GameState {
-  currentStage: 1 | 2 | 3 | 4 | 5 | "complete";
+  currentStage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | "complete";
   playerName: string;
   attempts: number;
   chaosLevel: number;
@@ -128,6 +128,10 @@ export function ChaosProvider({ children }: { children: React.ReactNode }) {
                   ? 4
                   : prev.currentStage === 4
                     ? 5
+                    : prev.currentStage === 5
+                      ? 6
+                      : prev.currentStage === 6
+                        ? 7
                   : "complete";
 
           const startsDrunkMode = prev.currentStage === 2 && nextStage === 3;

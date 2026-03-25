@@ -21,7 +21,7 @@ const BASE_COLORS = [
 ] as const;
 
 const FREQUENCIES = [261, 294, 329, 349, 392, 440, 494, 523, 587] as const;
-const TOTAL_ROUNDS = 4;
+const TOTAL_ROUNDS = 3;
 const GAP_MS = 400;
 const FLASH_MS = 600;
 
@@ -45,12 +45,11 @@ export default function Stage5_Memory({
   onComplete: () => void;
   onFail: () => void;
 }) {
-  const { recordMistake, recordSuccess } = useChaosController();
+  const { recordMistake, recordSuccess, setMemoryRound } = useChaosController();
 
   const [round, setRound] = useState(1);
   const [sequenceLength, setSequenceLength] = useState(3);
   const [primarySequence, setPrimarySequence] = useState<number[]>([]);
-  const [alternateSequence, setAlternateSequence] = useState<number[] | null>(null);
   const [userInput, setUserInput] = useState<number[]>([]);
 
   const [gridOrder, setGridOrder] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7, 8]);
@@ -65,8 +64,6 @@ export default function Stage5_Memory({
   const [fakeCountdown, setFakeCountdown] = useState<number | null>(null);
   const [flashOverlay, setFlashOverlay] = useState<"red" | "green" | null>(null);
   const [shakeAll, setShakeAll] = useState(false);
-  const [isFinalRoundSwayActive, setIsFinalRoundSwayActive] = useState(false);
-  const [finalRoundFailCount, setFinalRoundFailCount] = useState(0);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const timeoutIdsRef = useRef<number[]>([]);
@@ -75,9 +72,9 @@ export default function Stage5_Memory({
   const prepareRoundRef = useRef<(activeRound: number) => Promise<void>>(async () => {
     return;
   });
-  const roastFlagsRef = useRef({ colorSwap: false, twinSequence: false });
+  const roastFlagsRef = useRef({ colorSwap: false });
 
-  const sequenceLengthByRound = useMemo(() => [3, 4, 5, 6], []);
+  const sequenceLengthByRound = useMemo(() => [3, 4, 5], []);
 
   const clearScheduledTimeouts = () => {
     timeoutIdsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
@@ -99,6 +96,10 @@ export default function Stage5_Memory({
       document.body.style.cursor = "";
     };
   }, []);
+
+  useEffect(() => {
+    setMemoryRound(round);
+  }, [round, setMemoryRound]);
 
   const scheduleTimeout = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms);
@@ -242,10 +243,6 @@ export default function Stage5_Memory({
       setFakeCountdown(null);
     }
 
-    if (activeRound === 3 && !roastFlagsRef.current.twinSequence) {
-      chaosController.triggerRoast("Hansını yadda saxladın? İkisini? Heç birini?");
-      roastFlagsRef.current.twinSequence = true;
-    }
   };
 
   const prepareRound = async (activeRound: number) => {
@@ -259,30 +256,12 @@ export default function Stage5_Memory({
     setStatusText("Ardıcıllıq göstərildi");
     setUserInput([]);
     setPrimarySequence([]);
-    setAlternateSequence(null);
     setSequenceLength(targetLength);
     setFakeCountdown(null);
 
     const primary = buildSequence(targetLength);
-    let alternate: number[] | null = null;
-
-    if (activeRound === 3) {
-      alternate = [...primary];
-      const editIndex = Math.floor(Math.random() * alternate.length);
-      const candidates = Array.from({ length: 9 }, (_, id) => id).filter(
-        (id) => id !== alternate?.[editIndex],
-      );
-      alternate[editIndex] = candidates[Math.floor(Math.random() * candidates.length)];
-    }
 
     setPrimarySequence(primary);
-    setAlternateSequence(alternate);
-
-    if (activeRound === 4) {
-      setIsFinalRoundSwayActive(true);
-    } else {
-      setIsFinalRoundSwayActive(false);
-    }
 
     await wait(320);
 
@@ -290,21 +269,12 @@ export default function Stage5_Memory({
       return;
     }
 
-    const decoyIndex =
-      activeRound === 4 ? Math.floor(Math.random() * primary.length) : undefined;
-
-    await runSequencePlayback(primary, token, { decoyIndex });
-
-    if (activeRound === 3 && alternate) {
-      await wait(350);
-      await runSequencePlayback(alternate, token);
-    }
+    await runSequencePlayback(primary, token);
 
     if (!mountedRef.current || token !== playbackTokenRef.current) {
       return;
     }
 
-    setIsFinalRoundSwayActive(false);
     applyPostPlaybackChaos(activeRound);
 
     setIsPlayback(false);
@@ -323,23 +293,10 @@ export default function Stage5_Memory({
       .slice(0, candidateInput.length)
       .every((value, index) => value === candidateInput[index]);
 
-    if (round !== 3 || !alternateSequence) {
-      return {
-        isValidPrefix: primaryPrefixMatches,
-        isPrimaryComplete: candidateInput.length === primarySequence.length && primaryPrefixMatches,
-        isAlternateComplete: false,
-      };
-    }
-
-    const alternatePrefixMatches = alternateSequence
-      .slice(0, candidateInput.length)
-      .every((value, index) => value === candidateInput[index]);
-
     return {
-      isValidPrefix: primaryPrefixMatches || alternatePrefixMatches,
+      isValidPrefix: primaryPrefixMatches,
       isPrimaryComplete: candidateInput.length === primarySequence.length && primaryPrefixMatches,
-      isAlternateComplete:
-        candidateInput.length === alternateSequence.length && alternatePrefixMatches,
+      isAlternateComplete: false,
     };
   };
 
@@ -352,24 +309,7 @@ export default function Stage5_Memory({
     recordMistake();
     onFail();
 
-    if (round === 4) {
-      const nextFailCount = finalRoundFailCount + 1;
-      setFinalRoundFailCount(nextFailCount);
-
-      if (nextFailCount >= 2) {
-        setStatusText("Sistemimizdə xəta aşkarlandı. Siz qalibsiniz. (Qazanmadın əslində)");
-        setIsPassed(true);
-        await wait(600);
-        if (mountedRef.current) {
-          onComplete();
-        }
-        return;
-      }
-
-      setStatusText("Yaxın idi! Yenidən...");
-    } else {
-      setStatusText("Səhv ardıcıllıq 😵 Yenidən baxaq.");
-    }
+    setStatusText("Səhv ardıcıllıq 😵 Yenidən baxaq.");
 
     await wait(500);
 
@@ -448,9 +388,7 @@ export default function Stage5_Memory({
 
   return (
     <section
-      className={`relative w-full max-w-3xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-xl ${
-        isFinalRoundSwayActive ? "drunk-level-1" : ""
-      }`}
+      className="relative w-full max-w-3xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-xl"
     >
       {flashOverlay && (
         <div

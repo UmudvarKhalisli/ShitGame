@@ -127,3 +127,28 @@ body {
     sway-3 4s ease-in-out infinite,
     drunk-filter-3 6s ease-in-out infinite;
 }
+
+.boss-emoji-rain {
+  position: absolute;
+  top: -10vh;
+  display: inline-block;
+  animation-name: boss-emoji-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.55));
+  will-change: transform;
+}
+
+@keyframes boss-emoji-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120vh) rotate(340deg);
+    opacity: 0.95;
+  }
+}
