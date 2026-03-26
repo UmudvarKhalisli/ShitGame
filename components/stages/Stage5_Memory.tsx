@@ -22,8 +22,8 @@ const BASE_COLORS = [
 
 const FREQUENCIES = [261, 294, 329, 349, 392, 440, 494, 523, 587] as const;
 const TOTAL_ROUNDS = 3;
-const GAP_MS = 400;
-const FLASH_MS = 600;
+const GAP_MS = 550;
+const FLASH_MS = 900;
 
 function shuffle<T>(items: T[]) {
   const copy = [...items];
@@ -60,10 +60,12 @@ export default function Stage5_Memory({
   const [isAwaitingInput, setIsAwaitingInput] = useState(false);
   const [isPassed, setIsPassed] = useState(false);
   const [statusText, setStatusText] = useState("Hazırlaş... yaddaşın test olunur 🧠");
+  const [playbackStep, setPlaybackStep] = useState(0);
   const [hintText, setHintText] = useState("");
   const [fakeCountdown, setFakeCountdown] = useState<number | null>(null);
   const [flashOverlay, setFlashOverlay] = useState<"red" | "green" | null>(null);
   const [shakeAll, setShakeAll] = useState(false);
+  const [failedAttemptsInStage, setFailedAttemptsInStage] = useState(0);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const timeoutIdsRef = useRef<number[]>([]);
@@ -82,6 +84,7 @@ export default function Stage5_Memory({
   };
 
   useEffect(() => {
+    mountedRef.current = true;
     document.documentElement.style.cursor = "auto";
     document.body.style.cursor = "auto";
 
@@ -196,6 +199,7 @@ export default function Stage5_Memory({
       }
 
       const id = sequence[index];
+      setPlaybackStep(index + 1);
 
       await flashButton(id, FLASH_MS, token);
 
@@ -206,6 +210,8 @@ export default function Stage5_Memory({
 
       await wait(GAP_MS);
     }
+
+    setPlaybackStep(0);
   };
 
   const startFakeCountdown = () => {
@@ -253,7 +259,7 @@ export default function Stage5_Memory({
 
     setIsAwaitingInput(false);
     setIsPlayback(true);
-    setStatusText("Ardıcıllıq göstərildi");
+    setStatusText("Ardıcıllıq göstərilir...");
     setUserInput([]);
     setPrimarySequence([]);
     setSequenceLength(targetLength);
@@ -305,6 +311,7 @@ export default function Stage5_Memory({
     setShakeAll(true);
     setFlashOverlay("red");
     playWrongBuzz();
+    setFailedAttemptsInStage((prev) => prev + 1);
 
     recordMistake();
     onFail();
@@ -386,6 +393,17 @@ export default function Stage5_Memory({
     });
   };
 
+  const canUnlockSkip = round >= 3 && failedAttemptsInStage >= 20 && !isPlayback;
+
+  const handleSkipAfterFailures = () => {
+    setStatusText("20+ cəhddən sonra keçid aktiv oldu. Növbəti mərhələyə keçdin.");
+    recordMistake();
+    onFail();
+    window.setTimeout(() => {
+      onComplete();
+    }, 450);
+  };
+
   return (
     <section
       className="relative w-full max-w-3xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-xl"
@@ -404,6 +422,12 @@ export default function Stage5_Memory({
           Mərhələ {round} / {TOTAL_ROUNDS} • Ardıcıllıq uzunluğu: {sequenceLength}
         </p>
         <p className="text-sm font-semibold text-amber-300">{statusText}</p>
+        {isPlayback && playbackStep > 0 && (
+          <p className="text-xs font-semibold text-cyan-300">
+            Göstərilən addım: {playbackStep}/{sequenceLength}
+            {activeButtonId !== null ? ` • Yanan düymə: #${activeButtonId + 1}` : ""}
+          </p>
+        )}
         <p className="text-xs text-zinc-400">Daxil etdiyin addım: {userInput.length}</p>
         {hintText && <p className="text-xs text-zinc-400">{hintText}</p>}
         {fakeCountdown !== null && round >= 3 && (
@@ -428,15 +452,15 @@ export default function Stage5_Memory({
               whileTap={{ scale: 0.94 }}
               animate={{
                 scale: isActive ? 1.18 : 1,
-                opacity: shouldDim ? 0.32 : 1,
-                filter: isActive ? "brightness(2) saturate(1.8)" : "brightness(1)",
+                opacity: shouldDim ? 0.12 : 1,
+                filter: isActive ? "brightness(2.4) saturate(2)" : "brightness(1)",
+                backgroundColor: isActive ? "#ffffff" : slotColors[id],
                 boxShadow: isActive
                   ? `0 0 0 3px rgba(255,255,255,0.9), 0 0 36px ${slotColors[id]}, 0 0 70px ${slotColors[id]}`
                   : "0 0 0px rgba(0,0,0,0)",
               }}
-              transition={{ type: "spring", stiffness: 320, damping: 20 }}
+              transition={{ duration: isActive ? 0.08 : 0.15, ease: "linear" }}
               className="h-20 rounded-xl border border-zinc-700"
-              style={{ backgroundColor: slotColors[id] }}
               aria-label={`Memory button ${id + 1}`}
             />
           );
@@ -446,6 +470,21 @@ export default function Stage5_Memory({
       <p className="text-center text-xs text-zinc-500">
         Düzgün cavab rəngə yox, düymənin kimliyinə (pozisiyaya) bağlıdır.
       </p>
+
+      {canUnlockSkip && (
+        <div className="rounded-xl border border-amber-500/40 bg-zinc-900/90 p-3 text-center">
+          <p className="text-xs text-amber-300">
+            20 cəhddən sonra kömək keçidi açıldı. İstəsən bu mərhələni keçə bilərsən.
+          </p>
+          <button
+            type="button"
+            onClick={handleSkipAfterFailures}
+            className="mt-3 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-black transition hover:bg-amber-500"
+          >
+            Mərhələni Keç
+          </button>
+        </div>
+      )}
     </section>
   );
 }

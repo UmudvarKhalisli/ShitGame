@@ -865,12 +865,7 @@ export default function Stage_DarkSearch({
 
     chaosController.triggerRoast(roast.includes("İpucu") ? roast : roast);
 
-    if (wrongAttempts === 0) {
-      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZƏĞIİÖŞÜÇ".split("");
-      const filtered = alphabet.filter((char) => !safeUpper(wordPick.word).includes(char));
-      const fakeCount = wordPick.tier === 2 ? 2 : 3 + Math.floor(Math.random() * 2);
-      setFakeChars(shuffle(filtered).slice(0, fakeCount));
-    }
+    setFakeChars([]);
 
     window.setTimeout(() => setFeedback("idle"), 550);
   };
