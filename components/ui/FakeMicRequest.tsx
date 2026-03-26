@@ -16,6 +16,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
   const [phase, setPhase] = useState<MicPhase>("permission");
   const [volume, setVolume] = useState(0);
   const [detectedText, setDetectedText] = useState("");
+  const [confidence, setConfidence] = useState(0);
 
   const activatingTimerRef = useRef<number | null>(null);
   const roastTimerRef = useRef<number | null>(null);
@@ -24,6 +25,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
 
   const lastPointerRef = useRef<{ x: number; y: number; timestamp: number } | null>(null);
   const distanceHistoryRef = useRef<DistanceChunk[]>([]);
+  const confidenceRef = useRef(0);
   const detectedRef = useRef(false);
 
   const clearTimers = () => {
@@ -55,6 +57,8 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
     }
 
     detectedRef.current = false;
+    confidenceRef.current = 0;
+    setConfidence(0);
     setDetectedText("");
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -72,19 +76,31 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
       const deltaTime = Math.max(1, now - previous.timestamp);
 
       const speed = distance / deltaTime;
-      const currentVolume = Math.max(2, Math.min(100, Math.round(speed * 80)));
+      const currentVolume = Math.max(2, Math.min(100, Math.round(speed * 60)));
       setVolume(currentVolume);
 
       distanceHistoryRef.current.push({ timestamp: now, distance });
       distanceHistoryRef.current = distanceHistoryRef.current.filter(
-        (chunk) => now - chunk.timestamp <= 3000,
+        (chunk) => now - chunk.timestamp <= 4500,
       );
 
       const totalDistance = distanceHistoryRef.current.reduce((sum, chunk) => sum + chunk.distance, 0);
-      if (totalDistance > 500) {
+      if (currentVolume >= 78) {
+        confidenceRef.current = Math.min(100, confidenceRef.current + deltaTime * 0.09);
+      } else {
+        confidenceRef.current = Math.max(0, confidenceRef.current - deltaTime * 0.05);
+      }
+
+      setConfidence(Math.round(confidenceRef.current));
+
+      const enoughDistance = totalDistance >= 1200;
+      const enoughControl = confidenceRef.current >= 100;
+
+      if (enoughDistance && enoughControl) {
         detectedRef.current = true;
         setVolume(100);
-        setDetectedText("Səs aşkarlandı! Əla! 🎉");
+        setConfidence(100);
+        setDetectedText("Səs aşkarlandı! Bu dəfə doğrudan qışqırdın 😈🎉");
         setPhase("detected");
 
         completionTimerRef.current = window.setTimeout(() => {
@@ -101,6 +117,11 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
 
     decayTimerRef.current = window.setInterval(() => {
       setVolume((prev) => Math.max(0, prev - 6));
+      setConfidence((prev) => {
+        const next = Math.max(0, prev - 1.4);
+        confidenceRef.current = next;
+        return Math.round(next);
+      });
     }, 120);
 
     return () => {
@@ -127,7 +148,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
     }, 2000);
   };
 
-  const zoneText = volume >= 75 ? "Yaşıl zona" : "Sakit zona";
+  const zoneText = volume >= 78 ? "Yaşıl zona" : "Sakit zona";
 
   const waveBars = useMemo(() => Array.from({ length: 9 }, (_, index) => index), []);
 
@@ -190,12 +211,20 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                   <div className="h-3 overflow-hidden rounded-full bg-zinc-800">
                     <div
                       className={`h-full transition-[width] duration-75 ${
-                        volume >= 75 ? "bg-emerald-500" : "bg-amber-400"
+                        volume >= 78 ? "bg-emerald-500" : "bg-amber-400"
                       }`}
                       style={{ width: `${volume}%` }}
                     />
                   </div>
                   <p className="text-xs text-zinc-400">Səs ölçeri: {zoneText}</p>
+
+                  <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                    <div
+                      className="h-full bg-cyan-400 transition-[width] duration-100"
+                      style={{ width: `${confidence}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-zinc-400">Stabillik göstəricisi: {confidence}% (100% olmalıdır)</p>
                 </div>
 
                 {detectedText && <p className="text-sm font-semibold text-emerald-400">{detectedText}</p>}

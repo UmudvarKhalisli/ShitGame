@@ -14,8 +14,9 @@ import EntryAgreement from "@/components/ui/EntryAgreement";
 import FakeBSOD from "@/components/ui/FakeBSOD";
 import FakeLeaderboard from "@/components/ui/FakeLeaderboard";
 import FakeMicRequest from "@/components/ui/FakeMicRequest";
-import RoasterWidget from "@/components/ui/RoasterWidget";
 import SocialThreatPopup from "@/components/ui/SocialThreatPopup";
+import TheRoaster from "@/components/ui/TheRoaster";
+import WatchingEye from "@/components/ui/WatchingEye";
 import { ChaosControllerProvider } from "@/hooks/useChaosController";
 import { ChaosProvider, useChaosState } from "@/hooks/useChaosState";
 import { useEffect, useRef, useState } from "react";
@@ -484,7 +485,8 @@ function ChaosApp() {
       >
         <StageRouter />
       </main>
-      <RoasterWidget />
+      <WatchingEye />
+      <TheRoaster />
     </>
   );
 }

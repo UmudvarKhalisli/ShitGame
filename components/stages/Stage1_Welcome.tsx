@@ -1,7 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
+
+type FailurePhase = "idle" | "static" | "bsod" | "recovered";
 
 export default function Stage1_Welcome({
   onComplete,
@@ -12,8 +14,14 @@ export default function Stage1_Welcome({
 }) {
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [buttonRotation, setButtonRotation] = useState(0);
+  const [failurePhase, setFailurePhase] = useState<FailurePhase>("idle");
   const playAreaRef = useRef<HTMLDivElement | null>(null);
   const catchButtonRef = useRef<HTMLButtonElement | null>(null);
+  const staticTimerRef = useRef<number | null>(null);
+  const bsodTimerRef = useRef<number | null>(null);
+  const recoverTimerRef = useRef<number | null>(null);
+  const staticAudioRef = useRef<HTMLAudioElement | null>(null);
+  const buzzAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const clampPosition = (x: number, y: number) => {
     const container = playAreaRef.current;
@@ -58,13 +66,48 @@ export default function Stage1_Welcome({
 
     window.addEventListener("resize", handleResize);
 
+    staticAudioRef.current = new Audio("/sounds/fail.mp3");
+    if (staticAudioRef.current) {
+      staticAudioRef.current.loop = true;
+      staticAudioRef.current.volume = 0.35;
+    }
+
+    buzzAudioRef.current = new Audio("/sounds/fail.mp3");
+    if (buzzAudioRef.current) {
+      buzzAudioRef.current.loop = false;
+      buzzAudioRef.current.volume = 0.6;
+    }
+
     return () => {
       window.clearTimeout(initId);
       window.removeEventListener("resize", handleResize);
+      if (staticTimerRef.current !== null) {
+        window.clearTimeout(staticTimerRef.current);
+      }
+      if (bsodTimerRef.current !== null) {
+        window.clearTimeout(bsodTimerRef.current);
+      }
+      if (recoverTimerRef.current !== null) {
+        window.clearTimeout(recoverTimerRef.current);
+      }
+
+      if (staticAudioRef.current) {
+        staticAudioRef.current.pause();
+        staticAudioRef.current.currentTime = 0;
+      }
+
+      if (buzzAudioRef.current) {
+        buzzAudioRef.current.pause();
+        buzzAudioRef.current.currentTime = 0;
+      }
     };
   }, []);
 
   const handleInverseMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (failurePhase !== "idle") {
+      return;
+    }
+
     const container = playAreaRef.current;
     const button = catchButtonRef.current;
 
@@ -88,14 +131,47 @@ export default function Stage1_Welcome({
   };
 
   const handleEscape = () => {
+    if (failurePhase !== "idle") {
+      return;
+    }
+
     onFail();
     moveButton();
     setButtonRotation((prev) => prev + 120);
   };
 
   const handleCatch = () => {
-    onComplete();
+    if (failurePhase !== "idle") {
+      return;
+    }
+
+    setFailurePhase("static");
+    void staticAudioRef.current?.play().catch(() => {
+      return;
+    });
+
+    staticTimerRef.current = window.setTimeout(() => {
+      setFailurePhase("bsod");
+      if (staticAudioRef.current) {
+        staticAudioRef.current.pause();
+        staticAudioRef.current.currentTime = 0;
+      }
+      void buzzAudioRef.current?.play().catch(() => {
+        return;
+      });
+
+      bsodTimerRef.current = window.setTimeout(() => {
+        setFailurePhase("recovered");
+
+        recoverTimerRef.current = window.setTimeout(() => {
+          setFailurePhase("idle");
+          onComplete();
+        }, 2200);
+      }, 10000);
+    }, 3000);
   };
+
+  const glyphLine = "ᚠ⟁₪⫷⧖Жꙮ卐⟟ѪⵣⴹฬψฬѮ⧉ⴵѬ";
 
   return (
     <section className="relative w-full max-w-4xl space-y-5 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center shadow-xl">
@@ -112,13 +188,80 @@ export default function Stage1_Welcome({
           type="button"
           onMouseEnter={handleEscape}
           onClick={handleCatch}
+          disabled={failurePhase !== "idle"}
           animate={{ x: buttonPosition.x, y: buttonPosition.y, rotate: buttonRotation }}
           transition={{ type: "spring", stiffness: 320, damping: 18 }}
           className="absolute left-0 top-0 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white"
         >
-          😈 tuT inəM
+          Məni Kliklə
         </motion.button>
       </div>
+
+      <AnimatePresence>
+        {failurePhase === "static" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[160] overflow-hidden bg-black"
+          >
+            <motion.div
+              className="absolute inset-0"
+              animate={{ x: [0, -8, 8, -5, 5, 0], y: [0, 7, -7, 4, -4, 0] }}
+              transition={{ duration: 0.2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 30%, rgba(255,0,120,0.28), transparent 36%), radial-gradient(circle at 70% 40%, rgba(0,220,255,0.28), transparent 40%), repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 2px, rgba(0,0,0,0.2) 3px, rgba(0,0,0,0.2) 4px)",
+              }}
+            />
+            {Array.from({ length: 20 }).map((_, index) => (
+              <motion.div
+                key={`noise-${index}`}
+                className="absolute h-[2px] bg-white/60"
+                style={{
+                  top: `${index * 5}%`,
+                  width: `${35 + (index % 7) * 9}%`,
+                  left: `${(index * 13) % 50}%`,
+                }}
+                animate={{ x: [0, -40, 28, -18, 12, 0], opacity: [0.1, 0.7, 0.25, 0.8, 0.3, 0.1] }}
+                transition={{ duration: 0.16 + (index % 5) * 0.03, repeat: Number.POSITIVE_INFINITY }}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {failurePhase === "bsod" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[161] bg-[#0057D8] px-8 py-10 text-white"
+          >
+            <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-center gap-6">
+              <div className="text-[120px] leading-none">:(</div>
+              <p className="text-2xl font-semibold">Sistem kritik xətaya düşdü.</p>
+              <p className="text-sm opacity-90">{glyphLine.repeat(4)}</p>
+              <p className="text-sm opacity-80">⟁⧖⫷ 卐 ѪѬ ⟟⟒ⵣ ⴹ {glyphLine.repeat(2)}</p>
+              <p className="text-sm opacity-75">𖠋 𖢻 𖤍 ꙮ ⊬ ⊭ {glyphLine.repeat(2)}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {failurePhase === "recovered" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="fixed bottom-8 left-1/2 z-[162] -translate-x-1/2 rounded-xl border border-zinc-500 bg-zinc-950/95 px-5 py-3 text-sm font-bold text-zinc-100"
+          >
+            Sistemin sındığını sanırdın?
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
