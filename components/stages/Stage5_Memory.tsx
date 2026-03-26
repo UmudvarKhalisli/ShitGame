@@ -418,6 +418,7 @@ export default function Stage5_Memory({
       >
         {gridOrder.map((id) => {
           const isActive = activeButtonId === id;
+          const shouldDim = isPlayback && activeButtonId !== null && !isActive;
           return (
             <motion.button
               key={id}
@@ -426,9 +427,11 @@ export default function Stage5_Memory({
               onClick={() => handleButtonClick(id)}
               whileTap={{ scale: 0.94 }}
               animate={{
-                scale: isActive ? 1.2 : 1,
+                scale: isActive ? 1.18 : 1,
+                opacity: shouldDim ? 0.32 : 1,
+                filter: isActive ? "brightness(2) saturate(1.8)" : "brightness(1)",
                 boxShadow: isActive
-                  ? `0 0 28px ${slotColors[id]}, 0 0 56px ${slotColors[id]}`
+                  ? `0 0 0 3px rgba(255,255,255,0.9), 0 0 36px ${slotColors[id]}, 0 0 70px ${slotColors[id]}`
                   : "0 0 0px rgba(0,0,0,0)",
               }}
               transition={{ type: "spring", stiffness: 320, damping: 20 }}

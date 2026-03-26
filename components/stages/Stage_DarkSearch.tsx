@@ -694,7 +694,7 @@ export default function Stage_DarkSearch({
 
   const { letters, realLetters, fakeLetters, viewport } = useLetterPositions(wordPick.word, fakeChars);
 
-  const canOfferSkip = wordPick.tier === 2 && wrongAttempts >= 7 && elapsedSeconds >= 60;
+  const canOfferSkip = wrongAttempts >= 20;
   const canSkipByCondition = canOfferSkip && skipPenaltyAccepted && safeUpper(skipCodeInput) === "KEÇİR MƏNİ";
 
   useEffect(() => {
@@ -881,7 +881,7 @@ export default function Stage_DarkSearch({
       return;
     }
 
-    setPanelMessage("⚠ Cəza tətbiq olundu. Bu sözü skip etdin.");
+    setPanelMessage("⚠ Cəza tətbiq olundu. Mərhələdən keçid verildi.");
     setInputValue("");
     setSkipCodeInput("");
     setSkipPenaltyAccepted(false);
@@ -889,15 +889,8 @@ export default function Stage_DarkSearch({
     recordMistake();
     onFail();
 
-    if (wordIndex + 1 >= TOTAL_WORDS_PER_STAGE) {
-      window.setTimeout(() => {
-        onComplete();
-      }, 500);
-      return;
-    }
-
     window.setTimeout(() => {
-      setWordIndex((prev) => prev + 1);
+      onComplete();
     }, 500);
   };
 
@@ -957,14 +950,14 @@ export default function Stage_DarkSearch({
 
       {canOfferSkip && (
         <div className="fixed bottom-[128px] left-1/2 z-[123] w-[min(92vw,560px)] -translate-x-1/2 rounded-xl border border-amber-500/40 bg-zinc-900/90 p-3 text-zinc-100 shadow-xl">
-          <p className="text-xs text-amber-300">Çətin sözdə ilişdin. Şərti qəbul etsən növbəti sözə keçə bilərsən.</p>
+          <p className="text-xs text-amber-300">20 cəhddən sonra xüsusi keçid açıldı. Şərti qəbul etsən növbəti mərhələyə keçə bilərsən.</p>
           <label className="mt-2 flex items-center gap-2 text-xs text-zinc-300">
             <input
               type="checkbox"
               checked={skipPenaltyAccepted}
               onChange={(event) => setSkipPenaltyAccepted(event.target.checked)}
             />
-            Cəza qəbul edirəm (bu, uğursuz cəhd kimi sayılacaq)
+            Cəza qəbul edirəm (bu, ağır uğursuz cəhd kimi sayılacaq)
           </label>
           <div className="mt-2 flex items-center gap-2">
             <input

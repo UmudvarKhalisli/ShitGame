@@ -240,6 +240,9 @@ export default function Stage1_Welcome({
             className="fixed inset-0 z-[161] bg-[#0057D8] px-8 py-10 text-white"
           >
             <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-center gap-6">
+              <div className="inline-flex w-fit items-center gap-2 rounded border border-white/50 bg-white/10 px-3 py-1 text-xs font-bold tracking-wide text-white">
+                ⚠ OYUN SİMULYASİYASI • ƏSƏB BÖLMƏSİ TEST SƏHNƏSİ
+              </div>
               <div className="text-[120px] leading-none">:(</div>
               <p className="text-2xl font-semibold">Sistem kritik xətaya düşdü.</p>
               <p className="text-sm opacity-90">{glyphLine.repeat(4)}</p>
