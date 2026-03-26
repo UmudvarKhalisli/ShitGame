@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { chaosController } from "@/hooks/chaosController";
 import { useChaosController } from "@/hooks/useChaosController";
 
 type ToneType = OscillatorType;
@@ -25,15 +24,6 @@ const TOTAL_ROUNDS = 3;
 const GAP_MS = 550;
 const FLASH_MS = 900;
 
-function shuffle<T>(items: T[]) {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
-  }
-  return copy;
-}
-
 function buildSequence(length: number) {
   return Array.from({ length }, () => Math.floor(Math.random() * 9));
 }
@@ -52,8 +42,8 @@ export default function Stage5_Memory({
   const [primarySequence, setPrimarySequence] = useState<number[]>([]);
   const [userInput, setUserInput] = useState<number[]>([]);
 
-  const [gridOrder, setGridOrder] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7, 8]);
-  const [slotColors, setSlotColors] = useState<string[]>([...BASE_COLORS]);
+  const [gridOrder] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  const [slotColors] = useState<string[]>([...BASE_COLORS]);
 
   const [activeButtonId, setActiveButtonId] = useState<number | null>(null);
   const [isPlayback, setIsPlayback] = useState(false);
@@ -74,7 +64,6 @@ export default function Stage5_Memory({
   const prepareRoundRef = useRef<(activeRound: number) => Promise<void>>(async () => {
     return;
   });
-  const roastFlagsRef = useRef({ colorSwap: false });
 
   const sequenceLengthByRound = useMemo(() => [3, 4, 5], []);
 
@@ -214,40 +203,9 @@ export default function Stage5_Memory({
     setPlaybackStep(0);
   };
 
-  const startFakeCountdown = () => {
-    setFakeCountdown(5);
-
-    const ticks = [4, 3, 2, 1, 1, 1];
-    ticks.forEach((value, index) => {
-      scheduleTimeout(() => {
-        if (!mountedRef.current) {
-          return;
-        }
-
-        setFakeCountdown(value);
-      }, (index + 1) * 800);
-    });
-  };
-
-  const applyPostPlaybackChaos = (activeRound: number) => {
-    if (activeRound >= 2) {
-      setSlotColors((prev) => shuffle(prev));
-      setHintText("Rəngləri yadda saxla!");
-
-      if (!roastFlagsRef.current.colorSwap) {
-        chaosController.triggerRoast("Rəngləri yadda saxladın? Əhsən. İndi unud.");
-        roastFlagsRef.current.colorSwap = true;
-      }
-    } else {
-      setHintText("");
-    }
-
-    if (activeRound >= 3) {
-      setGridOrder((prev) => shuffle(prev));
-      startFakeCountdown();
-    } else {
-      setFakeCountdown(null);
-    }
+  const applyPostPlaybackChaos = () => {
+    setHintText("Rəng ardıcıllığını təkrarla 🎯");
+    setFakeCountdown(null);
 
   };
 
@@ -281,7 +239,7 @@ export default function Stage5_Memory({
       return;
     }
 
-    applyPostPlaybackChaos(activeRound);
+    applyPostPlaybackChaos();
 
     setIsPlayback(false);
     setIsAwaitingInput(true);
@@ -295,9 +253,12 @@ export default function Stage5_Memory({
   }, []);
 
   const validateInputPrefix = (candidateInput: number[]) => {
-    const primaryPrefixMatches = primarySequence
-      .slice(0, candidateInput.length)
-      .every((value, index) => value === candidateInput[index]);
+    const expectedColors = primarySequence.map((id) => slotColors[id]);
+    const candidateColors = candidateInput.map((id) => slotColors[id]);
+
+    const primaryPrefixMatches = expectedColors
+      .slice(0, candidateColors.length)
+      .every((value, index) => value === candidateColors[index]);
 
     return {
       isValidPrefix: primaryPrefixMatches,
@@ -468,7 +429,7 @@ export default function Stage5_Memory({
       </motion.div>
 
       <p className="text-center text-xs text-zinc-500">
-        Düzgün cavab rəngə yox, düymənin kimliyinə (pozisiyaya) bağlıdır.
+        Düzgün cavab rəng ardıcıllığına bağlıdır.
       </p>
 
       {canUnlockSkip && (
