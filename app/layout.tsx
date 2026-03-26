@@ -11,7 +11,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="bg-zinc-950 text-zinc-100">{children}</body>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="bg-zinc-950 text-zinc-100" style={{ fontFamily: "Inter, sans-serif" }}>
+        {children}
+      </body>
     </html>
   );
 }

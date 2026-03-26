@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useMemo, useRef, useState } from "react";
 
 const fakeTerms = `Bu müqaviləni qəbul etməklə təsdiq edirsiniz ki, sayta daxil olduğunuz andan etibarən ən azı bir dəfə aynaya baxıb “mən niyə buradayam?” deyəcəksiniz. Şirkətimiz istənilən vaxt sizi telefonla narahat edib “Necəsən?” soruşma hüququnu özündə saxlayır, cavabınız “yaxşıyam” olarsa, növbəti sual avtomatik “əminsən?” olacaq. Həftənin cümə axşamı günləri platformaya daxil olan istifadəçilər sistem tərəfindən təsadüfi olaraq “kartof mütəxəssisi” elan edilə bilər. Əgər siz bu statusu inkar etsəniz, profil şəklinizin yanında görünməz medal yaranacaq və yalnız qonşunuz onu görə biləcək. Razılaşırsınız ki, yazdığınız hər bir şikayət server otağında qoyulmuş xəyali bir kaktus tərəfindən emosional olaraq qiymətləndiriləcək.
 
@@ -13,6 +13,7 @@ Qaydalarımıza əsasən, gecə saatlarında daxil olan istifadəçilərdən sis
 Son olaraq, bu şərtləri qəbul etməklə etiraf edirsiniz ki, platforma bəzən sizi heç bir səbəb olmadan təbrik edə, ardınca da “zarafat etdim” deyə bilər. Sistem tərəfindən göndərilən “çox yaxşı gedirsən” mesajı növbəti saniyədə “amma bir az da səbir” düzəlişi ilə müşayiət oluna bilər. İstifadəçi hesab edir ki, bu sənəddəki absurdluq səviyyəsi normaldan yüksəkdir və buna baxmayaraq davam etmək qərarı onun özünə məxsus cəsarətli seçimidir. Əgər burada yazılanların hamısını sonadək oxumusunuzsa, siz artıq qeyri-rəsmi olaraq “Səbr Qəhrəmanı” statusuna yüksəlmisiniz. Bu status maddi üstünlük vermir, amma özünüzlə fəxr etmək üçün kifayət qədər əyləncəlidir. Davam etməklə siz həm şərtləri, həm də bu cümlənin lazımsız uzunluğunu qəbul etmiş olursunuz.`;
 
 export default function Stage3_Terms({
+  onFail,
   onComplete,
 }: {
   onComplete: () => void;
@@ -24,6 +25,39 @@ export default function Stage3_Terms({
   const [statusText, setStatusText] = useState("");
   const [errorText, setErrorText] = useState("");
   const [flashColor, setFlashColor] = useState<"red" | "green" | null>(null);
+  const [typedPhrase, setTypedPhrase] = useState("");
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+  const termsRef = useRef<HTMLDivElement | null>(null);
+  const requiredPhrase = useMemo(() => {
+    const options = [
+      "MƏN OXUDUM",
+      "DÜŞÜNÜB QƏBUL EDİRƏM",
+      "SƏBİRLƏ DAVAM",
+      "QAYDALARI ANLADIM",
+      "GERİ DÖNÜŞ YOXDUR",
+      "BU ŞƏRTLƏR AĞIRDIR",
+      "İMZA ATMADAN KEÇMİR",
+      "MƏNTİQİM HƏLƏ YERİNDƏDİR",
+      "OXU VƏ QƏRAR VER",
+    ];
+    return options[Math.floor(Math.random() * options.length)] ?? "SƏBİRLƏ DAVAM";
+  }, []);
+  const reversedRequiredPhrase = useMemo(
+    () => Array.from(requiredPhrase).reverse().join(""),
+    [requiredPhrase],
+  );
+
+  const normalize = (value: string) => value.trim().toLocaleUpperCase("az");
+
+  const handleScroll = () => {
+    const el = termsRef.current;
+    if (!el) {
+      return;
+    }
+
+    const reached = el.scrollTop + el.clientHeight >= el.scrollHeight - 12;
+    setIsScrolledToBottom(reached);
+  };
 
   const handleAccept = async () => {
     if (isLoading) {
@@ -32,6 +66,23 @@ export default function Stage3_Terms({
 
     if (!isChecked) {
       setErrorText("Davam etmək üçün checkbox işarələnməlidir.");
+      onFail();
+      return;
+    }
+
+    if (!isScrolledToBottom) {
+      setErrorText("Əvvəlcə mətni sonadək scroll et.");
+      setFlashColor("red");
+      onFail();
+      window.setTimeout(() => setFlashColor(null), 220);
+      return;
+    }
+
+    if (normalize(typedPhrase) !== normalize(reversedRequiredPhrase)) {
+      setErrorText("Cümləni tərsinə düzgün yazmadın.");
+      setFlashColor("red");
+      onFail();
+      window.setTimeout(() => setFlashColor(null), 220);
       return;
     }
 
@@ -48,7 +99,8 @@ export default function Stage3_Terms({
   };
 
   return (
-    <section className="relative w-full max-w-2xl space-y-5 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-xl">
+    <section className="fixed inset-0 z-[112] flex items-center justify-center bg-[#050508] p-6">
+      <div className="relative w-full max-w-3xl space-y-5 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-6 shadow-xl">
       {flashColor && (
         <div
           className={`pointer-events-none fixed inset-0 z-40 ${
@@ -59,7 +111,11 @@ export default function Stage3_Terms({
 
       <h1 className="text-3xl font-bold text-zinc-100">Qaydalar və Şərtlər</h1>
 
-      <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900/80 p-4 text-sm leading-7 text-zinc-200">
+      <div
+        ref={termsRef}
+        onScroll={handleScroll}
+        className="h-[45vh] overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900/80 p-4 text-sm leading-7 text-zinc-200"
+      >
         {fakeTerms}
       </div>
 
@@ -72,6 +128,18 @@ export default function Stage3_Terms({
         />
         Oxudum, anladım, peşman olacam
       </label>
+
+      <div className="space-y-2">
+        <p className="text-xs text-zinc-400">
+          Bu cümləni tərsinə yaz: <span className="font-bold text-zinc-200">{requiredPhrase}</span>
+        </p>
+        <input
+          value={typedPhrase}
+          onChange={(event) => setTypedPhrase(event.target.value)}
+          placeholder="Cümləni tərsinə yaz"
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 outline-none transition focus:border-zinc-400"
+        />
+      </div>
 
       <button
         type="button"
@@ -86,14 +154,15 @@ export default function Stage3_Terms({
         <div className="h-4 w-full overflow-hidden rounded-full bg-zinc-800">
           <div
             className="h-full bg-emerald-500 transition-[width] duration-100"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${progress || (isScrolledToBottom ? 100 : 0)}%` }}
           />
         </div>
-        <p className="text-xs text-zinc-400">Yüklənir: {progress}%</p>
+        <p className="text-xs text-zinc-400">Yüklənir: {progress || (isScrolledToBottom ? 100 : 0)}%</p>
       </div>
 
       {errorText && <p className="text-sm text-rose-400">{errorText}</p>}
       {statusText && <p className="text-sm font-semibold text-amber-300">{statusText}</p>}
+      </div>
     </section>
   );
 }

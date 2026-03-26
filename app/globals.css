@@ -2,15 +2,57 @@
 
 :root {
   color-scheme: dark;
+  --bg-primary: #0a0a0a;
+  --accent-purple: #7c3aed;
+  --accent-cyan: #06b6d4;
+  --accent-red: #ef4444;
+  --text-primary: #00f010;
+  --text-muted: #6b7280;
 }
 
 body {
   min-height: 100vh;
-  cursor: none;
+  background: #0a0a0a;
+  color: #00f010;
+  position: relative;
 }
 
-* {
-  cursor: none;
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 240, 16, 0.09) 3px,
+      rgba(0, 240, 16, 0.09) 4px
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
+  mix-blend-mode: screen;
+  animation: crt-flicker 2.4s ease-in-out infinite;
+}
+
+button {
+  border-radius: 0 !important;
+  box-shadow:
+    0 0 10px rgba(0, 240, 16, 0.45),
+    inset 0 0 4px rgba(0, 240, 16, 0.22);
+}
+
+button:hover {
+  box-shadow:
+    0 0 16px rgba(0, 240, 16, 0.7),
+    inset 0 0 6px rgba(0, 240, 16, 0.35);
+}
+
+html,
+body,
+body * {
+  cursor: auto !important;
 }
 
 .stage5-cursor-visible,
@@ -21,6 +63,60 @@ body {
 .entry-cursor-visible,
 .entry-cursor-visible * {
   cursor: auto !important;
+}
+
+.landing-page-cursor,
+.landing-page-cursor * {
+  cursor: auto !important;
+}
+
+.scanline-overlay {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(241, 240, 255, 0.02) 0px,
+    rgba(241, 240, 255, 0.02) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  mix-blend-mode: soft-light;
+}
+
+.glitch-title {
+  text-shadow: 3px 0 var(--accent-cyan), -3px 0 var(--accent-red);
+  animation: glitch 8s infinite;
+}
+
+.chaos-card {
+  position: relative;
+  background: #080818;
+  border-color: rgba(124, 58, 237, 0.2);
+  transition:
+    border-color 0.24s ease,
+    box-shadow 0.24s ease,
+    transform 0.24s ease;
+}
+
+.chaos-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+  opacity: 0.75;
+}
+
+.chaos-card:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 24px rgba(124, 58, 237, 0.15);
+  transform: translateY(-2px);
+}
+
+.cta-pulse {
+  animation: cta-pulse 2.1s ease-in-out 1.2s infinite;
 }
 
 .roaster-wink {
@@ -155,5 +251,48 @@ body {
   100% {
     transform: translateY(120vh) rotate(340deg);
     opacity: 0.95;
+  }
+}
+
+@keyframes glitch {
+  0% {
+    text-shadow: 3px 0 #06b6d4, -3px 0 #ef4444;
+  }
+  20% {
+    text-shadow: -4px 0 #06b6d4, 4px 0 #ef4444;
+    clip-path: inset(20% 0 60% 0);
+  }
+  40% {
+    text-shadow: 4px 0 #ef4444, -4px 0 #06b6d4;
+    clip-path: inset(60% 0 10% 0);
+  }
+  60% {
+    text-shadow: -2px 0 #06b6d4, 2px 0 #ef4444;
+    clip-path: none;
+  }
+  100% {
+    text-shadow: 3px 0 #06b6d4, -3px 0 #ef4444;
+  }
+}
+
+@keyframes cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.36);
+  }
+  50% {
+    box-shadow: 0 0 26px rgba(124, 58, 237, 0.52);
+  }
+}
+
+@keyframes crt-flicker {
+  0% {
+    opacity: 0.99;
+  }
+  50% {
+    opacity: 0.96;
+  }
+  100% {
+    opacity: 0.99;
   }
 }

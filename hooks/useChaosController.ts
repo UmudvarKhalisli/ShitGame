@@ -314,9 +314,15 @@ function applyStageChaos(prev: ChaosState, stage: ChaosState["currentStage"]): C
 export function ChaosControllerProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ChaosState>(defaultState);
   const idleStepsAwardedRef = useRef(0);
+  const lastInteractionUpdateRef = useRef(0);
 
   const markInteraction = useCallback(() => {
     const now = Date.now();
+    if (now - lastInteractionUpdateRef.current < 120) {
+      return;
+    }
+
+    lastInteractionUpdateRef.current = now;
     setState((prev) => ({
       ...prev,
       startTime: prev.startTime === 0 ? now : prev.startTime,

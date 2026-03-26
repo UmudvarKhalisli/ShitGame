@@ -85,7 +85,7 @@ export default function RoasterWidget() {
   useEffect(() => {
     const onInteraction = () => {
       lastInteractionRef.current = Date.now();
-      setIdleTime(0);
+      setIdleTime((prev) => (prev === 0 ? prev : 0));
     };
 
     const events: Array<keyof WindowEventMap> = ["mousemove", "click", "keydown"];

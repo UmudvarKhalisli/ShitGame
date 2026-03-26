@@ -223,12 +223,71 @@ function useLetterPositions(word: string, fakeChars: string[]) {
   }, [fakeChars, viewport.height, viewport.width]);
 
   useAnimationFrame(() => {
-    const drift = (items: LetterNode[]) =>
-      items.map((letter) => {
-        let nextX = letter.x + letter.vx;
-        let nextY = letter.y + letter.vy;
-        let nextVx = letter.vx;
-        let nextVy = letter.vy;
+    const minSpacing = Math.max(88, Math.min(122, 132 - word.length * 4));
+    const maxSpeed = 0.24;
+
+    const drift = (items: LetterNode[]) => {
+      if (items.length <= 1) {
+        return items.map((item) => {
+          let nextX = item.x + item.vx;
+          let nextY = item.y + item.vy;
+          let nextVx = item.vx;
+          let nextVy = item.vy;
+
+          if (nextX < EDGE_PADDING || nextX > viewport.width - EDGE_PADDING) {
+            nextVx = -nextVx;
+            nextX = Math.max(EDGE_PADDING, Math.min(viewport.width - EDGE_PADDING, nextX));
+          }
+
+          if (nextY < EDGE_PADDING || nextY > viewport.height - EDGE_PADDING - 120) {
+            nextVy = -nextVy;
+            nextY = Math.max(EDGE_PADDING, Math.min(viewport.height - EDGE_PADDING - 120, nextY));
+          }
+
+          return {
+            ...item,
+            x: nextX,
+            y: nextY,
+            vx: Math.max(-maxSpeed, Math.min(maxSpeed, nextVx)),
+            vy: Math.max(-maxSpeed, Math.min(maxSpeed, nextVy)),
+          };
+        });
+      }
+
+      const next = items.map((item) => ({ ...item, x: item.x + item.vx, y: item.y + item.vy }));
+
+      for (let i = 0; i < next.length; i += 1) {
+        for (let j = i + 1; j < next.length; j += 1) {
+          const first = next[i];
+          const second = next[j];
+          const dx = second.x - first.x;
+          const dy = second.y - first.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+
+          if (dist < minSpacing) {
+            const overlap = (minSpacing - dist) * 0.5;
+            const ux = dx / dist;
+            const uy = dy / dist;
+            const push = Math.min(2.2, overlap);
+
+            first.x -= ux * push;
+            first.y -= uy * push;
+            second.x += ux * push;
+            second.y += uy * push;
+
+            first.vx -= ux * 0.03;
+            first.vy -= uy * 0.03;
+            second.vx += ux * 0.03;
+            second.vy += uy * 0.03;
+          }
+        }
+      }
+
+      return next.map((item) => {
+        let nextX = item.x;
+        let nextY = item.y;
+        let nextVx = item.vx;
+        let nextVy = item.vy;
 
         if (nextX < EDGE_PADDING || nextX > viewport.width - EDGE_PADDING) {
           nextVx = -nextVx;
@@ -241,13 +300,14 @@ function useLetterPositions(word: string, fakeChars: string[]) {
         }
 
         return {
-          ...letter,
+          ...item,
           x: nextX,
           y: nextY,
-          vx: nextVx,
-          vy: nextVy,
+          vx: Math.max(-maxSpeed, Math.min(maxSpeed, nextVx)),
+          vy: Math.max(-maxSpeed, Math.min(maxSpeed, nextVy)),
         };
       });
+    };
 
     setRealLetters((prev) => drift(prev));
     setFakeLetters((prev) => drift(prev));
@@ -587,6 +647,8 @@ export default function Stage_DarkSearch({
   const [feedback, setFeedback] = useState<"idle" | "wrong" | "correct">("idle");
   const [panelMessage, setPanelMessage] = useState("");
   const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [skipCodeInput, setSkipCodeInput] = useState("");
+  const [skipPenaltyAccepted, setSkipPenaltyAccepted] = useState(false);
   const [fakeChars, setFakeChars] = useState<string[]>([]);
   const [discoveredIds, setDiscoveredIds] = useState<Set<string>>(new Set());
   const [hintLetterId, setHintLetterId] = useState<string | null>(null);
@@ -602,6 +664,7 @@ export default function Stage_DarkSearch({
   const triggered180Ref = useRef(false);
 
   const audio = useSpookyAudio();
+  const { playLetterRevealTone } = audio;
 
   if (initialPlayCountRef.current === null) {
     initialPlayCountRef.current = state.darkSearchPlays;
@@ -621,6 +684,8 @@ export default function Stage_DarkSearch({
     setFeedback("idle");
     setPanelMessage("");
     setWrongAttempts(0);
+    setSkipCodeInput("");
+    setSkipPenaltyAccepted(false);
     setFakeChars([]);
     setDiscoveredIds(new Set());
     discoveredIdsRef.current = new Set();
@@ -628,6 +693,9 @@ export default function Stage_DarkSearch({
   }, [wordPick.word]);
 
   const { letters, realLetters, fakeLetters, viewport } = useLetterPositions(wordPick.word, fakeChars);
+
+  const canOfferSkip = wordPick.tier === 2 && wrongAttempts >= 7 && elapsedSeconds >= 60;
+  const canSkipByCondition = canOfferSkip && skipPenaltyAccepted && safeUpper(skipCodeInput) === "KEÇİR MƏNİ";
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -699,17 +767,27 @@ export default function Stage_DarkSearch({
       const first = realLetters.find((letter) => letter.id === newlyDiscovered[0]);
       if (first) {
         const tone = 420 + (first.char.charCodeAt(0) % 7) * 28;
-        audio.playLetterRevealTone(tone);
+        playLetterRevealTone(tone);
       }
     }
 
     setDiscoveredIds((prev) => {
+      const alreadySameLength = prev.size === discoveredIdsRef.current.size + newlyDiscovered.length;
+      if (newlyDiscovered.length === 0 && alreadySameLength) {
+        return prev;
+      }
+
       const next = new Set(prev);
       discoveredNow.forEach((id) => next.add(id));
       discoveredIdsRef.current = next;
+
+      if (next.size === prev.size) {
+        return prev;
+      }
+
       return next;
     });
-  }, [audio, mouse, realLetters]);
+  }, [mouse, playLetterRevealTone, realLetters]);
 
   useEffect(() => {
     if (elapsedSeconds >= 60 && !triggered60Ref.current) {
@@ -790,14 +868,41 @@ export default function Stage_DarkSearch({
     if (wrongAttempts === 0) {
       const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZƏĞIİÖŞÜÇ".split("");
       const filtered = alphabet.filter((char) => !safeUpper(wordPick.word).includes(char));
-      setFakeChars(shuffle(filtered).slice(0, 3 + Math.floor(Math.random() * 2)));
+      const fakeCount = wordPick.tier === 2 ? 2 : 3 + Math.floor(Math.random() * 2);
+      setFakeChars(shuffle(filtered).slice(0, fakeCount));
     }
 
     window.setTimeout(() => setFeedback("idle"), 550);
   };
 
+  const handleConditionalSkip = () => {
+    if (!canSkipByCondition) {
+      setPanelMessage("Skip üçün şərti tam doldur: checkbox + kod.");
+      return;
+    }
+
+    setPanelMessage("⚠ Cəza tətbiq olundu. Bu sözü skip etdin.");
+    setInputValue("");
+    setSkipCodeInput("");
+    setSkipPenaltyAccepted(false);
+    setFeedback("idle");
+    recordMistake();
+    onFail();
+
+    if (wordIndex + 1 >= TOTAL_WORDS_PER_STAGE) {
+      window.setTimeout(() => {
+        onComplete();
+      }, 500);
+      return;
+    }
+
+    window.setTimeout(() => {
+      setWordIndex((prev) => prev + 1);
+    }, 500);
+  };
+
   return (
-    <section className="fixed inset-0 z-[112] cursor-none overflow-hidden bg-[#050508]">
+    <section className="fixed inset-0 z-[112] overflow-hidden bg-[#050508]">
       <DarkOverlay mouse={mouse} radius={flashlightRadius} tintRadius={flickerActive ? 80 : 140} />
 
       <div className="absolute left-4 top-4 z-[121] rounded-lg border border-zinc-700 bg-zinc-900/75 px-3 py-2 text-xs font-semibold text-zinc-100">
@@ -839,15 +944,6 @@ export default function Stage_DarkSearch({
         />
       )}
 
-      <div
-        className="pointer-events-none fixed z-[123] h-2 w-2 rounded-full bg-white"
-        style={{
-          left: mouse.x - 4,
-          top: mouse.y - 4,
-          boxShadow: "0 0 12px 6px rgba(200,180,255,0.8)",
-        }}
-      />
-
       <InputPanel
         inputValue={inputValue}
         onChange={setInputValue}
@@ -858,6 +954,35 @@ export default function Stage_DarkSearch({
         feedback={feedback}
         message={panelMessage}
       />
+
+      {canOfferSkip && (
+        <div className="fixed bottom-[128px] left-1/2 z-[123] w-[min(92vw,560px)] -translate-x-1/2 rounded-xl border border-amber-500/40 bg-zinc-900/90 p-3 text-zinc-100 shadow-xl">
+          <p className="text-xs text-amber-300">Çətin sözdə ilişdin. Şərti qəbul etsən növbəti sözə keçə bilərsən.</p>
+          <label className="mt-2 flex items-center gap-2 text-xs text-zinc-300">
+            <input
+              type="checkbox"
+              checked={skipPenaltyAccepted}
+              onChange={(event) => setSkipPenaltyAccepted(event.target.checked)}
+            />
+            Cəza qəbul edirəm (bu, uğursuz cəhd kimi sayılacaq)
+          </label>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              value={skipCodeInput}
+              onChange={(event) => setSkipCodeInput(event.target.value)}
+              placeholder="Kod yaz: KEÇİR MƏNİ"
+              className="w-full rounded-lg border border-zinc-600 bg-zinc-950 px-3 py-2 text-xs outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleConditionalSkip}
+              className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-black transition hover:bg-amber-500"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      )}
 
       <AnimatePresence>
         {showVictory && (

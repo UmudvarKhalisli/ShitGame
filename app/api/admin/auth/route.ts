@@ -1,9 +1,38 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import { readFileSync } from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { join } from "path";
 
 const COOKIE_NAME = "stage_admin_session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 14;
+
+function readAdminBypassFromExample() {
+  try {
+    const envExample = readFileSync(join(process.cwd(), ".env.example"), "utf8");
+    const match = envExample.match(/^\s*ADMIN_BYPASS_KEY\s*=\s*(.+)\s*$/m);
+    if (!match) {
+      return undefined;
+    }
+
+    return match[1].trim().replace(/^['"]|['"]$/g, "");
+  } catch {
+    return undefined;
+  }
+}
+
+function getAdminSecret() {
+  const fromEnv = process.env.ADMIN_BYPASS_KEY?.trim();
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return readAdminBypassFromExample();
+  }
+
+  return undefined;
+}
 
 function signPayload(payload: string, secret: string) {
   return createHmac("sha256", secret).update(payload).digest("hex");
@@ -43,7 +72,7 @@ function isValidToken(token: string | undefined, secret: string | undefined) {
 }
 
 export async function POST(request: NextRequest) {
-  const adminSecret = process.env.ADMIN_BYPASS_KEY;
+  const adminSecret = getAdminSecret();
 
   if (!adminSecret) {
     return NextResponse.json(
@@ -53,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const key = typeof body?.key === "string" ? body.key : "";
+  const key = typeof body?.key === "string" ? body.key.trim() : "";
 
   if (!key || key !== adminSecret) {
     return NextResponse.json({ ok: false, error: "Invalid key." }, { status: 401 });
@@ -77,7 +106,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const adminSecret = process.env.ADMIN_BYPASS_KEY;
+  const adminSecret = getAdminSecret();
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
 

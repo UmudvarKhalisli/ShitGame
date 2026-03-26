@@ -40,20 +40,8 @@ export default function Stage2_Name({
   const [activeFont, setActiveFont] = useState(fontOptions[0]);
   const [activePlaceholder, setActivePlaceholder] = useState(placeholderOptions[0]);
   const [error, setError] = useState("");
-  const [fakeCursorPosition, setFakeCursorPosition] = useState({ x: 0, y: 0 });
 
   const displayedValue = typedValue.split("").reverse().join("");
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setFakeCursorPosition({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -133,7 +121,7 @@ export default function Stage2_Name({
   };
 
   return (
-    <section className="relative w-full max-w-xl cursor-none space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center shadow-xl">
+    <section className="relative w-full max-w-xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center shadow-xl">
       <motion.h1
         key={activeFont}
         initial={{ opacity: 0, y: -8 }}
@@ -189,17 +177,6 @@ export default function Stage2_Name({
           Davam Et →
         </button>
       </form>
-
-      <div
-        className="pointer-events-none fixed z-50 animate-pulse text-2xl font-black text-zinc-100"
-        style={{
-          left: fakeCursorPosition.x,
-          top: fakeCursorPosition.y,
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        ?
-      </div>
     </section>
   );
 }
