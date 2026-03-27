@@ -337,21 +337,19 @@ export default function Stage5_Memory({
 
     playTone(FREQUENCIES[buttonId], 0.18, "triangle");
 
-    setUserInput((prev) => {
-      const nextInput = [...prev, buttonId];
-      const verdict = validateInputPrefix(nextInput);
+    const nextInput = [...userInput, buttonId];
+    setUserInput(nextInput);
 
-      if (!verdict.isValidPrefix) {
-        void handleWrongAttempt();
-        return nextInput;
-      }
+    const verdict = validateInputPrefix(nextInput);
 
-      if (verdict.isPrimaryComplete || verdict.isAlternateComplete) {
-        void handleRoundSuccess();
-      }
+    if (!verdict.isValidPrefix) {
+      void handleWrongAttempt();
+      return;
+    }
 
-      return nextInput;
-    });
+    if (verdict.isPrimaryComplete || verdict.isAlternateComplete) {
+      void handleRoundSuccess();
+    }
   };
 
   const canUnlockSkip = round >= 3 && failedAttemptsInStage >= 20 && !isPlayback;

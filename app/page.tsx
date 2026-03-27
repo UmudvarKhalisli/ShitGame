@@ -141,17 +141,27 @@ export default function LandingPage() {
             transition={{ delay: 0.75, duration: 0.45, ease: "easeOut" }}
             className="mt-10"
           >
-            <button
-              type="button"
-              onClick={() => router.push("/game")}
-              className="cta-pulse rounded-[6px] border-[1.5px] border-[var(--accent-purple)] bg-transparent px-14 py-4 text-[18px] tracking-[0.35em] text-[#C084FC] transition-all duration-300 hover:bg-[rgba(124,58,237,0.15)] hover:tracking-[0.45em] hover:shadow-[0_0_28px_rgba(124,58,237,0.58)]"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                boxShadow: "0 0 20px rgba(124,58,237,0.4)",
-              }}
-            >
-              OYUNA BAŞLA →
-            </button>
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={() => router.push("/game")}
+                className="cta-pulse rounded-[6px] border-[1.5px] border-[var(--accent-purple)] bg-transparent px-14 py-4 text-[18px] tracking-[0.35em] text-[#C084FC] transition-all duration-300 hover:bg-[rgba(124,58,237,0.15)] hover:tracking-[0.45em] hover:shadow-[0_0_28px_rgba(124,58,237,0.58)]"
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  boxShadow: "0 0 20px rgba(124,58,237,0.4)",
+                }}
+              >
+                OYUNA BAŞLA →
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dia-again")}
+                className="rounded-[6px] border-[1.5px] border-rose-400/70 bg-rose-500/10 px-8 py-4 text-[15px] tracking-[0.2em] text-rose-200 transition-all duration-300 hover:bg-rose-500/20 hover:shadow-[0_0_22px_rgba(244,63,94,0.55)]"
+                style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+              >
+                DIA AGAIN MINI LEVEL
+              </button>
+            </div>
             <p
               className="mt-4 text-[10px] text-[#4B5563]"
               style={{ fontFamily: "'Share Tech Mono', monospace" }}
