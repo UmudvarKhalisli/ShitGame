@@ -33,6 +33,15 @@ type FallingHazard = {
   speed: number;
 };
 
+type LaughSticker = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  rotate: number;
+  face: string;
+};
+
 type RoundConfig = {
   id: number;
   title: string;
@@ -119,21 +128,18 @@ const ROUNDS: RoundConfig[] = [
   },
   {
     id: 5,
-    title: "Raund 5/5: Final Qarışıqlıq",
-    note: "Ağır jump + tərs idarə + qaçan qapı eyni anda.",
-    moveSpeed: 4.3,
-    jump: -9.4,
-    gravity: 0.94,
-    invertAfterMs: 2200,
-    teleportDoorDistance: 108,
-    fallingHazards: true,
+    title: "Raund 5/5",
+    note: "5/5 mərhələ",
+    moveSpeed: 4.8,
+    jump: -10.3,
+    gravity: 0.82,
     platforms: [
       { id: 1, x: 104, y: 252, w: 146, h: 12 },
-      { id: 2, x: 284, y: 226, w: 114, h: 12 },
-      { id: 3, x: 436, y: 198, w: 108, h: 12 },
-      { id: 4, x: 590, y: 170, w: 96, h: 12 },
+      { id: 2, x: 282, y: 226, w: 114, h: 12 },
+      { id: 3, x: 432, y: 198, w: 108, h: 12 },
+      { id: 4, x: 586, y: 172, w: 96, h: 12 },
     ],
-    door: { x: 704, y: 108, w: 32, h: 74 },
+    door: { x: 704, y: 98, w: 32, h: 74 },
   },
 ];
 
@@ -170,8 +176,11 @@ export default function Stage8_DiaAgainRush({
   const [fakeBroken, setFakeBroken] = useState(false);
   const [fakeDrop, setFakeDrop] = useState(0);
   const [hazardView, setHazardView] = useState<FallingHazard[]>([]);
+  const [laughStickers, setLaughStickers] = useState<LaughSticker[]>([]);
   const round4ApproachCount = roundApproachCounts[3] ?? 0;
   const isRound4Mercy = round.id === 4 && round4ApproachCount >= 24;
+  const headingText = round.id === 5 ? "Stage 9: Dia Again Rush (5/5)" : `Stage 9: Dia Again Rush (${round.title})`;
+  const statusText = round.id === 5 ? "5/5 mərhələ" : status;
 
   const playerRef = useRef<Player>({ x: START_X, y: START_Y, vx: 0, vy: 0, onGround: true });
   const keysRef = useRef({ left: false, right: false, up: false });
@@ -195,6 +204,19 @@ export default function Stage8_DiaAgainRush({
       window.clearTimeout(invertTimerRef.current);
       invertTimerRef.current = null;
     }
+  };
+
+  const spawnLaughStickers = () => {
+    const faces = ["😂", "🤣", "😹", "😆", "😈"];
+    const next = Array.from({ length: 7 }, (_, index) => ({
+      id: Date.now() + index,
+      x: 8 + Math.random() * 84,
+      y: 12 + Math.random() * 72,
+      size: 24 + Math.floor(Math.random() * 22),
+      rotate: -22 + Math.random() * 44,
+      face: faces[Math.floor(Math.random() * faces.length)] ?? "😂",
+    }));
+    setLaughStickers(next);
   };
 
   const randomizeDoor = (playerX: number, playerY: number) => {
@@ -231,6 +253,7 @@ export default function Stage8_DiaAgainRush({
 
     setFakeBroken(false);
     setFakeDrop(0);
+    setLaughStickers([]);
     fakeBrokenRef.current = false;
     fakeDropRef.current = 0;
     fakeBrokenAtRef.current = null;
@@ -510,6 +533,7 @@ export default function Stage8_DiaAgainRush({
         if (hitHazard || nextY > WORLD_HEIGHT + 24) {
           setDead(true);
           setStarted(false);
+          spawnLaughStickers();
           const nextRoundFailCount = (roundFailCounts[roundIndex] ?? 0) + 1;
           setRoundFailCounts((prev) => {
             const next = [...prev];
@@ -557,7 +581,7 @@ export default function Stage8_DiaAgainRush({
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-2xl font-black text-zinc-100">Stage 9: Dia Again Rush ({round.title})</h2>
+        <h2 className="text-2xl font-black text-zinc-100">{headingText}</h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -583,7 +607,7 @@ export default function Stage8_DiaAgainRush({
         </div>
       </div>
 
-      <p className="text-xs text-zinc-300">{status}</p>
+      <p className="text-xs text-zinc-300">{statusText}</p>
 
       <div className="relative mx-auto overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#0f172a,#101827)]" style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}>
         <div className="absolute left-0 bg-zinc-700/80" style={{ top: FLOOR_Y, width: WORLD_WIDTH, height: WORLD_HEIGHT - FLOOR_Y }} />
@@ -623,6 +647,22 @@ export default function Stage8_DiaAgainRush({
           className="absolute rounded-[4px] border border-amber-200 bg-amber-300 shadow-[0_0_14px_rgba(253,224,71,0.55)]"
           style={{ left: playerView.x, top: playerView.y, width: PLAYER_SIZE, height: PLAYER_SIZE }}
         />
+
+        {dead && laughStickers.map((sticker) => (
+          <span
+            key={sticker.id}
+            className="pointer-events-none absolute select-none"
+            style={{
+              left: `${sticker.x}%`,
+              top: `${sticker.y}%`,
+              transform: `translate(-50%, -50%) rotate(${sticker.rotate}deg)`,
+              fontSize: `${sticker.size}px`,
+              textShadow: "0 0 10px rgba(255,255,255,0.45)",
+            }}
+          >
+            {sticker.face}
+          </span>
+        ))}
       </div>
     </section>
   );
