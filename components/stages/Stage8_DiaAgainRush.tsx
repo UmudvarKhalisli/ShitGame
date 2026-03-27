@@ -126,8 +126,6 @@ const ROUNDS: RoundConfig[] = [
     gravity: 0.94,
     invertAfterMs: 2200,
     teleportDoorDistance: 108,
-    fakePlatformId: 3,
-    fakeSupportMs: 420,
     fallingHazards: true,
     platforms: [
       { id: 1, x: 104, y: 252, w: 146, h: 12 },
