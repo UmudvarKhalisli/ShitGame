@@ -23,7 +23,7 @@ const mistakeRoasts = [
   "Siçanı sındırdın, yoxsa beynini?",
 ];
 
-const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, string> = {
+const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, string> = {
   1: "Düymə qaçır, sən də qaçırsan 🏃",
   2: "Adını da unudubsan görəsən • siçan itə bilər ;) (bug deyil)",
   3: "99%... 99%... hələ 99%... tanış gəlir?",
@@ -32,6 +32,8 @@ const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, string> = {
   6: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
   7: "Məntiq var, amma beynin artıq ona inanmır",
   8: "Boss fight-a çatdın. İndi beyin səni test edir",
+  9: "Yeni level gəldi, amma barmaqların hələ köhnə rejimdədir",
+  10: "SONA ÇAT qapısı sənə çatdırmaz. Sən onu aldatmalısan",
 };
 
 const NORMAL_ROAST_COOLDOWN_MS = 8000;
@@ -130,11 +132,7 @@ export default function RoasterWidget() {
 
   useEffect(() => {
     const previousStage = previousStageRef.current;
-    if (
-      gameState.currentStage !== previousStage &&
-      gameState.currentStage !== "complete" &&
-      gameState.currentStage in stageRoasts
-    ) {
+    if (gameState.currentStage !== previousStage && gameState.currentStage !== "complete") {
       showRoast(stageRoasts[gameState.currentStage]);
     }
 
