@@ -26,6 +26,7 @@ const MOVE_SPEED = 4.4;
 const JUMP_SPEED = -12.5;
 const GRAVITY = 0.72;
 const MAX_FALL = 15;
+const FAKE_SUPPORT_MS = 650;
 
 const START_X = 46;
 const START_Y = WORLD_HEIGHT - 70 - PLAYER_SIZE;
@@ -50,7 +51,7 @@ const PLATFORMS: Platform[] = [
   { id: 1, x: 120, y: 390, width: 150, height: 16 },
   { id: 2, x: 320, y: 336, width: 145, height: 16, fake: true },
   { id: 3, x: 535, y: 292, width: 135, height: 16 },
-  { id: 4, x: 715, y: 256, width: 110, height: 16 },
+  { id: 4, x: 710, y: 320, width: 125, height: 16 },
 ];
 
 export default function DiaAgainPage() {
@@ -81,6 +82,7 @@ export default function DiaAgainPage() {
 
   const fakeDropRef = useRef(0);
   const fakeBrokenRef = useRef(false);
+  const fakeBreakStartedAtRef = useRef<number | null>(null);
   const spikesTriggeredRef = useRef(false);
   const spikesYRef = useRef(SPIKES.hiddenY);
 
@@ -102,6 +104,7 @@ export default function DiaAgainPage() {
     setFakePlatformDrop(0);
     fakeBrokenRef.current = false;
     fakeDropRef.current = 0;
+    fakeBreakStartedAtRef.current = null;
 
     setSpikesTriggered(false);
     setSpikesY(SPIKES.hiddenY);
@@ -133,6 +136,7 @@ export default function DiaAgainPage() {
     setFakePlatformDrop(0);
     fakeBrokenRef.current = false;
     fakeDropRef.current = 0;
+    fakeBreakStartedAtRef.current = null;
 
     setSpikesTriggered(false);
     setSpikesY(SPIKES.hiddenY);
@@ -202,6 +206,7 @@ export default function DiaAgainPage() {
   useEffect(() => {
     const tick = () => {
       const player = playerRef.current;
+      const now = Date.now();
 
       if (started && !dead && !won) {
         const leftPressed = keysRef.current.left;
@@ -230,7 +235,10 @@ export default function DiaAgainPage() {
           if (!platform.fake) {
             return true;
           }
-          return !fakeBrokenRef.current;
+          const fakeStillSolid =
+            !fakeBrokenRef.current ||
+            (fakeBreakStartedAtRef.current !== null && now - fakeBreakStartedAtRef.current < FAKE_SUPPORT_MS);
+          return fakeStillSolid;
         }).map((platform) => {
           if (platform.fake) {
             return {
@@ -258,6 +266,7 @@ export default function DiaAgainPage() {
 
             if (platform.fake && !fakeBrokenRef.current) {
               fakeBrokenRef.current = true;
+              fakeBreakStartedAtRef.current = now;
               setFakeBroken(true);
             }
           }
@@ -271,7 +280,10 @@ export default function DiaAgainPage() {
           nextOnGround = true;
         }
 
-        if (fakeBrokenRef.current && fakeDropRef.current < 140) {
+        const canFakeDropStart =
+          fakeBreakStartedAtRef.current !== null && now - fakeBreakStartedAtRef.current >= FAKE_SUPPORT_MS;
+
+        if (fakeBrokenRef.current && canFakeDropStart && fakeDropRef.current < 140) {
           fakeDropRef.current += 4.2;
           setFakePlatformDrop(fakeDropRef.current);
         }
@@ -396,12 +408,16 @@ export default function DiaAgainPage() {
           {PLATFORMS.map((platform) => {
             const isFake = Boolean(platform.fake);
             const platformY = isFake ? platform.y + fakePlatformDrop : platform.y;
-            const hidden = isFake && fakeBroken;
+            const hidden = isFake && fakePlatformDrop > 6;
 
             return (
               <div
                 key={platform.id}
-                className="absolute rounded-sm border border-cyan-300/50 bg-cyan-400/30 transition-all duration-300"
+                className={`absolute rounded-sm border transition-all duration-300 ${
+                  isFake && fakeBroken
+                    ? "border-rose-300/70 bg-rose-500/35"
+                    : "border-cyan-300/50 bg-cyan-400/30"
+                }`}
                 style={{
                   left: platform.x,
                   top: platformY,
