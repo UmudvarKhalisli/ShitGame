@@ -90,7 +90,7 @@ export default function TheRoaster() {
   }, [gameState.attempts, randomMessage, showRoast]);
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-1/2 z-[140] w-[min(92vw,680px)] -translate-x-1/2">
+    <div className="pointer-events-none fixed left-1/2 top-5 z-[140] w-[min(92vw,680px)] -translate-x-1/2">
       <AnimatePresence>
         {activeMessage && (
           <motion.div

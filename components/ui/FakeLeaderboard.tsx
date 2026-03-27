@@ -159,7 +159,11 @@ export default function FakeLeaderboard({
 }) {
   const { calculateFinalScore } = useChaosController();
 
-  const finalScore = calculateFinalScore();
+  const finalScoreRef = useRef<ReturnType<typeof calculateFinalScore> | null>(null);
+  if (finalScoreRef.current === null) {
+    finalScoreRef.current = calculateFinalScore();
+  }
+  const finalScore = finalScoreRef.current;
   const safeName = playerName || "Anonim Kölgə";
   const [rows, setRows] = useState<LeaderboardEntry[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
@@ -216,6 +220,58 @@ export default function FakeLeaderboard({
     osc.onended = () => {
       void ctx.close();
     };
+  };
+
+  const generateCertificatePdf = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1240;
+    canvas.height = 1754;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("Canvas konteksti açıla bilmədi.");
+    }
+
+    ctx.fillStyle = "#07120f";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "#00f010";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+
+    ctx.fillStyle = "#004a1e";
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, 150, 72, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#00f010";
+    ctx.font = "700 32px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("BB", canvas.width / 2, 162);
+
+    ctx.font = "800 56px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
+    ctx.fillText("BOS-BES RƏSMİ DİPLOM", canvas.width / 2, 330);
+
+    ctx.textAlign = "left";
+    ctx.font = "700 42px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
+    ctx.fillText(`Ad: ${safeName}`, 130, 540);
+    ctx.fillText(`Cəhd: ${attempts}`, 130, 630);
+    ctx.fillText(`Vaxt: ${toTime(finalScore.totalTimeSeconds)}`, 130, 720);
+    ctx.fillText(`Səbir Səviyyəsi: ${patienceLevel}`, 130, 810);
+
+    ctx.font = "500 33px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
+    ctx.fillText("Bu sənəd yalnız ciddi vaxt itkisindən sonra verilir.", 130, 980);
+    ctx.fillText("Sistem təsdiqi: BOŞ-BEŞ Arxiv Qovluğu", 130, 1065);
+
+    ctx.fillStyle = "#84b488";
+    ctx.font = "500 24px 'Inter', 'Segoe UI', sans-serif";
+    ctx.fillText("www.bos-bes.local", 130, 1600);
+    ctx.textAlign = "right";
+    ctx.fillText("Issued: 2026", canvas.width - 130, 1600);
+
+    const pdf = new jsPDF({ unit: "mm", format: "a4" });
+    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
+    pdf.save("bos-bes-diplom.pdf");
   };
 
   useEffect(() => {
@@ -345,41 +401,7 @@ export default function FakeLeaderboard({
         setCertificateProgress(99);
         const holdId = window.setTimeout(() => {
           setCertificateProgress(100);
-          const pdf = new jsPDF({ unit: "mm", format: "a4" });
-          pdf.setFillColor(8, 16, 12);
-          pdf.rect(0, 0, 210, 297, "F");
-
-          pdf.setDrawColor(0, 240, 16);
-          pdf.setLineWidth(0.8);
-          pdf.roundedRect(12, 12, 186, 273, 4, 4);
-
-          pdf.setFillColor(0, 40, 18);
-          pdf.circle(105, 38, 13, "F");
-          pdf.setTextColor(0, 240, 16);
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(10);
-          pdf.text("BB", 101.2, 40.4);
-
-          pdf.setFontSize(22);
-          pdf.text("BOS-BES RƏSMİ DİPLOM", 105, 72, { align: "center" });
-
-          pdf.setFontSize(13);
-          pdf.text(`Ad: ${safeName}`, 24, 106);
-          pdf.text(`Cəhd: ${attempts}`, 24, 118);
-          pdf.text(`Vaxt: ${toTime(finalScore.totalTimeSeconds)}`, 24, 130);
-          pdf.text(`Səbir Səviyyəsi: ${patienceLevel}`, 24, 142);
-
-          pdf.setFont("helvetica", "normal");
-          pdf.setFontSize(11);
-          pdf.text("Bu sənəd yalnız ciddi vaxt itkisindən sonra verilir.", 24, 164);
-          pdf.text("Sistem təsdiqi: BOŞ-BEŞ Arxiv Qovluğu", 24, 176);
-
-          pdf.setTextColor(120, 180, 130);
-          pdf.setFontSize(9);
-          pdf.text("www.bos-bes.local", 24, 268);
-          pdf.text("Issued: 2026", 168, 268);
-
-          pdf.save("bos-bes-diplom.pdf");
+          generateCertificatePdf();
           setStatusText("Diplom sistem tərəfindən təsdiq edildi.");
           setCertificateOpen(false);
           setCertificateProgress(0);

@@ -599,7 +599,7 @@ export default function Stage8_DiaAgainRush({
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-2xl font-black text-zinc-100">Dia Again Rush ({round.title})</h2>
+        <h2 className="text-2xl font-black text-zinc-100">Die Again Rush ({round.title})</h2>
         <div className="flex gap-2">
           <button
             type="button"
