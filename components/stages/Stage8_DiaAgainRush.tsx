@@ -128,18 +128,21 @@ const ROUNDS: RoundConfig[] = [
   },
   {
     id: 5,
-    title: "Raund 5/5",
-    note: "5/5 mərhələ",
-    moveSpeed: 4.8,
-    jump: -10.3,
-    gravity: 0.82,
+    title: "Raund 5/5: Final Qarışıqlıq",
+    note: "Ağır jump + tərs idarə + qaçan qapı eyni anda.",
+    moveSpeed: 4.3,
+    jump: -9.4,
+    gravity: 0.94,
+    invertAfterMs: 2200,
+    teleportDoorDistance: 108,
+    fallingHazards: true,
     platforms: [
       { id: 1, x: 104, y: 252, w: 146, h: 12 },
-      { id: 2, x: 282, y: 226, w: 114, h: 12 },
-      { id: 3, x: 432, y: 198, w: 108, h: 12 },
-      { id: 4, x: 586, y: 172, w: 96, h: 12 },
+      { id: 2, x: 284, y: 226, w: 114, h: 12 },
+      { id: 3, x: 436, y: 198, w: 108, h: 12 },
+      { id: 4, x: 590, y: 170, w: 96, h: 12 },
     ],
-    door: { x: 704, y: 98, w: 32, h: 74 },
+    door: { x: 704, y: 108, w: 32, h: 74 },
   },
 ];
 
@@ -179,8 +182,6 @@ export default function Stage8_DiaAgainRush({
   const [laughStickers, setLaughStickers] = useState<LaughSticker[]>([]);
   const round4ApproachCount = roundApproachCounts[3] ?? 0;
   const isRound4Mercy = round.id === 4 && round4ApproachCount >= 24;
-  const headingText = round.id === 5 ? "Stage 9: Dia Again Rush (5/5)" : `Stage 9: Dia Again Rush (${round.title})`;
-  const statusText = round.id === 5 ? "5/5 mərhələ" : status;
 
   const playerRef = useRef<Player>({ x: START_X, y: START_Y, vx: 0, vy: 0, onGround: true });
   const keysRef = useRef({ left: false, right: false, up: false });
@@ -581,7 +582,7 @@ export default function Stage8_DiaAgainRush({
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-2xl font-black text-zinc-100">{headingText}</h2>
+        <h2 className="text-2xl font-black text-zinc-100">Stage 9: Dia Again Rush ({round.title})</h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -607,7 +608,7 @@ export default function Stage8_DiaAgainRush({
         </div>
       </div>
 
-      <p className="text-xs text-zinc-300">{statusText}</p>
+      <p className="text-xs text-zinc-300">{status}</p>
 
       <div className="relative mx-auto overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#0f172a,#101827)]" style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}>
         <div className="absolute left-0 bg-zinc-700/80" style={{ top: FLOOR_Y, width: WORLD_WIDTH, height: WORLD_HEIGHT - FLOOR_Y }} />

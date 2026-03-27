@@ -50,6 +50,10 @@ export default function WatchingEye() {
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_24%,rgba(255,255,255,0.22),transparent_45%)]" />
 
+        <div className="absolute -bottom-10 left-4 h-11 w-2 rounded-full bg-gradient-to-b from-red-400/80 via-red-500/85 to-red-900/10 eye-blood-drop" />
+        <div className="absolute -bottom-8 left-14 h-8 w-1.5 rounded-full bg-gradient-to-b from-red-300/80 via-red-500/80 to-red-900/10 eye-blood-drop eye-blood-drop-delayed" />
+        <div className="absolute -bottom-12 right-8 h-12 w-2 rounded-full bg-gradient-to-b from-red-400/85 via-red-600/85 to-red-900/10 eye-blood-drop eye-blood-drop-slow" />
+
         <div className="absolute left-1/2 top-1/2 h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-zinc-300 bg-white shadow-[0_0_16px_rgba(255,255,255,0.38)]">
           <div
             ref={eyeRef}
@@ -64,6 +68,43 @@ export default function WatchingEye() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .eye-blood-drop {
+          animation: eye-blood-drip 2.8s ease-in-out infinite;
+          transform-origin: top center;
+          filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
+        }
+
+        .eye-blood-drop-delayed {
+          animation-delay: 0.9s;
+          animation-duration: 3.1s;
+        }
+
+        .eye-blood-drop-slow {
+          animation-delay: 0.45s;
+          animation-duration: 3.5s;
+        }
+
+        @keyframes eye-blood-drip {
+          0% {
+            opacity: 0.25;
+            transform: translateY(-8px) scaleY(0.35);
+          }
+          25% {
+            opacity: 0.95;
+            transform: translateY(0px) scaleY(1);
+          }
+          68% {
+            opacity: 0.82;
+            transform: translateY(6px) scaleY(1.1);
+          }
+          100% {
+            opacity: 0.18;
+            transform: translateY(18px) scaleY(0.25);
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -237,8 +237,7 @@ export default function Stage9_ExitDoorChaos({
             setStarted(false);
             setStatus("3/3 tutdun! Stage 10 tamamlandı.");
             stopMusic();
-            const doneId = window.setTimeout(() => onComplete(), 320);
-            timeoutsRef.current.push(doneId);
+            onComplete();
           } else {
             setCatchCount(nextCatchCount);
             setStatus(`${nextCatchCount}/${REQUIRED_CATCHES} tutuş. İndi daha çətindir...`);
