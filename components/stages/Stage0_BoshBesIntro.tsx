@@ -103,7 +103,7 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-4 text-center">
-        <div className="mt-2 text-xs uppercase tracking-[0.25em] text-[#d76464]">Boş-Beş / Input Buffer v0.5</div>
+        <div className="mt-2 text-xs uppercase tracking-[0.25em] text-[#d76464]">Boş-Beş</div>
         <h1 className="glitch-title text-6xl font-black tracking-[0.24em] text-[#ff3131] sm:text-7xl">BOŞ-BEŞ</h1>
         <p className="text-sm text-[#d09090]">Vaxtın çoxdur? Gəl bir az da biz xərcləyək.</p>
 

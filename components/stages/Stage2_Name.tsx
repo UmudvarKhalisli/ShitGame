@@ -121,7 +121,7 @@ export default function Stage2_Name({
   };
 
   return (
-    <section className="relative w-full max-w-xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center shadow-xl">
+    <section className="relative mx-auto w-full max-w-2xl space-y-7 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-10 text-center shadow-xl">
       <motion.h1
         key={activeFont}
         initial={{ opacity: 0, y: -8 }}
@@ -150,7 +150,7 @@ export default function Stage2_Name({
             }}
             placeholder={activePlaceholder}
             aria-label="Ad daxil et"
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-lg text-zinc-100 outline-none transition focus:border-zinc-400"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-4 text-center text-xl text-zinc-100 outline-none transition focus:border-zinc-400"
           />
 
           <AnimatePresence>
@@ -172,7 +172,7 @@ export default function Stage2_Name({
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-emerald-500"
+          className="w-full rounded-xl bg-emerald-600 px-4 py-4 text-lg font-semibold text-white transition hover:bg-emerald-500"
         >
           Davam Et →
         </button>

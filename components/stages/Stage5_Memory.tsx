@@ -376,7 +376,7 @@ export default function Stage5_Memory({
       )}
 
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-black text-zinc-100">Yaddaş Testi: Simon Says Chaos</h1>
+        <h1 className="text-3xl font-black text-zinc-100">Yaddaş Testi</h1>
         <p className="text-sm text-zinc-300">
           Mərhələ {round} / {TOTAL_ROUNDS} • Ardıcıllıq uzunluğu: {sequenceLength}
         </p>

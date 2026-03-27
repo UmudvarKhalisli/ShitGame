@@ -27,25 +27,24 @@ function playGlitchNoise() {
     return;
   }
 
-  const context = new AudioCtx();
-  const duration = 1.1;
-  const sampleRate = context.sampleRate;
-  const buffer = context.createBuffer(1, Math.floor(sampleRate * duration), sampleRate);
-  const data = buffer.getChannelData(0);
-
-  for (let i = 0; i < data.length; i += 1) {
-    data[i] = (Math.random() * 2 - 1) * 0.75;
-  }
-
-  const source = context.createBufferSource();
+    const context = new AudioCtx();
+    const now = context.currentTime;
+    const oscillator = context.createOscillator();
   const gain = context.createGain();
-  gain.gain.value = 0.85;
-  source.buffer = buffer;
-  source.connect(gain);
+
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(420, now);
+    oscillator.frequency.exponentialRampToValueAtTime(150, now + 0.9);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.95);
+
+    oscillator.connect(gain);
   gain.connect(context.destination);
-  source.start();
-  source.stop(context.currentTime + duration);
-  source.onended = () => {
+    oscillator.start(now);
+    oscillator.stop(now + 0.98);
+    oscillator.onended = () => {
     void context.close();
   };
 }
@@ -89,9 +88,10 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
 
   const blinkTimerRef = useRef<number | null>(null);
   const blinkCloseRef = useRef<number | null>(null);
+  const explodeCooldownRef = useRef(0);
 
   const stressLevel = Math.min(Math.max(effectiveMissClicks, 0), MAX_STRESS);
-  const eyeScale = 1 + stressLevel * 0.15;
+  const eyeScale = 0.88 + stressLevel * 0.1;
 
   const theme = useMemo(() => {
     const alpha = 0.4 + stressLevel * 0.06;
@@ -148,10 +148,12 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
   }, [isExploded]);
 
   useEffect(() => {
-    if (stressLevel < 10 || isExploded) {
+    const now = Date.now();
+    if (stressLevel < 10 || isExploded || now < explodeCooldownRef.current) {
       return;
     }
 
+    explodeCooldownRef.current = now + 9000;
     setIsExploded(true);
     playGlitchNoise();
 
@@ -169,10 +171,15 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
       setShowGlitch(false);
     }, 3400);
 
+    const respawnId = window.setTimeout(() => {
+      setIsExploded(false);
+    }, 4200);
+
     return () => {
       window.clearTimeout(glitchShowId);
       window.clearTimeout(explodeDoneId);
       window.clearTimeout(glitchHideId);
+      window.clearTimeout(respawnId);
     };
   }, [isExploded, onExplode, stressLevel]);
 
@@ -200,7 +207,7 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
               y: stressLevel >= 6 ? { repeat: Number.POSITIVE_INFINITY, duration: 0.08 } : { duration: 0.2 },
               rotate: { duration: 0.16 },
             }}
-            className="fixed right-12 top-12 z-[100] flex h-44 w-44 items-center justify-center"
+            className="fixed right-12 top-12 z-[100] flex h-36 w-36 items-center justify-center"
           >
             <BloodDrip x="25%" delay={0} width={3} bloodColor={theme.blood} />
             <BloodDrip x="55%" delay={1.2} width={5} bloodColor={theme.blood} />
@@ -260,7 +267,7 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
             initial={{ y: 0, rotate: 0, opacity: 1 }}
             animate={{ y: 2000, rotate: 1080, opacity: 0 }}
             transition={{ duration: 2, ease: "easeIn" }}
-            className="fixed right-12 top-12 flex h-44 w-44 items-center justify-center"
+            className="fixed right-12 top-12 flex h-36 w-36 items-center justify-center"
           >
             <div className="flex h-full w-full items-center justify-center rounded-full border-2 border-red-600 bg-red-950 text-7xl shadow-[0_0_120px_#ff0000]">
               🩸

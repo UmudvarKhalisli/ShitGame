@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const clauses = [
   {
@@ -19,23 +19,10 @@ const clauses = [
 ];
 
 export default function EntryAgreement({ onAccept }: { onAccept: (fullName: string) => void }) {
-  const scrollRef = useRef<HTMLDivElement | null>(null);
   const [fullName, setFullName] = useState("");
   const [nameError, setNameError] = useState("");
-  const [scrollScore, setScrollScore] = useState(0);
-  const [scrollRequirement, setScrollRequirement] = useState(1);
   const [isSigning, setIsSigning] = useState(false);
   const [isDramaticExit, setIsDramaticExit] = useState(false);
-
-  useEffect(() => {
-    const element = scrollRef.current;
-    if (!element) {
-      return;
-    }
-
-    const travelDistance = Math.max(1, element.scrollHeight - element.clientHeight);
-    setScrollRequirement(travelDistance * 3);
-  }, []);
 
   useEffect(() => {
     const handleEscapeBlock = (event: KeyboardEvent) => {
@@ -49,23 +36,11 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
     return () => window.removeEventListener("keydown", handleEscapeBlock, { capture: true });
   }, []);
 
-  const unlockProgress = Math.min(100, Math.round((scrollScore / scrollRequirement) * 100));
-  const isUnlocked = unlockProgress >= 100;
   const isNameValid = fullName.trim().length > 0;
-  const canSubmit = isUnlocked && isNameValid && !isSigning;
-
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const element = event.currentTarget;
-    const movement = Math.abs(element.scrollTop - (Number(element.dataset.lastTop) || 0));
-    element.dataset.lastTop = String(element.scrollTop);
-
-    if (movement > 0) {
-      setScrollScore((prev) => Math.min(prev + movement, scrollRequirement));
-    }
-  };
+  const canSubmit = isNameValid && !isSigning;
 
   const handleAccept = async () => {
-    if (isSigning || !isUnlocked) {
+    if (isSigning) {
       return;
     }
 
@@ -83,7 +58,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
     onAccept(fullName.trim());
   };
 
-  const actionText = !isUnlocked ? "HƏYATIMI RİSKƏ ATIRAM" : "Əminsən?";
+  const actionText = "HƏYATIMI RİSKƏ ATIRAM";
 
   const stampText = useMemo(
     () => "ƏSƏB BÖLMƏSİ MMC • RƏSMİ XƏBƏRDARLIQ • TƏSDİQLƏNİB",
@@ -126,7 +101,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
               : { scale: 1 }
           }
           transition={{ duration: 0.7, ease: "easeInOut" }}
-          className="relative h-screen w-screen overflow-hidden border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
+          className="relative min-h-screen w-screen overflow-y-auto border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
         >
           <div className="pointer-events-none absolute inset-0 opacity-10">
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-22deg] text-[28px] font-black tracking-[0.2em] text-rose-400">
@@ -136,7 +111,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
 
           {isDramaticExit && <div className="pointer-events-none absolute inset-0 bg-red-500/40" />}
 
-          <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col space-y-5 p-6 sm:p-8">
+          <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col space-y-5 p-6 sm:p-8">
             <header className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-4">
               <h2 className="text-center text-lg font-extrabold text-rose-300 sm:text-xl">
                 ⚠ DİQQƏT: PSİXOLOJİ SAĞLAMLIQ VƏ CİHAZ TƏHLÜKƏSİZLİYİ XƏBƏRDARLIĞI
@@ -144,8 +119,6 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
             </header>
 
             <div
-              ref={scrollRef}
-              onScroll={handleScroll}
               className="h-[min(50vh,460px)] overflow-y-auto overscroll-contain rounded-xl border border-zinc-700 bg-zinc-900/80 p-5 text-sm leading-7 text-zinc-200"
             >
               <ol className="space-y-5">
@@ -174,18 +147,6 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
                 className="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100 outline-none focus:border-zinc-400"
               />
               {nameError && <p className="mt-2 text-xs text-rose-400">{nameError}</p>}
-            </div>
-
-            <div className="space-y-3">
-              <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-                <div
-                  className="h-full bg-rose-500 transition-all duration-200"
-                  style={{ width: `${unlockProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-zinc-400">
-                Oxuma tamamlanması (qeyri-rəsmi): {unlockProgress}% • Minimum 300% scroll tələb olunur.
-              </p>
             </div>
 
             <button

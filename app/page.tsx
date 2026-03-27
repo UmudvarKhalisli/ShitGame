@@ -51,7 +51,7 @@ export default function LandingPage() {
             className="rounded border border-[rgba(107,114,128,0.25)] px-2 py-1 text-[11px] text-[var(--text-muted)]"
             style={{ fontFamily: "'Share Tech Mono', monospace" }}
           >
-            v2.0.1
+            SON SINAQ BURAXILIŞI
           </span>
         </div>
       </nav>
@@ -66,7 +66,7 @@ export default function LandingPage() {
             className="mb-6 rounded-full border border-[rgba(124,58,237,0.4)] bg-[rgba(124,58,237,0.08)] px-5 py-2 text-[11px] tracking-[0.4em] text-[#A855F7]"
             style={{ fontFamily: "'Share Tech Mono', monospace" }}
           >
-            {"// XAİN UX EKSPERIMENTI //"}
+            {"// ƏSƏB SINAĞI LABORATORİYASI //"}
           </motion.div>
 
           <motion.h1
@@ -97,7 +97,7 @@ export default function LandingPage() {
             animate="visible"
             transition={{ delay: 0.45, duration: 0.4, ease: "easeOut" }}
             className="mt-5 max-w-[420px] text-center text-[18px] font-light text-[#9CA3AF]"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            style={{ fontFamily: "'Noto Sans', sans-serif" }}
           >
             Bir düyməni basmaq bu qədər çətin olmamalıydı.
           </motion.p>
@@ -153,14 +153,6 @@ export default function LandingPage() {
               >
                 OYUNA BAŞLA →
               </button>
-              <button
-                type="button"
-                onClick={() => router.push("/dia-again")}
-                className="rounded-[6px] border-[1.5px] border-rose-400/70 bg-rose-500/10 px-8 py-4 text-[15px] tracking-[0.2em] text-rose-200 transition-all duration-300 hover:bg-rose-500/20 hover:shadow-[0_0_22px_rgba(244,63,94,0.55)]"
-                style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-              >
-                DIA AGAIN MINI LEVEL
-              </button>
             </div>
             <p
               className="mt-4 text-[10px] text-[#4B5563]"
@@ -177,7 +169,7 @@ export default function LandingPage() {
               className="text-[42px] leading-none text-[var(--text-primary)]"
               style={{ fontFamily: "'Bebas Neue', sans-serif" }}
             >
-              NƏ SİZİ GÖZLƏYİR
+              Sizi Nə Gözləyir?
             </h3>
             <div className="mt-4 h-[2px] w-[120px] bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-cyan)]" />
           </div>
@@ -192,7 +184,7 @@ export default function LandingPage() {
                 >
                   {feature.title}
                 </h4>
-                <p className="mt-2 text-[13px] text-[var(--text-muted)]" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p className="mt-2 text-[13px] text-[var(--text-muted)]" style={{ fontFamily: "'Noto Sans', sans-serif" }}>
                   {feature.description}
                 </p>
               </article>

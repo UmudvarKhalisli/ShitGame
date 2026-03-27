@@ -151,10 +151,10 @@ export default function RoasterWidget() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, x: 24, scale: 0.82 }}
+      initial={{ opacity: 0, y: -40, x: 24, scale: 0.82 }}
       animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 280, damping: 18 }}
-      className="fixed bottom-5 right-5 z-[95]"
+      className="fixed right-5 top-5 z-[95]"
     >
       <div className="relative flex flex-col items-end gap-3">
         <AnimatePresence>

@@ -1,11 +1,11 @@
 "use client";
 
 import confetti from "canvas-confetti";
+import { jsPDF } from "jspdf";
 import { animate, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useChaosController } from "@/hooks/useChaosController";
-import { useChaosState } from "@/hooks/useChaosState";
 
 type LeaderboardEntry = {
   id: string;
@@ -28,6 +28,107 @@ const FALLBACK_ROWS: Omit<LeaderboardEntry, "rank" | "highlight">[] = [
 const SLANDER_LINE = "Mən boş adamam, vaxtımı bura xərcləyirəm";
 const TERMINAL_BTN =
   "rounded-md border border-emerald-400/70 bg-emerald-700/20 px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] text-emerald-200 transition hover:border-red-400/70 hover:bg-red-700/20 hover:text-red-200";
+const NAME_POOL = [
+  "Aysel Q.",
+  "Ramin Dev",
+  "Nigar K.",
+  "Elvin Code",
+  "Səbinə L.",
+  "Murad N.",
+  "Kənan Byte",
+  "Günel H.",
+  "Tural S.",
+  "Mina A.",
+  "Orxan D.",
+  "Lalə M.",
+  "Samir V.",
+  "Fidan P.",
+  "Vüsal R.",
+  "Nərmin C.",
+  "Zaur T.",
+  "Kamal Ə.",
+  "Afaq B.",
+  "Rövşən Y.",
+];
+
+type ServerRow = {
+  id: string;
+  player_name: string;
+  patience_level: number;
+  attempts: number;
+  total_time_seconds: number;
+};
+
+function randomBetween(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pickBotName(used: Set<string>, fallbackIndex: number) {
+  for (let i = 0; i < 40; i += 1) {
+    const name = NAME_POOL[Math.floor(Math.random() * NAME_POOL.length)] ?? `Oyunçu ${fallbackIndex + 1}`;
+    if (!used.has(name)) {
+      used.add(name);
+      return name;
+    }
+  }
+
+  const fallback = `Oyunçu ${fallbackIndex + 1}`;
+  used.add(fallback);
+  return fallback;
+}
+
+function buildShowcaseRows({
+  safeName,
+  attempts,
+  totalTimeSeconds,
+  apiRows,
+}: {
+  safeName: string;
+  attempts: number;
+  totalTimeSeconds: number;
+  apiRows: ServerRow[];
+}) {
+  const userRank = randomBetween(2, 9);
+  const usedNames = new Set<string>([safeName]);
+  const apiNames = apiRows.map((item) => item.player_name).filter((name) => name && name !== safeName);
+  const topPatience = randomBetween(900, 980);
+  const patienceStep = randomBetween(18, 32);
+  const rows: LeaderboardEntry[] = [];
+
+  for (let rank = 1; rank <= 10; rank += 1) {
+    const basePatience = Math.max(520, topPatience - (rank - 1) * patienceStep + randomBetween(-6, 6));
+
+    if (rank === userRank) {
+      rows.push({
+        id: "user-row",
+        rank,
+        playerName: safeName,
+        patienceLevel: basePatience,
+        attempts,
+        totalTimeSeconds,
+        highlight: true,
+      });
+      continue;
+    }
+
+    const apiCandidate = apiNames.shift();
+    const playerName = apiCandidate && !usedNames.has(apiCandidate)
+      ? apiCandidate
+      : pickBotName(usedNames, rank);
+
+    rows.push({
+      id: `bot-${rank}`,
+      rank,
+      playerName,
+      patienceLevel: basePatience,
+      attempts: randomBetween(8 + rank * 2, 45 + rank * 5),
+      totalTimeSeconds: randomBetween(180 + rank * 18, 760 + rank * 34),
+      highlight: false,
+    });
+  }
+
+  return rows;
+}
 
 function toTime(seconds: number) {
   const clamped = Math.max(0, Math.floor(seconds));
@@ -57,7 +158,6 @@ export default function FakeLeaderboard({
   attempts: number;
 }) {
   const { calculateFinalScore } = useChaosController();
-  const { setStage } = useChaosState();
 
   const finalScore = calculateFinalScore();
   const safeName = playerName || "Anonim Kölgə";
@@ -77,7 +177,7 @@ export default function FakeLeaderboard({
   const [certificateProgress, setCertificateProgress] = useState(0);
   const certificateTimerRef = useRef<number | null>(null);
 
-  const [callPhase, setCallPhase] = useState<"idle" | "incoming" | "bsod">("idle");
+  const [callPhase, setCallPhase] = useState<"idle" | "incoming" | "signal" | "goodbye">("idle");
 
   const patienceLevel = useMemo(() => {
     const base = 1000;
@@ -87,7 +187,7 @@ export default function FakeLeaderboard({
     return Math.max(0, base - fromAttempts - fromTime + bonus);
   }, [attempts, finalScore.memoryRoundsCompleted, finalScore.quizCorrectAnswers, finalScore.totalTimeSeconds]);
 
-  const playStaticNoise = () => {
+  const playSmoothCallTone = () => {
     const AudioCtx =
       window.AudioContext ||
       (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -97,25 +197,23 @@ export default function FakeLeaderboard({
     }
 
     const ctx = new AudioCtx();
-    const duration = 1.2;
-    const sampleRate = ctx.sampleRate;
-    const buffer = ctx.createBuffer(1, sampleRate * duration, sampleRate);
-    const data = buffer.getChannelData(0);
-
-    for (let i = 0; i < data.length; i += 1) {
-      data[i] = (Math.random() * 2 - 1) * 0.85;
-    }
-
-    const src = ctx.createBufferSource();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    gain.gain.value = 0.9;
 
-    src.buffer = buffer;
-    src.connect(gain);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.exponentialRampToValueAtTime(330, now + 1.1);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+    osc.connect(gain);
     gain.connect(ctx.destination);
-    src.start();
-    src.stop(ctx.currentTime + duration);
-    src.onended = () => {
+    osc.start(now);
+    osc.stop(now + 1.25);
+    osc.onended = () => {
       void ctx.close();
     };
   };
@@ -167,55 +265,37 @@ export default function FakeLeaderboard({
         const response = await fetch("/api/leaderboard", { cache: "no-store" });
         const payload = (await response.json().catch(() => ({}))) as {
           ok?: boolean;
-          rows?: Array<{
-            id: string;
-            player_name: string;
-            patience_level: number;
-            attempts: number;
-            total_time_seconds: number;
-          }>;
+          rows?: ServerRow[];
         };
 
-        if (!payload.ok || !payload.rows || payload.rows.length === 0) {
-          const fallback = FALLBACK_ROWS.map((item, index) => ({
-            ...item,
-            rank: index + 1,
-            highlight: item.playerName === safeName,
-          }));
-          setRows(fallback);
-          setStatusText("Leaderboard fallback rejimində açıldı.");
-        } else {
-          const sorted = [...payload.rows].sort((a, b) => {
-            if (b.patience_level !== a.patience_level) {
-              return b.patience_level - a.patience_level;
-            }
-            if (a.attempts !== b.attempts) {
-              return a.attempts - b.attempts;
-            }
-            return a.total_time_seconds - b.total_time_seconds;
-          });
+        const sourceRows = payload.ok && payload.rows ? payload.rows : [];
+        const showcase = buildShowcaseRows({
+          safeName,
+          attempts,
+          totalTimeSeconds: finalScore.totalTimeSeconds,
+          apiRows: sourceRows,
+        });
 
-          const mapped = sorted.map((item, index) => ({
-            id: item.id,
-            rank: index + 1,
-            playerName: item.player_name,
-            patienceLevel: item.patience_level,
-            attempts: item.attempts,
-            totalTimeSeconds: item.total_time_seconds,
-            highlight: item.player_name === safeName,
-          }));
-
-          setRows(mapped);
-          setStatusText("Səbir Səviyyəsi üzrə sıralandı.");
-        }
+        setRows(showcase);
+        setStatusText("Top 10 oyunçu: realistik müqayisə cədvəli yeniləndi.");
       } catch {
-        const fallback = FALLBACK_ROWS.map((item, index) => ({
-          ...item,
-          rank: index + 1,
-          highlight: item.playerName === safeName,
+        const fallbackFromTemplate = FALLBACK_ROWS.map((item) => ({
+          id: item.id,
+          player_name: item.playerName,
+          patience_level: item.patienceLevel,
+          attempts: item.attempts,
+          total_time_seconds: item.totalTimeSeconds,
         }));
-        setRows(fallback);
-        setStatusText("Supabase bağlantısı alınmadı, local siyahı göstərilir.");
+
+        const showcase = buildShowcaseRows({
+          safeName,
+          attempts,
+          totalTimeSeconds: finalScore.totalTimeSeconds,
+          apiRows: fallbackFromTemplate,
+        });
+
+        setRows(showcase);
+        setStatusText("Şəbəkə zəifdir, local top 10 göstərildi.");
       } finally {
         setLoadingRows(false);
       }
@@ -265,15 +345,41 @@ export default function FakeLeaderboard({
         setCertificateProgress(99);
         const holdId = window.setTimeout(() => {
           setCertificateProgress(100);
-          const content =
-            "Təbriklər! Sən rəsmi olaraq vaxtını BOŞ-BEŞ işlərə sərf edən birisən. Bu fayl da elə vaxtın kimi boşdur.";
-          const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "diplom.txt";
-          a.click();
-          URL.revokeObjectURL(url);
+          const pdf = new jsPDF({ unit: "mm", format: "a4" });
+          pdf.setFillColor(8, 16, 12);
+          pdf.rect(0, 0, 210, 297, "F");
+
+          pdf.setDrawColor(0, 240, 16);
+          pdf.setLineWidth(0.8);
+          pdf.roundedRect(12, 12, 186, 273, 4, 4);
+
+          pdf.setFillColor(0, 40, 18);
+          pdf.circle(105, 38, 13, "F");
+          pdf.setTextColor(0, 240, 16);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(10);
+          pdf.text("BB", 101.2, 40.4);
+
+          pdf.setFontSize(22);
+          pdf.text("BOS-BES RƏSMİ DİPLOM", 105, 72, { align: "center" });
+
+          pdf.setFontSize(13);
+          pdf.text(`Ad: ${safeName}`, 24, 106);
+          pdf.text(`Cəhd: ${attempts}`, 24, 118);
+          pdf.text(`Vaxt: ${toTime(finalScore.totalTimeSeconds)}`, 24, 130);
+          pdf.text(`Səbir Səviyyəsi: ${patienceLevel}`, 24, 142);
+
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(11);
+          pdf.text("Bu sənəd yalnız ciddi vaxt itkisindən sonra verilir.", 24, 164);
+          pdf.text("Sistem təsdiqi: BOŞ-BEŞ Arxiv Qovluğu", 24, 176);
+
+          pdf.setTextColor(120, 180, 130);
+          pdf.setFontSize(9);
+          pdf.text("www.bos-bes.local", 24, 268);
+          pdf.text("Issued: 2026", 168, 268);
+
+          pdf.save("bos-bes-diplom.pdf");
           setStatusText("Diplom sistem tərəfindən təsdiq edildi.");
           setCertificateOpen(false);
           setCertificateProgress(0);
@@ -298,11 +404,10 @@ export default function FakeLeaderboard({
   }, []);
 
   const triggerFakeCallResult = () => {
-    playStaticNoise();
-    setCallPhase("bsod");
+    playSmoothCallTone();
+    setCallPhase("signal");
     window.setTimeout(() => {
-      setCallPhase("idle");
-      setStage(1);
+      setCallPhase("goodbye");
     }, 2000);
   };
 
@@ -432,12 +537,30 @@ export default function FakeLeaderboard({
         </div>
       )}
 
-      {callPhase === "bsod" && (
-        <div className="fixed inset-0 z-[180] flex items-center justify-center bg-[#0057D8] text-white">
-          <div className="max-w-2xl space-y-3 px-6 text-left">
-            <p className="text-7xl">:(</p>
-            <p className="text-2xl font-bold">Sistem kritik xətaya düşdü.</p>
-            <p className="text-sm">STATIC_CALL_EXCEPTION // Rebooting to Stage 1...</p>
+      {callPhase === "signal" && (
+        <div className="fixed inset-0 z-[180] flex items-center justify-center bg-black/95 text-white">
+          <div className="max-w-2xl space-y-3 px-6 text-center">
+            <p className="text-6xl">📶</p>
+            <p className="text-2xl font-bold">Zəng bağlandı, siqnal qaldı.</p>
+            <p className="text-sm">CALL_END_SEQUENCE // Yeni sonluq hazırlanır...</p>
+          </div>
+        </div>
+      )}
+
+      {callPhase === "goodbye" && (
+        <div className="fixed inset-0 z-[181] flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(16,72,45,0.35),rgba(0,0,0,0.96)_55%)] p-4">
+          <div className="w-full max-w-2xl rounded-xl border border-emerald-500/40 bg-zinc-950/95 p-6 text-center shadow-[0_0_45px_rgba(16,185,129,0.2)]">
+            <h3 className="text-3xl font-black text-emerald-200">Oyunun Sonu</h3>
+            <p className="mt-3 text-sm text-zinc-300">
+              Sən bu dəfə sistemə uduzmadın, sadəcə onu bezdirdin. Final log saxlanıldı.
+            </p>
+            <button
+              type="button"
+              className="mt-5 rounded-md border border-emerald-400/70 bg-emerald-700/20 px-5 py-2 text-sm font-bold uppercase tracking-[0.12em] text-emerald-200 transition hover:bg-emerald-700/30"
+              onClick={() => setCallPhase("idle")}
+            >
+              Siyahıya Qayıt
+            </button>
           </div>
         </div>
       )}

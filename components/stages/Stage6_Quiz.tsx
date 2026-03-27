@@ -336,7 +336,7 @@ export default function Stage6_Quiz({
   return (
     <section className="relative w-full max-w-3xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-xl">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-black text-zinc-100">Stage 6: Logic Quiz Chaos</h1>
+        <h1 className="text-3xl font-black text-zinc-100">Mərhələ 6: Məntiq Viktorinası</h1>
         <p className="text-sm text-zinc-300">{counterText}</p>
         <p className="text-sm font-semibold text-rose-300">Qalan vaxt: {Math.max(0, Math.ceil(timerSeconds))}s</p>
         <p className="text-sm font-semibold text-amber-300">{statusText}</p>

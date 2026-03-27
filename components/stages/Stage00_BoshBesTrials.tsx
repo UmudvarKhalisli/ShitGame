@@ -93,7 +93,7 @@ export default function Stage00_BoshBesTrials({
 
   return (
     <section className="relative w-full max-w-4xl overflow-hidden rounded-xl border border-[#2a5a2a] bg-[#060c06]/95 p-8 text-[#00f010] shadow-[0_0_35px_rgba(0,240,16,0.18)]">
-      <h2 className="text-center text-4xl font-black tracking-[0.15em]">BOŞ-BEŞ MISSIONS</h2>
+      <h2 className="text-center text-4xl font-black tracking-[0.15em]">BOŞ-BEŞ MİSSİYASI</h2>
 
       {step === "illusion" && (
         <div className="mt-8 space-y-5">

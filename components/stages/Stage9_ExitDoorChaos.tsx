@@ -235,7 +235,7 @@ export default function Stage9_ExitDoorChaos({
             setCatchCount(nextCatchCount);
             setWon(true);
             setStarted(false);
-            setStatus("3/3 tutdun! Stage 10 tamamlandı.");
+            setStatus("3/3 tutdun! Bütün tutuşlar tamamlandı.");
             stopMusic();
             onComplete();
           } else {
@@ -315,7 +315,7 @@ export default function Stage9_ExitDoorChaos({
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-2xl font-black text-zinc-100">Stage 10: Exit Door Chaos</h2>
+        <h2 className="text-2xl font-black text-zinc-100">Qaçan Qapı Xaosu</h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -349,7 +349,7 @@ export default function Stage9_ExitDoorChaos({
           transition={{ type: "spring", stiffness: 260, damping: 20, mass: 0.55 }}
           style={{ left: 0, top: 0, width: doorView.width, height: doorView.height, transformOrigin: "center center" }}
         >
-          <p className="pt-2 text-center text-xs font-black uppercase tracking-[0.2em] text-rose-200">SONA CAT</p>
+          <p className="pt-2 text-center text-xs font-black uppercase tracking-[0.2em] text-rose-200">QAPI</p>
         </motion.div>
       </div>
     </section>

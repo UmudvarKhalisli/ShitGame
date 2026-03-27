@@ -202,7 +202,7 @@ function StageRouter() {
 
     if (remaining > 0) {
       setGateMessage(
-        `Bu keçid düyməsi naz edir 🤡 Stage ${stageNumber} üçün ${requiredClicks} dəfə tez bas. Qalıb: ${remaining}`,
+        `Bu keçid düyməsi naz edir 🤡 Mərhələ ${stageNumber} üçün ${requiredClicks} dəfə tez bas. Qalıb: ${remaining}`,
       );
       return;
     }
@@ -318,7 +318,7 @@ function StageRouter() {
   return (
     <div className="w-full max-w-3xl space-y-6">
       <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
-        Stage {stageNumber}/{TOTAL_STAGES} | Cəhd: {gameState.attempts} | 😤
+        Mərhələ {stageNumber}/{TOTAL_STAGES} | Cəhd: {gameState.attempts} | 😤
       </div>
 
       {(showAdminLogin || isAdmin) && (
@@ -364,7 +364,7 @@ function StageRouter() {
                     onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | "complete")}
                     className="rounded-md border border-zinc-600 bg-zinc-950 px-2 py-2 text-xs font-bold hover:bg-zinc-800"
                   >
-                    {stage === "complete" ? "Leaderboard" : `Stage ${stage}`}
+                    {stage === "complete" ? "Leaderboard" : `Mərhələ ${stage}`}
                   </button>
                 ))}
               </div>
@@ -448,7 +448,7 @@ function StageRouter() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 left-1/2 z-[120] -translate-x-1/2 rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-3 text-sm font-semibold text-zinc-100 shadow-xl"
+            className="fixed left-1/2 top-24 z-[120] -translate-x-1/2 rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-3 text-sm font-semibold text-zinc-100 shadow-xl"
           >
             Sayt özünü sağaltdı. Davam et. 💪
           </motion.div>
@@ -475,8 +475,8 @@ function StageRouter() {
                   transition={{ duration: 0.2 }}
                   className="w-[290px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 text-sm text-zinc-200 shadow-xl"
                 >
-                  <p className="font-semibold text-zinc-100">Stage {stageNumber} kömək paneli</p>
-                  <p className="mt-1 text-xs text-zinc-400">Bu stage cəhd sayı: {currentStageAttempts}</p>
+                  <p className="font-semibold text-zinc-100">Mərhələ {stageNumber} kömək paneli</p>
+                  <p className="mt-1 text-xs text-zinc-400">Bu mərhələ cəhd sayı: {currentStageAttempts}</p>
                   <p className="mt-2 text-amber-300">
                     {isHardHintUnlocked ? activeStageHint.hard : activeStageHint.soft}
                   </p>

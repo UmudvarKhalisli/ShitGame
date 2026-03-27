@@ -188,6 +188,7 @@ export default function Stage8_DiaAgainRush({
   const rafRef = useRef<number | null>(null);
   const invertTimerRef = useRef<number | null>(null);
   const autoStartNextRoundRef = useRef(false);
+  const approachCooldownUntilRef = useRef(0);
 
   const doorRef = useRef<Door>(round.door);
   const doorCooldownUntilRef = useRef(0);
@@ -251,6 +252,7 @@ export default function Stage8_DiaAgainRush({
     doorRef.current = initialDoor;
     setDoorView(initialDoor);
     doorCooldownUntilRef.current = 0;
+    approachCooldownUntilRef.current = 0;
 
     setFakeBroken(false);
     setFakeDrop(0);
@@ -484,20 +486,22 @@ export default function Stage8_DiaAgainRush({
           const minTeleportDistance = isRound4Mercy ? 70 : 52;
           const teleportCooldown = isRound4Mercy ? 1300 : 420;
 
-          if (distance < effectiveTeleportDistance && distance > minTeleportDistance) {
-            if (round.id === 4) {
-              const nextApproachCount = (roundApproachCounts[roundIndex] ?? 0) + 1;
-              setRoundApproachCounts((prev) => {
-                const next = [...prev];
-                next[roundIndex] = nextApproachCount;
-                return next;
-              });
+          if (round.id === 4 && distance < effectiveTeleportDistance && now >= approachCooldownUntilRef.current) {
+            approachCooldownUntilRef.current = now + 260;
+            setRoundApproachCounts((prev) => {
+              const next = [...prev];
+              const nextApproachCount = (next[roundIndex] ?? 0) + 1;
+              next[roundIndex] = nextApproachCount;
 
               if (nextApproachCount === 24) {
                 setStatus("Raund 4: 24 yaxınlaşmadan sonra mercy unlock açıldı. Qapı indi daha yavaş qaçır.");
               }
-            }
 
+              return next;
+            });
+          }
+
+          if (distance < effectiveTeleportDistance && distance > minTeleportDistance) {
             doorCooldownUntilRef.current = now + teleportCooldown;
             randomizeDoor(nextX, nextY);
           }
@@ -533,7 +537,7 @@ export default function Stage8_DiaAgainRush({
           clearTimers();
 
           if (roundIndex >= ROUNDS.length - 1) {
-            setStatus("Stage 9-un bütün 5 raundunu keçdin! 🔥");
+            setStatus("Dia Again Rush-un bütün 5 raundunu keçdin! 🔥");
             window.setTimeout(() => onComplete(), 320);
           } else {
             setStatus(`${round.title} keçildi. Növbəti raunda keçilir...`);
@@ -595,7 +599,7 @@ export default function Stage8_DiaAgainRush({
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-2xl font-black text-zinc-100">Stage 9: Dia Again Rush ({round.title})</h2>
+        <h2 className="text-2xl font-black text-zinc-100">Dia Again Rush ({round.title})</h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -654,7 +658,6 @@ export default function Stage8_DiaAgainRush({
           className="absolute border border-emerald-300/70 bg-emerald-500/30"
           style={{ left: doorView.x, top: doorView.y, width: doorView.w, height: doorView.h }}
         >
-          <span className="absolute inset-x-0 top-1 text-center text-[10px] font-bold uppercase text-emerald-100">SONA</span>
         </div>
 
         <div
