@@ -175,6 +175,7 @@ export default function Stage8_DiaAgainRush({
   const keysRef = useRef({ left: false, right: false, up: false });
   const rafRef = useRef<number | null>(null);
   const invertTimerRef = useRef<number | null>(null);
+  const autoStartNextRoundRef = useRef(false);
 
   const doorRef = useRef<Door>(round.door);
   const doorCooldownUntilRef = useRef(0);
@@ -259,6 +260,7 @@ export default function Stage8_DiaAgainRush({
   const resetRun = () => {
     clearTimers();
     setRoundFailCounts(Array.from({ length: ROUNDS.length }, () => 0));
+    autoStartNextRoundRef.current = false;
 
     if (roundIndex !== 0) {
       setRoundIndex(0);
@@ -277,16 +279,9 @@ export default function Stage8_DiaAgainRush({
     setupRound(false);
   };
 
-  const goToNextRound = () => {
-    if (roundIndex >= ROUNDS.length - 1) {
-      return;
-    }
-
-    setRoundIndex((prev) => prev + 1);
-  };
-
   useEffect(() => {
-    setupRound(false);
+    setupRound(autoStartNextRoundRef.current);
+    autoStartNextRoundRef.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundIndex]);
 
@@ -480,7 +475,11 @@ export default function Stage8_DiaAgainRush({
             setStatus("Stage 9-un bütün 5 raundunu keçdin! 🔥");
             window.setTimeout(() => onComplete(), 320);
           } else {
-            setStatus(`${round.title} keçildi. Növbəti raunda keç düyməsini bas.`);
+            setStatus(`${round.title} keçildi. Növbəti raunda keçilir...`);
+            autoStartNextRoundRef.current = true;
+            window.setTimeout(() => {
+              setRoundIndex((prev) => prev + 1);
+            }, 260);
           }
         }
 
@@ -552,18 +551,6 @@ export default function Stage8_DiaAgainRush({
       </div>
 
       <p className="text-xs text-zinc-300">{status}</p>
-
-      {won && roundIndex < ROUNDS.length - 1 && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={goToNextRound}
-            className="rounded-md border border-cyan-300/70 bg-cyan-500/20 px-5 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-100 transition hover:bg-cyan-500/35"
-          >
-            Növbəti raunda keç
-          </button>
-        </div>
-      )}
 
       <div className="relative mx-auto overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#0f172a,#101827)]" style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}>
         <div className="absolute left-0 bg-zinc-700/80" style={{ top: FLOOR_Y, width: WORLD_WIDTH, height: WORLD_HEIGHT - FLOOR_Y }} />

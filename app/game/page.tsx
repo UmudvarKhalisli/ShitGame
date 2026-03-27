@@ -283,7 +283,7 @@ function StageRouter() {
   } else if (gameState.currentStage === 8) {
     stageNode = <Stage7_BossRound onFail={handleStageFail} onComplete={advanceStage} />;
   } else if (gameState.currentStage === 9) {
-    stageNode = <Stage8_DiaAgainRush onFail={handleStageFail} onComplete={handleStageComplete} />;
+    stageNode = <Stage8_DiaAgainRush onFail={handleStageFail} onComplete={advanceStage} />;
   } else {
     stageNode = <Stage9_ExitDoorChaos onFail={handleStageFail} onComplete={advanceStage} />;
   }
