@@ -22,8 +22,10 @@ export default function Stage9_ExitDoorChaos({
   onComplete: () => void;
   onFail: () => void;
 }) {
+  const REQUIRED_CATCHES = 3;
   const [started, setStarted] = useState(false);
   const [won, setWon] = useState(false);
+  const [catchCount, setCatchCount] = useState(0);
   const [status, setStatus] = useState("Qapını tutmağa çalış. Yaxınlaşanda qaçacaq.");
 
   const [playerView, setPlayerView] = useState({ x: 24, y: WORLD_HEIGHT / 2 - PLAYER_SIZE / 2 });
@@ -138,6 +140,7 @@ export default function Stage9_ExitDoorChaos({
     stopMusic();
     setStarted(false);
     setWon(false);
+    setCatchCount(0);
     setStatus("Qapını tutmağa çalış. Yaxınlaşanda qaçacaq.");
     playerRef.current = { x: 24, y: WORLD_HEIGHT / 2 - PLAYER_SIZE / 2 };
     setPlayerView(playerRef.current);
@@ -153,7 +156,7 @@ export default function Stage9_ExitDoorChaos({
   const start = () => {
     reset();
     setStarted(true);
-    setStatus("Qapını küncə sıxışdır, sonra əks tərəfə tullanacaq.");
+    setStatus("Qapını 3 dəfə tutmalısan. Hər tutuşdan sonra çətinləşəcək.");
     startMusic();
   };
 
@@ -203,6 +206,12 @@ export default function Stage9_ExitDoorChaos({
       if (started && !won) {
         const now = Date.now();
         const player = playerRef.current;
+        const difficultyLevel = catchCount;
+        const catchRadius = difficultyLevel === 0 ? 58 : difficultyLevel === 1 ? 48 : 40;
+        const teleportNearMax = difficultyLevel === 0 ? 172 : difficultyLevel === 1 ? 196 : 220;
+        const teleportNearMin = difficultyLevel === 0 ? 88 : difficultyLevel === 1 ? 76 : 64;
+        const teleportCooldown = difficultyLevel === 0 ? 460 : difficultyLevel === 1 ? 360 : 300;
+        const noTeleportWindow = difficultyLevel === 0 ? 1300 : difficultyLevel === 1 ? 980 : 720;
 
         const xDir = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
         const yDir = (keysRef.current.down ? 1 : 0) - (keysRef.current.up ? 1 : 0);
@@ -219,28 +228,42 @@ export default function Stage9_ExitDoorChaos({
         const doorCy = door.y + door.height / 2;
         const dist = Math.hypot(playerCx - doorCx, playerCy - doorCy);
 
-        if (dist < 54 && !isFlippingRef.current) {
-          setWon(true);
-          setStarted(false);
-          setStatus("Tutdun! Stage 10 tamamlandı.");
-          stopMusic();
-          const doneId = window.setTimeout(() => onComplete(), 300);
-          timeoutsRef.current.push(doneId);
+        if (dist < catchRadius && !isFlippingRef.current) {
+          const nextCatchCount = catchCount + 1;
+
+          if (nextCatchCount >= REQUIRED_CATCHES) {
+            setCatchCount(nextCatchCount);
+            setWon(true);
+            setStarted(false);
+            setStatus("3/3 tutdun! Stage 10 tamamlandı.");
+            stopMusic();
+            const doneId = window.setTimeout(() => onComplete(), 320);
+            timeoutsRef.current.push(doneId);
+          } else {
+            setCatchCount(nextCatchCount);
+            setStatus(`${nextCatchCount}/${REQUIRED_CATCHES} tutuş. İndi daha çətindir...`);
+
+            // Reposition door after each successful catch so player must chase again.
+            cooldownUntilRef.current = now + 480;
+            noTeleportUntilRef.current = now + 620;
+            teleportBurstRef.current = 0;
+            randomDoor(player.x, player.y);
+          }
         } else if (
-          dist < 180 &&
-          dist > 86 &&
+          dist < teleportNearMax &&
+          dist > teleportNearMin &&
           now >= cooldownUntilRef.current &&
           now >= noTeleportUntilRef.current &&
           !isFlippingRef.current
         ) {
-          cooldownUntilRef.current = now + 430;
+          cooldownUntilRef.current = now + teleportCooldown;
           teleportBurstRef.current += 1;
           randomDoor(player.x, player.y);
 
           if (teleportBurstRef.current >= 5) {
             teleportBurstRef.current = 0;
-            noTeleportUntilRef.current = now + 1400;
-            setStatus("Qapı yoruldu... 1 saniyəlik şans pəncərən var!");
+            noTeleportUntilRef.current = now + noTeleportWindow;
+            setStatus("Qapı yoruldu... qısa şans pəncərən var!");
           }
         }
 
@@ -288,7 +311,7 @@ export default function Stage9_ExitDoorChaos({
       clearTimeouts();
       stopMusic();
     };
-  }, [onComplete, onFail, randomDoor, started, stopMusic, won]);
+  }, [catchCount, onComplete, onFail, randomDoor, started, stopMusic, won]);
 
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
@@ -313,6 +336,7 @@ export default function Stage9_ExitDoorChaos({
       </div>
 
       <p className="text-xs text-zinc-300">{status}</p>
+      <p className="text-xs font-semibold text-rose-200">Tutuş: {catchCount}/{REQUIRED_CATCHES}</p>
 
       <div className="relative mx-auto overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#131521,#101826)]" style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}>
         <div

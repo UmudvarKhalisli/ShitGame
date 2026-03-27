@@ -162,12 +162,14 @@ export default function Stage8_DiaAgainRush({
   const [dead, setDead] = useState(false);
   const [controlsInverted, setControlsInverted] = useState(false);
   const [status, setStatus] = useState("5 raundlu chaos başladı. Start bas.");
+  const [roundFailCounts, setRoundFailCounts] = useState<number[]>(Array.from({ length: ROUNDS.length }, () => 0));
 
   const [playerView, setPlayerView] = useState({ x: START_X, y: START_Y });
   const [doorView, setDoorView] = useState<Door>(round.door);
   const [fakeBroken, setFakeBroken] = useState(false);
   const [fakeDrop, setFakeDrop] = useState(0);
   const [hazardView, setHazardView] = useState<FallingHazard[]>([]);
+  const isRound4Mercy = round.id === 4 && (roundFailCounts[roundIndex] ?? 0) >= 16;
 
   const playerRef = useRef<Player>({ x: START_X, y: START_Y, vx: 0, vy: 0, onGround: true });
   const keysRef = useRef({ left: false, right: false, up: false });
@@ -239,9 +241,11 @@ export default function Stage8_DiaAgainRush({
     setPlayerView({ x: START_X, y: START_Y });
 
     if (!startImmediately) {
-      setStatus(`${round.title} hazırdır. Start bas.`);
+      const mercyText = isRound4Mercy ? " • Mercy unlock aktivdir." : "";
+      setStatus(`${round.title} hazırdır. Start bas.${mercyText}`);
     } else {
-      setStatus(round.note);
+      const mercyText = isRound4Mercy ? " Mercy unlock: qapı daha az qaçacaq." : "";
+      setStatus(`${round.note}${mercyText}`);
     }
 
     if (startImmediately && round.invertAfterMs) {
@@ -254,6 +258,7 @@ export default function Stage8_DiaAgainRush({
 
   const resetRun = () => {
     clearTimers();
+    setRoundFailCounts(Array.from({ length: ROUNDS.length }, () => 0));
 
     if (roundIndex !== 0) {
       setRoundIndex(0);
@@ -432,8 +437,12 @@ export default function Stage8_DiaAgainRush({
           const doorCenterY = doorRef.current.y + doorRef.current.h / 2;
 
           const distance = Math.hypot(playerCenterX - doorCenterX, playerCenterY - doorCenterY);
-          if (distance < round.teleportDoorDistance && distance > 52) {
-            doorCooldownUntilRef.current = now + 420;
+          const effectiveTeleportDistance = isRound4Mercy ? 84 : round.teleportDoorDistance;
+          const minTeleportDistance = isRound4Mercy ? 74 : 52;
+          const teleportCooldown = isRound4Mercy ? 980 : 420;
+
+          if (distance < effectiveTeleportDistance && distance > minTeleportDistance) {
+            doorCooldownUntilRef.current = now + teleportCooldown;
             randomizeDoor(nextX, nextY);
           }
         }
@@ -455,11 +464,12 @@ export default function Stage8_DiaAgainRush({
           }
         }
 
+        const catchPadding = isRound4Mercy ? 14 : 0;
         const touchesDoor =
           playerRight > doorRef.current.x &&
-          nextX < doorRef.current.x + doorRef.current.w &&
+          nextX < doorRef.current.x + doorRef.current.w + catchPadding &&
           playerBottom > doorRef.current.y &&
-          nextY < doorRef.current.y + doorRef.current.h;
+          nextY < doorRef.current.y + doorRef.current.h + catchPadding;
 
         if (touchesDoor) {
           setWon(true);
@@ -477,7 +487,19 @@ export default function Stage8_DiaAgainRush({
         if (hitHazard || nextY > WORLD_HEIGHT + 24) {
           setDead(true);
           setStarted(false);
-          setStatus(`${round.title}: uduzdun. Bu raundu yenidən başlat.`);
+          const nextRoundFailCount = (roundFailCounts[roundIndex] ?? 0) + 1;
+          setRoundFailCounts((prev) => {
+            const next = [...prev];
+            next[roundIndex] = nextRoundFailCount;
+            return next;
+          });
+
+          if (round.id === 4 && nextRoundFailCount >= 16) {
+            setStatus(`${round.title}: Mercy unlock açıldı. İndi qapını tutmaq daha asandır.`);
+          } else {
+            setStatus(`${round.title}: uduzdun. Bu raundu yenidən başlat.`);
+          }
+
           clearTimers();
           onFail();
         }
@@ -498,7 +520,7 @@ export default function Stage8_DiaAgainRush({
       }
       clearTimers();
     };
-  }, [controlsInverted, dead, onComplete, onFail, round, roundIndex, started, won]);
+  }, [controlsInverted, dead, isRound4Mercy, onComplete, onFail, round, roundFailCounts, roundIndex, started, won]);
 
   return (
     <section className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/85 p-5">
