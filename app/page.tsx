@@ -203,7 +203,7 @@ export default function LandingPage() {
 
       <footer className="relative z-10 flex h-[60px] items-center justify-center border-t border-[rgba(124,58,237,0.1)] px-6 text-center text-[11px] text-[#374151]">
         <span style={{ fontFamily: "'Share Tech Mono', monospace" }}>
-          © 2025 Əsəb Bölməsi MMC • Bütün əsəblər qorunur.
+          © 2026 Əsəb Bölməsi MMC • Bütün əsəblər qorunur.
         </span>
       </footer>
     </div>

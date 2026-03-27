@@ -205,7 +205,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
             </button>
 
             <p className="text-center text-xs text-zinc-500">
-              © 2025 Əsəb Bölməsi MMC. Bütün əsəblər qorunur.
+              © 2026 Əsəb Bölməsi MMC. Bütün əsəblər qorunur.
             </p>
           </div>
         </motion.div>

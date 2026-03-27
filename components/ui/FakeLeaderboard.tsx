@@ -195,7 +195,7 @@ export default function FakeLeaderboard({
       </div>
 
       <p className="text-center text-sm font-semibold text-amber-300">
-        🎖️ Siz bu mərhələnin keçən {playerRank}-ci ən ZƏİF BƏNDİ sizsiniz!
+        🎖️ Siz bu mərhələnin keçən {playerRank}-ci ən ZƏİF BƏNDİsiniz!
       </p>
 
       <div className="space-y-2 text-center">
