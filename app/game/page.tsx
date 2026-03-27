@@ -16,7 +16,7 @@ import Stage8_DiaAgainRush from "@/components/stages/Stage8_DiaAgainRush";
 import Stage9_ExitDoorChaos from "@/components/stages/Stage9_ExitDoorChaos";
 import EntryAgreement from "@/components/ui/EntryAgreement";
 import FakeBSOD from "@/components/ui/FakeBSOD";
-import FakeLeaderboard from "@/components/ui/FakeLeaderboard";
+import FakeLeaderboard from "../../components/ui/FakeLeaderboard";
 import FakeMicRequest from "@/components/ui/FakeMicRequest";
 import SocialThreatPopup from "@/components/ui/SocialThreatPopup";
 import TheRoaster from "@/components/ui/TheRoaster";
