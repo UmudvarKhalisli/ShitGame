@@ -35,7 +35,9 @@ export default function Stage9_ExitDoorChaos({
   const playerRef = useRef({ x: 24, y: WORLD_HEIGHT / 2 - PLAYER_SIZE / 2 });
   const doorRef = useRef<Door>({ x: WORLD_WIDTH / 2 - 64, y: WORLD_HEIGHT / 2 - 30, width: 128, height: 60 });
   const cooldownUntilRef = useRef(0);
+  const noTeleportUntilRef = useRef(0);
   const isFlippingRef = useRef(false);
+  const teleportBurstRef = useRef(0);
   const timeoutsRef = useRef<number[]>([]);
 
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -142,7 +144,9 @@ export default function Stage9_ExitDoorChaos({
     const initialDoor = { x: WORLD_WIDTH / 2 - 64, y: WORLD_HEIGHT / 2 - 30, width: 128, height: 60 };
     setDoor(initialDoor);
     cooldownUntilRef.current = 0;
+    noTeleportUntilRef.current = 0;
     isFlippingRef.current = false;
+    teleportBurstRef.current = 0;
     setDoorScale(1);
   }, [stopMusic]);
 
@@ -215,16 +219,29 @@ export default function Stage9_ExitDoorChaos({
         const doorCy = door.y + door.height / 2;
         const dist = Math.hypot(playerCx - doorCx, playerCy - doorCy);
 
-        if (dist < 32 && !isFlippingRef.current) {
+        if (dist < 54 && !isFlippingRef.current) {
           setWon(true);
           setStarted(false);
           setStatus("Tutdun! Stage 10 tamamlandı.");
           stopMusic();
           const doneId = window.setTimeout(() => onComplete(), 300);
           timeoutsRef.current.push(doneId);
-        } else if (dist < 150 && dist > 42 && now >= cooldownUntilRef.current && !isFlippingRef.current) {
-          cooldownUntilRef.current = now + 320;
+        } else if (
+          dist < 180 &&
+          dist > 86 &&
+          now >= cooldownUntilRef.current &&
+          now >= noTeleportUntilRef.current &&
+          !isFlippingRef.current
+        ) {
+          cooldownUntilRef.current = now + 430;
+          teleportBurstRef.current += 1;
           randomDoor(player.x, player.y);
+
+          if (teleportBurstRef.current >= 5) {
+            teleportBurstRef.current = 0;
+            noTeleportUntilRef.current = now + 1400;
+            setStatus("Qapı yoruldu... 1 saniyəlik şans pəncərən var!");
+          }
         }
 
         const nearLeft = door.x <= 12;
@@ -253,7 +270,7 @@ export default function Stage9_ExitDoorChaos({
           timeoutsRef.current.push(flipId);
         }
 
-        if (now > cooldownUntilRef.current + 6000 && !won) {
+        if (now > cooldownUntilRef.current + 12000 && !won) {
           setStatus("Qapı səni troll edir... daha aqressiv yaxınlaş.");
           onFail();
           cooldownUntilRef.current = now;
