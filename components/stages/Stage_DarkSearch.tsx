@@ -31,6 +31,22 @@ const WORD_DEFINITIONS: Record<string, string> = {
   "ƏSƏB": "Bu saytın əsas məhsulu",
 };
 
+const WORD_SYNONYM_HINTS: Record<string, string> = {
+  KOD: "Şifrə",
+  BUG: "Xəta",
+  OYN: "Oyun",
+  "TƏLƏ": "Tor",
+  "DƏLI": "Çılğın",
+  CHAOS: "Qarışıqlıq",
+  "ƏSƏB": "Nerv",
+  OYUN: "Məşğuliyyət",
+  GIZLI: "Məxfi",
+  SIRR: "Məxfilik",
+  QARANLIQ: "Zülmət",
+  XAOSLAND: "Xaos diyarı",
+  DARKMODE: "Qara rejim",
+};
+
 const WRONG_ROASTS = [
   "Hərfləri gördün, amma sözü görmədin 😂",
   "Gözlər var, görmür deyiblər...",
@@ -696,6 +712,7 @@ export default function Stage_DarkSearch({
 
   const canOfferSkip = wrongAttempts >= 20;
   const canSkipByCondition = canOfferSkip && skipPenaltyAccepted && safeUpper(skipCodeInput) === "KEÇİR MƏNİ";
+  const synonymHint = WORD_SYNONYM_HINTS[safeUpper(wordPick.word)] ?? "Məna ipucu: gizli anlayış";
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -946,6 +963,7 @@ export default function Stage_DarkSearch({
       {canOfferSkip && (
         <div className="fixed bottom-[128px] left-1/2 z-[123] w-[min(92vw,560px)] -translate-x-1/2 rounded-xl border border-amber-500/40 bg-zinc-900/90 p-3 text-zinc-100 shadow-xl">
           <p className="text-xs text-amber-300">20 cəhddən sonra xüsusi keçid açıldı. Şərti qəbul etsən növbəti mərhələyə keçə bilərsən.</p>
+          <p className="mt-2 text-xs text-cyan-200">İpucu (yaxın sinonim): {synonymHint}</p>
           <label className="mt-2 flex items-center gap-2 text-xs text-zinc-300">
             <input
               type="checkbox"
