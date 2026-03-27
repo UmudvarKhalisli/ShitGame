@@ -10,6 +10,8 @@ import Stage_DarkSearch from "@/components/stages/Stage_DarkSearch";
 import Stage5_Memory from "@/components/stages/Stage5_Memory";
 import Stage6_Quiz from "@/components/stages/Stage6_Quiz";
 import Stage7_BossRound from "@/components/stages/Stage7_BossRound";
+import Stage8_DiaAgainRush from "@/components/stages/Stage8_DiaAgainRush";
+import Stage9_ExitDoorChaos from "@/components/stages/Stage9_ExitDoorChaos";
 import EntryAgreement from "@/components/ui/EntryAgreement";
 import FakeBSOD from "@/components/ui/FakeBSOD";
 import FakeLeaderboard from "@/components/ui/FakeLeaderboard";
@@ -45,7 +47,7 @@ function StageRouter() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const rapidClickRef = useRef({ count: 0, lastClickAt: 0 });
 
-  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, { soft: string; hard: string }> = {
+  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, { soft: string; hard: string }> = {
     1: {
       soft: "Düyməyə yox, hərəkət ritminə fikir ver. Eyni qayda ilə həmişə qaçmır.",
       hard: "Düymə qaçanda bir tərəfi sıxışdır və kənara qaçış yolunu bağla.",
@@ -77,6 +79,14 @@ function StageRouter() {
     8: {
       soft: "Qaydanı gör, sonra klik et. Hər raund ayrı oyun kimidir.",
       hard: "R1 normal, R2 tərsinə, R3 təkrarlananlar, R4 ilk+son, R5 istənilən 3 simvol.",
+    },
+    9: {
+      soft: "Bu raundda jump fizikası dəyişir. Ritmi izləməyə çalış.",
+      hard: "İlk hissədə aşağı jump, sonra hiper jump+tərs idarəetmə gəlir. Hərəkəti əvvəlcədən planla.",
+    },
+    10: {
+      soft: "Qapı səni aldadacaq. Tam üstünə qaçma, bucaqla yaxınlaş.",
+      hard: "Qapını küncə sıxışdıranda yox olub əks tərəfdə çıxır. Teleport cooldown anını tut.",
     },
   };
 
@@ -136,7 +146,7 @@ function StageRouter() {
 
   const soberCompleted = gameState.sobriety >= 100;
   const stageNumber =
-    gameState.currentStage === "complete" ? 8 : Number(gameState.currentStage);
+    gameState.currentStage === "complete" ? 10 : Number(gameState.currentStage);
 
   const registerStageAttempt = () => {
     incrementAttempts();
@@ -230,7 +240,7 @@ function StageRouter() {
     setIsAdmin(false);
   };
 
-  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | "complete") => {
+  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | "complete") => {
     acceptEntry();
     completeMicRequest();
     setStage(stage);
@@ -269,8 +279,12 @@ function StageRouter() {
     stageNode = <Stage5_Memory onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 7) {
     stageNode = <Stage6_Quiz onFail={handleStageFail} onComplete={handleStageComplete} />;
-  } else {
+  } else if (gameState.currentStage === 8) {
     stageNode = <Stage7_BossRound onFail={handleStageFail} onComplete={advanceStage} />;
+  } else if (gameState.currentStage === 9) {
+    stageNode = <Stage8_DiaAgainRush onFail={handleStageFail} onComplete={handleStageComplete} />;
+  } else {
+    stageNode = <Stage9_ExitDoorChaos onFail={handleStageFail} onComplete={advanceStage} />;
   }
 
   const activeStageHint =
@@ -280,7 +294,7 @@ function StageRouter() {
   return (
     <div className="w-full max-w-3xl space-y-6">
       <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
-        Stage {stageNumber}/8 | Cəhd: {gameState.attempts} | 😤
+        Stage {stageNumber}/10 | Cəhd: {gameState.attempts} | 😤
       </div>
 
       {(showAdminLogin || isAdmin) && (
@@ -319,11 +333,11 @@ function StageRouter() {
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, "complete"].map((stage) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "complete"].map((stage) => (
                   <button
                     key={String(stage)}
                     type="button"
-                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | "complete")}
+                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | "complete")}
                     className="rounded-md border border-zinc-600 bg-zinc-950 px-2 py-2 text-xs font-bold hover:bg-zinc-800"
                   >
                     {stage === "complete" ? "Leaderboard" : `Stage ${stage}`}
@@ -470,7 +484,9 @@ function ChaosApp() {
     gameState.currentStage === 3 ||
     gameState.currentStage === 5 ||
     gameState.currentStage === 6 ||
-    gameState.currentStage === 8;
+    gameState.currentStage === 8 ||
+    gameState.currentStage === 9 ||
+    gameState.currentStage === 10;
   const isEffectActive =
     gameState.isDrunkBrowserActive && gameState.sobriety < 100 && !isPlainVisualStage;
 
