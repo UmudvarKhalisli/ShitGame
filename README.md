@@ -1,4 +1,4 @@
-# Shit Game Site
+# BoshBesh Site
 
 Deliberately frustrating but addictive web experience built with Next.js (App Router), React, TypeScript, and Tailwind CSS.
 
