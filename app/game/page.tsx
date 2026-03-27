@@ -46,6 +46,7 @@ function StageRouter() {
   const [currentStageAttempts, setCurrentStageAttempts] = useState(0);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const rapidClickRef = useRef({ count: 0, lastClickAt: 0 });
+  const TOTAL_STAGES = 10;
 
   const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, { soft: string; hard: string }> = {
     1: {
@@ -146,7 +147,7 @@ function StageRouter() {
 
   const soberCompleted = gameState.sobriety >= 100;
   const stageNumber =
-    gameState.currentStage === "complete" ? 10 : Number(gameState.currentStage);
+    gameState.currentStage === "complete" ? TOTAL_STAGES : Number(gameState.currentStage);
 
   const registerStageAttempt = () => {
     incrementAttempts();
@@ -294,7 +295,7 @@ function StageRouter() {
   return (
     <div className="w-full max-w-3xl space-y-6">
       <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
-        Stage {stageNumber}/10 | Cəhd: {gameState.attempts} | 😤
+        Stage {stageNumber}/{TOTAL_STAGES} | Cəhd: {gameState.attempts} | 😤
       </div>
 
       {(showAdminLogin || isAdmin) && (
@@ -333,7 +334,7 @@ function StageRouter() {
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "complete"].map((stage) => (
+                {[...Array.from({ length: TOTAL_STAGES }, (_, index) => index + 1), "complete"].map((stage) => (
                   <button
                     key={String(stage)}
                     type="button"
