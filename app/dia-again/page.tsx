@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Platform = {
   id: number;
@@ -9,6 +10,35 @@ type Platform = {
   width: number;
   height: number;
   fake?: boolean;
+};
+
+type Gate = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type Hazard = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  speed: number;
+};
+
+type StageConfig = {
+  id: number;
+  title: string;
+  note: string;
+  platforms: Platform[];
+  gate: Gate;
+  reverseAfterMs?: number;
+  superJumpFactor?: number;
+  fallingHazards?: boolean;
+  fakePlatformId?: number;
+  trapSpikes?: boolean;
+  windForce?: number;
 };
 
 type PlayerState = {
@@ -21,56 +51,113 @@ type PlayerState = {
 
 const WORLD_WIDTH = 920;
 const WORLD_HEIGHT = 500;
+const FLOOR_Y = WORLD_HEIGHT - 32;
 const PLAYER_SIZE = 28;
-const MOVE_SPEED = 4.4;
-const JUMP_SPEED = -12.5;
+
+const BASE_MOVE_SPEED = 4.5;
+const BASE_JUMP_SPEED = -12.5;
 const GRAVITY = 0.72;
 const MAX_FALL = 15;
-const FAKE_SUPPORT_MS = 650;
+const FAKE_PLATFORM_GRACE_MS = 620;
 
 const START_X = 46;
-const START_Y = WORLD_HEIGHT - 70 - PLAYER_SIZE;
-const FLOOR_Y = WORLD_HEIGHT - 32;
+const START_Y = FLOOR_Y - PLAYER_SIZE;
 
-const GATE = {
-  x: 838,
-  y: 232,
-  width: 38,
-  height: 98,
-};
-
-const SPIKES = {
-  x: GATE.x - 6,
-  width: GATE.width + 12,
-  height: 34,
-  hiddenY: GATE.y - 90,
-  landedY: GATE.y - 8,
-};
-
-const PLATFORMS: Platform[] = [
-  { id: 1, x: 120, y: 390, width: 150, height: 16 },
-  { id: 2, x: 320, y: 336, width: 145, height: 16, fake: true },
-  { id: 3, x: 535, y: 292, width: 135, height: 16 },
-  { id: 4, x: 710, y: 320, width: 125, height: 16 },
+const STAGES: StageConfig[] = [
+  {
+    id: 1,
+    title: "Mərhələ 1: Yağış Başlayır",
+    note: "Yuxarıdan qutular düşür, ritmlə qaç.",
+    fallingHazards: true,
+    platforms: [
+      { id: 1, x: 140, y: 392, width: 160, height: 16 },
+      { id: 2, x: 388, y: 346, width: 145, height: 16 },
+      { id: 3, x: 620, y: 308, width: 120, height: 16 },
+    ],
+    gate: { x: 842, y: 244, width: 40, height: 96 },
+  },
+  {
+    id: 2,
+    title: "Mərhələ 2: Saxta Döşəmə",
+    note: "2-ci platforma ayağının altında gecikmə ilə dağılır.",
+    fakePlatformId: 2,
+    platforms: [
+      { id: 1, x: 125, y: 390, width: 160, height: 16 },
+      { id: 2, x: 335, y: 340, width: 150, height: 16, fake: true },
+      { id: 3, x: 565, y: 300, width: 145, height: 16 },
+      { id: 4, x: 738, y: 326, width: 104, height: 16 },
+    ],
+    gate: { x: 852, y: 250, width: 36, height: 92 },
+  },
+  {
+    id: 3,
+    title: "Mərhələ 3: Beyin Tərsinə",
+    note: "3 saniyədən sonra sağ-sol idarəsi tərsinə keçir.",
+    reverseAfterMs: 3000,
+    platforms: [
+      { id: 1, x: 150, y: 390, width: 145, height: 16 },
+      { id: 2, x: 360, y: 332, width: 132, height: 16 },
+      { id: 3, x: 560, y: 286, width: 124, height: 16 },
+      { id: 4, x: 730, y: 252, width: 96, height: 16 },
+    ],
+    gate: { x: 846, y: 185, width: 38, height: 102 },
+  },
+  {
+    id: 4,
+    title: "Mərhələ 4: Super Jump",
+    note: "Tullanış çox güclüdür, havada nəzarət et.",
+    superJumpFactor: 1.55,
+    windForce: -0.42,
+    platforms: [
+      { id: 1, x: 140, y: 396, width: 146, height: 16 },
+      { id: 2, x: 325, y: 354, width: 118, height: 16 },
+      { id: 3, x: 492, y: 308, width: 120, height: 16 },
+      { id: 4, x: 666, y: 258, width: 108, height: 16 },
+    ],
+    gate: { x: 836, y: 178, width: 42, height: 108 },
+  },
+  {
+    id: 5,
+    title: "Mərhələ 5: Qapı Tələsi",
+    note: "Qapıya yaxınlaşanda gizli tikanlar düşəcək, altından gir.",
+    trapSpikes: true,
+    fallingHazards: true,
+    platforms: [
+      { id: 1, x: 138, y: 390, width: 150, height: 16 },
+      { id: 2, x: 355, y: 338, width: 146, height: 16 },
+      { id: 3, x: 574, y: 290, width: 134, height: 16 },
+      { id: 4, x: 748, y: 320, width: 90, height: 16 },
+    ],
+    gate: { x: 854, y: 242, width: 34, height: 90 },
+  },
 ];
 
 export default function DiaAgainPage() {
+  const router = useRouter();
+
+  const [stageIndex, setStageIndex] = useState(0);
+  const stage = STAGES[stageIndex];
+
   const [started, setStarted] = useState(false);
-  const [controlsInverted, setControlsInverted] = useState(false);
   const [dead, setDead] = useState(false);
-  const [won, setWon] = useState(false);
+  const [stageWon, setStageWon] = useState(false);
+  const [allStagesCleared, setAllStagesCleared] = useState(false);
+
+  const [controlsInverted, setControlsInverted] = useState(false);
   const [deathCount, setDeathCount] = useState(0);
 
   const [playerView, setPlayerView] = useState({ x: START_X, y: START_Y });
+
+  const [hazardView, setHazardView] = useState<Hazard[]>([]);
   const [fakeBroken, setFakeBroken] = useState(false);
-  const [fakePlatformDrop, setFakePlatformDrop] = useState(0);
+  const [fakeDropView, setFakeDropView] = useState(0);
 
   const [spikesTriggered, setSpikesTriggered] = useState(false);
-  const [spikesY, setSpikesY] = useState(SPIKES.hiddenY);
+  const [spikesY, setSpikesY] = useState(0);
 
   const keysRef = useRef({ left: false, right: false, up: false });
   const rafRef = useRef<number | null>(null);
-  const invertTimeoutRef = useRef<number | null>(null);
+  const reverseTimerRef = useRef<number | null>(null);
 
   const playerRef = useRef<PlayerState>({
     x: START_X,
@@ -80,39 +167,38 @@ export default function DiaAgainPage() {
     onGround: true,
   });
 
-  const fakeDropRef = useRef(0);
   const fakeBrokenRef = useRef(false);
-  const fakeBreakStartedAtRef = useRef<number | null>(null);
+  const fakeDropRef = useRef(0);
+  const fakeBrokenAtRef = useRef<number | null>(null);
+
+  const hazardsRef = useRef<Hazard[]>([]);
+  const lastHazardSpawnRef = useRef(0);
+  const hazardIdRef = useRef(0);
+
   const spikesTriggeredRef = useRef(false);
-  const spikesYRef = useRef(SPIKES.hiddenY);
+  const spikesYRef = useRef(0);
 
-  const clearTimer = () => {
-    if (invertTimeoutRef.current !== null) {
-      window.clearTimeout(invertTimeoutRef.current);
-      invertTimeoutRef.current = null;
+  const lastTickRef = useRef(0);
+
+  const spikeBox = useMemo(() => {
+    const width = stage.gate.width - 8;
+    return {
+      x: stage.gate.x + 4,
+      width,
+      height: 28,
+      hiddenY: stage.gate.y - 86,
+      landedY: stage.gate.y - 14,
+    };
+  }, [stage.gate.width, stage.gate.x, stage.gate.y]);
+
+  const clearReverseTimer = useCallback(() => {
+    if (reverseTimerRef.current !== null) {
+      window.clearTimeout(reverseTimerRef.current);
+      reverseTimerRef.current = null;
     }
-  };
+  }, []);
 
-  const hardReset = () => {
-    clearTimer();
-    setControlsInverted(false);
-    setDead(false);
-    setWon(false);
-    setStarted(false);
-
-    setFakeBroken(false);
-    setFakePlatformDrop(0);
-    fakeBrokenRef.current = false;
-    fakeDropRef.current = 0;
-    fakeBreakStartedAtRef.current = null;
-
-    setSpikesTriggered(false);
-    setSpikesY(SPIKES.hiddenY);
-    spikesTriggeredRef.current = false;
-    spikesYRef.current = SPIKES.hiddenY;
-
-    keysRef.current = { left: false, right: false, up: false };
-
+  const resetPlayer = useCallback(() => {
     playerRef.current = {
       x: START_X,
       y: START_Y,
@@ -120,52 +206,96 @@ export default function DiaAgainPage() {
       vy: 0,
       onGround: true,
     };
-
     setPlayerView({ x: START_X, y: START_Y });
+  }, []);
+
+  const resetStageState = useCallback(() => {
+    clearReverseTimer();
+
+    setDead(false);
+    setStageWon(false);
+    setControlsInverted(false);
+
+    setFakeBroken(false);
+    setFakeDropView(0);
+    fakeBrokenRef.current = false;
+    fakeDropRef.current = 0;
+    fakeBrokenAtRef.current = null;
+
+    hazardsRef.current = [];
+    setHazardView([]);
+    lastHazardSpawnRef.current = 0;
+
+    setSpikesTriggered(false);
+    setSpikesY(spikeBox.hiddenY);
+    spikesTriggeredRef.current = false;
+    spikesYRef.current = spikeBox.hiddenY;
+
+    keysRef.current = { left: false, right: false, up: false };
+    resetPlayer();
+  }, [clearReverseTimer, resetPlayer, spikeBox.hiddenY]);
+
+  const hardResetAll = () => {
+    setStarted(false);
+    setStageIndex(0);
+    setAllStagesCleared(false);
+    resetStageState();
   };
 
   const startRun = () => {
-    clearTimer();
-
-    setDead(false);
-    setWon(false);
+    resetStageState();
     setStarted(true);
-    setControlsInverted(false);
 
-    setFakeBroken(false);
-    setFakePlatformDrop(0);
-    fakeBrokenRef.current = false;
-    fakeDropRef.current = 0;
-    fakeBreakStartedAtRef.current = null;
-
-    setSpikesTriggered(false);
-    setSpikesY(SPIKES.hiddenY);
-    spikesTriggeredRef.current = false;
-    spikesYRef.current = SPIKES.hiddenY;
-
-    playerRef.current = {
-      x: START_X,
-      y: START_Y,
-      vx: 0,
-      vy: 0,
-      onGround: true,
-    };
-    setPlayerView({ x: START_X, y: START_Y });
-
-    invertTimeoutRef.current = window.setTimeout(() => {
-      setControlsInverted(true);
-    }, 10000);
+    if (stage.reverseAfterMs) {
+      reverseTimerRef.current = window.setTimeout(() => {
+        setControlsInverted(true);
+      }, stage.reverseAfterMs);
+    }
   };
 
-  const triggerDeath = () => {
-    if (dead || won) {
+  const restartCurrentStage = () => {
+    startRun();
+  };
+
+  const triggerDeath = useCallback(() => {
+    if (dead || stageWon || allStagesCleared) {
       return;
     }
 
     setDead(true);
+    setStarted(false);
     setDeathCount((prev) => prev + 1);
-    clearTimer();
+    clearReverseTimer();
+  }, [allStagesCleared, clearReverseTimer, dead, stageWon]);
+
+  const completeStage = useCallback(() => {
+    setStarted(false);
+    setStageWon(true);
+    clearReverseTimer();
+
+    if (stageIndex === STAGES.length - 1) {
+      setAllStagesCleared(true);
+    }
+  }, [clearReverseTimer, stageIndex]);
+
+  const goToNextStage = () => {
+    if (stageIndex >= STAGES.length - 1) {
+      return;
+    }
+
+    setStageIndex((prev) => prev + 1);
+    setStarted(false);
+    setAllStagesCleared(false);
+    setDead(false);
+    setStageWon(false);
   };
+
+  useEffect(() => {
+    resetStageState();
+    setStarted(false);
+    setDead(false);
+    setStageWon(false);
+  }, [stageIndex, resetStageState]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -204,126 +334,179 @@ export default function DiaAgainPage() {
   }, []);
 
   useEffect(() => {
-    const tick = () => {
-      const player = playerRef.current;
-      const now = Date.now();
+    const tick = (timestamp: number) => {
+      if (lastTickRef.current === 0) {
+        lastTickRef.current = timestamp;
+      }
 
-      if (started && !dead && !won) {
-        const leftPressed = keysRef.current.left;
-        const rightPressed = keysRef.current.right;
-        const xDir =
-          (rightPressed ? 1 : 0) - (leftPressed ? 1 : 0);
-        const movement = controlsInverted ? -xDir : xDir;
+      const frameRatio = Math.min(2, (timestamp - lastTickRef.current) / 16.67);
+      lastTickRef.current = timestamp;
 
-        player.vx = movement * MOVE_SPEED;
+      if (started && !dead && !stageWon && !allStagesCleared) {
+        const player = playerRef.current;
+        const now = Date.now();
+
+        const xDir = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
+        const controlDir = controlsInverted ? -xDir : xDir;
+
+        const wind = stage.windForce ?? 0;
+        player.vx = controlDir * BASE_MOVE_SPEED + wind;
 
         if (keysRef.current.up && player.onGround) {
-          player.vy = JUMP_SPEED;
+          const jumpFactor = stage.superJumpFactor ?? 1;
+          player.vy = BASE_JUMP_SPEED * jumpFactor;
           player.onGround = false;
         }
 
-        player.vy = Math.min(MAX_FALL, player.vy + GRAVITY);
+        player.vy = Math.min(MAX_FALL, player.vy + GRAVITY * frameRatio);
 
         const prevY = player.y;
-        let nextX = player.x + player.vx;
-        let nextY = player.y + player.vy;
+        let nextX = player.x + player.vx * frameRatio;
+        let nextY = player.y + player.vy * frameRatio;
         let nextOnGround = false;
 
         nextX = Math.max(0, Math.min(WORLD_WIDTH - PLAYER_SIZE, nextX));
 
-        const activePlatforms = PLATFORMS.filter((platform) => {
-          if (!platform.fake) {
-            return true;
-          }
-          const fakeStillSolid =
-            !fakeBrokenRef.current ||
-            (fakeBreakStartedAtRef.current !== null && now - fakeBreakStartedAtRef.current < FAKE_SUPPORT_MS);
-          return fakeStillSolid;
-        }).map((platform) => {
-          if (platform.fake) {
-            return {
-              ...platform,
-              y: platform.y + fakeDropRef.current,
-            };
-          }
-          return platform;
-        });
+        const activePlatforms = stage.platforms
+          .filter((platform) => {
+            if (platform.id !== stage.fakePlatformId) {
+              return true;
+            }
+
+            const stillSolid =
+              !fakeBrokenRef.current ||
+              (fakeBrokenAtRef.current !== null && now - fakeBrokenAtRef.current < FAKE_PLATFORM_GRACE_MS);
+            return stillSolid;
+          })
+          .map((platform) => {
+            if (platform.id !== stage.fakePlatformId) {
+              return platform;
+            }
+            return { ...platform, y: platform.y + fakeDropRef.current };
+          });
 
         for (const platform of activePlatforms) {
           const prevBottom = prevY + PLAYER_SIZE;
           const nextBottom = nextY + PLAYER_SIZE;
 
-          const isFallingOntoPlatform =
-            player.vy >= 0 && prevBottom <= platform.y && nextBottom >= platform.y;
+          const fallingOnto = player.vy >= 0 && prevBottom <= platform.y && nextBottom >= platform.y;
+          const overlapsX = nextX + PLAYER_SIZE > platform.x && nextX < platform.x + platform.width;
 
-          const overlapsX =
-            nextX + PLAYER_SIZE > platform.x && nextX < platform.x + platform.width;
-
-          if (isFallingOntoPlatform && overlapsX) {
+          if (fallingOnto && overlapsX) {
             nextY = platform.y - PLAYER_SIZE;
             player.vy = 0;
             nextOnGround = true;
 
-            if (platform.fake && !fakeBrokenRef.current) {
+            if (platform.id === stage.fakePlatformId && !fakeBrokenRef.current) {
               fakeBrokenRef.current = true;
-              fakeBreakStartedAtRef.current = now;
+              fakeBrokenAtRef.current = now;
               setFakeBroken(true);
             }
           }
         }
 
-        const prevFloorBottom = prevY + PLAYER_SIZE;
-        const nextFloorBottom = nextY + PLAYER_SIZE;
-        if (player.vy >= 0 && prevFloorBottom <= FLOOR_Y && nextFloorBottom >= FLOOR_Y) {
+        const prevBottom = prevY + PLAYER_SIZE;
+        const nextBottom = nextY + PLAYER_SIZE;
+        if (player.vy >= 0 && prevBottom <= FLOOR_Y && nextBottom >= FLOOR_Y) {
           nextY = FLOOR_Y - PLAYER_SIZE;
           player.vy = 0;
           nextOnGround = true;
         }
 
-        const canFakeDropStart =
-          fakeBreakStartedAtRef.current !== null && now - fakeBreakStartedAtRef.current >= FAKE_SUPPORT_MS;
-
-        if (fakeBrokenRef.current && canFakeDropStart && fakeDropRef.current < 140) {
-          fakeDropRef.current += 4.2;
-          setFakePlatformDrop(fakeDropRef.current);
+        const canDropFake =
+          fakeBrokenAtRef.current !== null && now - fakeBrokenAtRef.current >= FAKE_PLATFORM_GRACE_MS;
+        if (fakeBrokenRef.current && canDropFake && fakeDropRef.current < 160) {
+          fakeDropRef.current += 4.5 * frameRatio;
+          setFakeDropView(fakeDropRef.current);
         }
 
-        const playerCenterX = nextX + PLAYER_SIZE / 2;
-        if (!spikesTriggeredRef.current && Math.abs(playerCenterX - (GATE.x + GATE.width / 2)) <= 50) {
-          spikesTriggeredRef.current = true;
-          setSpikesTriggered(true);
+        if (stage.fallingHazards) {
+          if (lastHazardSpawnRef.current === 0 || now - lastHazardSpawnRef.current > 950) {
+            lastHazardSpawnRef.current = now;
+            const size = 16 + Math.floor(Math.random() * 14);
+            hazardsRef.current = [
+              ...hazardsRef.current,
+              {
+                id: hazardIdRef.current,
+                x: 60 + Math.random() * (WORLD_WIDTH - 120),
+                y: -size,
+                size,
+                speed: 3 + Math.random() * 2.5,
+              },
+            ];
+            hazardIdRef.current += 1;
+          }
+
+          hazardsRef.current = hazardsRef.current
+            .map((hazard) => ({
+              ...hazard,
+              y: hazard.y + hazard.speed * frameRatio,
+            }))
+            .filter((hazard) => hazard.y < WORLD_HEIGHT + 40);
+
+          setHazardView(hazardsRef.current);
+        } else if (hazardsRef.current.length > 0) {
+          hazardsRef.current = [];
+          setHazardView([]);
         }
 
-        if (spikesTriggeredRef.current && spikesYRef.current < SPIKES.landedY) {
-          spikesYRef.current = Math.min(SPIKES.landedY, spikesYRef.current + 8);
-          setSpikesY(spikesYRef.current);
+        if (stage.trapSpikes) {
+          const centerX = nextX + PLAYER_SIZE / 2;
+          const gateCenterX = stage.gate.x + stage.gate.width / 2;
+          if (!spikesTriggeredRef.current && Math.abs(centerX - gateCenterX) <= 56) {
+            spikesTriggeredRef.current = true;
+            setSpikesTriggered(true);
+          }
+
+          if (spikesTriggeredRef.current && spikesYRef.current < spikeBox.landedY) {
+            spikesYRef.current = Math.min(spikeBox.landedY, spikesYRef.current + 9 * frameRatio);
+            setSpikesY(spikesYRef.current);
+          }
         }
 
         const playerRight = nextX + PLAYER_SIZE;
         const playerBottom = nextY + PLAYER_SIZE;
 
-        const spikesTop = spikesYRef.current;
-        const spikesBottom = spikesYRef.current + SPIKES.height;
-        const spikesRight = SPIKES.x + SPIKES.width;
-        const hitsSpikes =
-          playerRight > SPIKES.x &&
-          nextX < spikesRight &&
-          playerBottom > spikesTop &&
-          nextY < spikesBottom;
+        let hitHazard = false;
+        for (const hazard of hazardsRef.current) {
+          const overlaps =
+            playerRight > hazard.x &&
+            nextX < hazard.x + hazard.size &&
+            playerBottom > hazard.y &&
+            nextY < hazard.y + hazard.size;
 
-        if (hitsSpikes || nextY > WORLD_HEIGHT + 40) {
+          if (overlaps) {
+            hitHazard = true;
+            break;
+          }
+        }
+
+        if (stage.trapSpikes) {
+          const spikeRight = spikeBox.x + spikeBox.width;
+          const spikeBottom = spikesYRef.current + spikeBox.height;
+          const touchesSpikes =
+            playerRight > spikeBox.x &&
+            nextX < spikeRight &&
+            playerBottom > spikesYRef.current &&
+            nextY < spikeBottom;
+
+          if (touchesSpikes) {
+            hitHazard = true;
+          }
+        }
+
+        if (hitHazard || nextY > WORLD_HEIGHT + 40) {
           triggerDeath();
         }
 
-        const touchingGate =
-          playerRight > GATE.x &&
-          nextX < GATE.x + GATE.width &&
-          playerBottom > GATE.y &&
-          nextY < GATE.y + GATE.height;
+        const touchesGate =
+          playerRight > stage.gate.x &&
+          nextX < stage.gate.x + stage.gate.width &&
+          playerBottom > stage.gate.y &&
+          nextY < stage.gate.y + stage.gate.height;
 
-        if (touchingGate && !dead) {
-          clearTimer();
-          setWon(true);
+        if (touchesGate && !dead) {
+          completeStage();
         }
 
         player.x = nextX;
@@ -342,26 +525,42 @@ export default function DiaAgainPage() {
       if (rafRef.current !== null) {
         window.cancelAnimationFrame(rafRef.current);
       }
+      lastTickRef.current = 0;
+      clearReverseTimer();
     };
-  }, [started, dead, won, controlsInverted]);
+  }, [
+    allStagesCleared,
+    clearReverseTimer,
+    completeStage,
+    controlsInverted,
+    dead,
+    stage,
+    stage.gate.height,
+    stage.gate.width,
+    stage.gate.x,
+    stage.gate.y,
+    stageIndex,
+    stageWon,
+    spikeBox.height,
+    spikeBox.landedY,
+    spikeBox.width,
+    spikeBox.x,
+    started,
+    triggerDeath,
+  ]);
 
-  useEffect(() => {
-    return () => {
-      clearTimer();
-    };
-  }, []);
+  const stageProgress = `${stageIndex + 1}/${STAGES.length}`;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-8 sm:px-6">
-      <section className="relative overflow-hidden rounded-2xl border border-red-500/35 bg-zinc-950/95 p-4 shadow-[0_0_40px_rgba(239,68,68,0.12)] sm:p-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <section className="relative overflow-hidden rounded-2xl border border-rose-500/35 bg-zinc-950/95 p-4 shadow-[0_0_42px_rgba(244,63,94,0.14)] sm:p-6">
+        <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-[0.18em] text-red-300 sm:text-3xl">
-              Dia Again Mini Level
+            <h1 className="text-2xl font-black uppercase tracking-[0.18em] text-rose-300 sm:text-3xl">
+              Dia Again: 5 Mini Mərhələ
             </h1>
-            <p className="mt-1 text-xs text-zinc-400 sm:text-sm">
-              WASD və ya ox düymələri ilə hərəkət et. 10 saniyədən sonra sağ-sol idarəsi tərsinə çevriləcək.
-            </p>
+            <p className="mt-1 text-xs text-zinc-400 sm:text-sm">{stage.title}</p>
+            <p className="mt-1 text-xs text-zinc-500 sm:text-sm">{stage.note}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -374,24 +573,23 @@ export default function DiaAgainPage() {
             </button>
             <button
               type="button"
-              onClick={hardReset}
+              onClick={hardResetAll}
               className="rounded-md border border-zinc-400/50 bg-zinc-700/25 px-4 py-2 text-sm font-bold uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-600/35"
             >
-              Reset
+              Reset All
             </button>
           </div>
         </div>
 
-        <div className="mb-3 flex flex-wrap items-center gap-4 text-xs sm:text-sm">
+        <div className="mb-3 flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+          <span className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-zinc-200">Mərhələ: {stageProgress}</span>
           <span className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-zinc-200">
-            Status: {won ? "Qalibiyyət" : dead ? "Öldün" : started ? "Qaçırsan" : "Başlamağa hazır"}
+            Status: {allStagesCleared ? "Hamısı keçildi" : stageWon ? "Mərhələ keçildi" : dead ? "Öldün" : started ? "Oyundasan" : "Hazırsan"}
           </span>
           <span className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-zinc-200">
-            Tərs idarəetmə: {controlsInverted ? "Aktiv" : "Hələ normal"}
+            Tərs idarəetmə: {controlsInverted ? "Aktiv" : "Normal"}
           </span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-zinc-200">
-            Ölüm sayı: {deathCount}
-          </span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-zinc-200">Ölüm sayı: {deathCount}</span>
         </div>
 
         <div
@@ -405,10 +603,10 @@ export default function DiaAgainPage() {
             style={{ top: FLOOR_Y, width: WORLD_WIDTH, height: WORLD_HEIGHT - FLOOR_Y }}
           />
 
-          {PLATFORMS.map((platform) => {
-            const isFake = Boolean(platform.fake);
-            const platformY = isFake ? platform.y + fakePlatformDrop : platform.y;
-            const hidden = isFake && fakePlatformDrop > 6;
+          {stage.platforms.map((platform) => {
+            const isFake = platform.id === stage.fakePlatformId;
+            const y = isFake ? platform.y + fakeDropView : platform.y;
+            const hidden = isFake && fakeDropView > 8;
 
             return (
               <div
@@ -420,7 +618,7 @@ export default function DiaAgainPage() {
                 }`}
                 style={{
                   left: platform.x,
-                  top: platformY,
+                  top: y,
                   width: platform.width,
                   height: platform.height,
                   opacity: hidden ? 0 : 1,
@@ -429,60 +627,105 @@ export default function DiaAgainPage() {
             );
           })}
 
+          {hazardView.map((hazard) => (
+            <div
+              key={hazard.id}
+              className="absolute rounded-sm border border-orange-200/60 bg-orange-400/80 shadow-[0_0_12px_rgba(251,146,60,0.65)]"
+              style={{ left: hazard.x, top: hazard.y, width: hazard.size, height: hazard.size }}
+            />
+          ))}
+
           <div
             className="absolute border border-emerald-300/70 bg-emerald-500/25"
-            style={{ left: GATE.x, top: GATE.y, width: GATE.width, height: GATE.height }}
+            style={{ left: stage.gate.x, top: stage.gate.y, width: stage.gate.width, height: stage.gate.height }}
           >
             <div className="absolute inset-x-0 top-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100">
               Qapı
             </div>
           </div>
 
-          <div
-            className="absolute bg-rose-500/95 shadow-[0_0_18px_rgba(244,63,94,0.75)] transition-all duration-100"
-            style={{
-              left: SPIKES.x,
-              top: spikesY,
-              width: SPIKES.width,
-              height: SPIKES.height,
-              clipPath: "polygon(0 100%,10% 0,20% 100%,30% 0,40% 100%,50% 0,60% 100%,70% 0,80% 100%,90% 0,100% 100%)",
-              opacity: spikesTriggered ? 1 : 0,
-            }}
-          />
+          {stage.trapSpikes && (
+            <div
+              className="absolute bg-rose-500/95 shadow-[0_0_18px_rgba(244,63,94,0.75)] transition-all duration-100"
+              style={{
+                left: spikeBox.x,
+                top: spikesY,
+                width: spikeBox.width,
+                height: spikeBox.height,
+                clipPath:
+                  "polygon(0 100%,10% 0,20% 100%,30% 0,40% 100%,50% 0,60% 100%,70% 0,80% 100%,90% 0,100% 100%)",
+                opacity: spikesTriggered ? 1 : 0,
+              }}
+            />
+          )}
 
           <div
             className="absolute rounded-[4px] border border-amber-200 bg-amber-300 shadow-[0_0_18px_rgba(253,224,71,0.6)]"
             style={{ left: playerView.x, top: playerView.y, width: PLAYER_SIZE, height: PLAYER_SIZE }}
           />
 
-          {!started && (
-            <div className="absolute inset-0 grid place-items-center bg-zinc-950/55">
+          {!started && !dead && !stageWon && (
+            <div className="absolute inset-0 grid place-items-center bg-zinc-950/50">
               <p className="text-center text-lg font-black uppercase tracking-[0.2em] text-zinc-100">
-                Start düyməsini bas və qaç
+                Start bas və {stage.title.toLowerCase()} keç
               </p>
             </div>
           )}
 
-          {won && (
-            <div className="absolute inset-0 grid place-items-center bg-emerald-950/45">
-              <p className="text-center text-3xl font-black uppercase tracking-[0.2em] text-emerald-300">
-                Qalibiyyət!
-              </p>
+          {stageWon && !allStagesCleared && (
+            <div className="absolute inset-0 z-20 grid place-items-center bg-emerald-950/45 p-4">
+              <div className="text-center">
+                <p className="text-center text-3xl font-black uppercase tracking-[0.2em] text-emerald-300">
+                  Mərhələ Keçildi
+                </p>
+                <button
+                  type="button"
+                  onClick={goToNextStage}
+                  className="mt-5 rounded-md border border-emerald-300/70 bg-emerald-600/25 px-5 py-2 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:bg-emerald-600/40"
+                >
+                  Növbəti mini mərhələ
+                </button>
+              </div>
+            </div>
+          )}
+
+          {allStagesCleared && (
+            <div className="absolute inset-0 z-20 grid place-items-center bg-cyan-950/55 p-4">
+              <div className="text-center">
+                <p className="text-3xl font-black uppercase tracking-[0.2em] text-cyan-200">5/5 keçdin</p>
+                <p className="mt-2 text-sm text-cyan-100/85">İndi əsas oyunun növbəti mərhələsinə keçə bilərsən.</p>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/game")}
+                    className="rounded-md border border-cyan-300/70 bg-cyan-500/25 px-5 py-2 text-sm font-bold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/40"
+                  >
+                    Növbəti mərhələyə keç
+                  </button>
+                  <button
+                    type="button"
+                    onClick={hardResetAll}
+                    className="rounded-md border border-zinc-300/55 bg-zinc-700/30 px-5 py-2 text-sm font-bold uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-600/40"
+                  >
+                    Yenidən oyna
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
           {dead && (
-            <div className="absolute inset-0 z-30 grid place-items-center bg-black/70">
+            <div className="absolute inset-0 z-30 grid place-items-center bg-black/70 p-4">
               <div className="text-center">
                 <p className="death-glitch text-3xl font-black uppercase text-red-500 sm:text-5xl">
                   Yenə ölməyi bacardın?
                 </p>
                 <button
                   type="button"
-                  onClick={hardReset}
+                  onClick={restartCurrentStage}
                   className="mt-5 rounded-md border border-red-400/70 bg-red-600/20 px-5 py-2 text-sm font-bold uppercase tracking-[0.14em] text-red-200 transition hover:bg-red-600/35"
                 >
-                  Ən başa qayıt
+                  Bu mərhələni yenidən başlat
                 </button>
               </div>
             </div>
