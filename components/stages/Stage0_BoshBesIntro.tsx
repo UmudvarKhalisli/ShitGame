@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
@@ -188,3 +188,4 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
     </section>
   );
 }
+

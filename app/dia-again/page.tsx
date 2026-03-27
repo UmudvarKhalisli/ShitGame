@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -812,7 +812,7 @@ export default function DiaAgainPage() {
             <button
               type="button"
               onClick={startRun}
-              className="rounded-md border border-emerald-400/60 bg-emerald-500/15 px-4 py-2 text-sm font-bold uppercase tracking-[0.14em] text-emerald-200 transition hover:bg-emerald-500/28"
+              className="rounded-md border border-violet-400/60 bg-violet-500/15 px-4 py-2 text-sm font-bold uppercase tracking-[0.14em] text-violet-200 transition hover:bg-violet-500/28"
             >
               Start
             </button>
@@ -884,12 +884,12 @@ export default function DiaAgainPage() {
             type="button"
             tabIndex={-1}
             aria-hidden
-            className="absolute border border-emerald-300/80 bg-emerald-500/25"
+            className="absolute border border-violet-300/80 bg-violet-500/25"
             animate={{ x: gateView.x, y: gateView.y, scale: gateScale }}
             transition={{ type: "spring", stiffness: 250, damping: 20, mass: 0.65 }}
             style={{ left: 0, top: 0, width: gateView.width, height: gateView.height, transformOrigin: "center center" }}
           >
-            <div className="absolute inset-x-0 top-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100">
+            <div className="absolute inset-x-0 top-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-violet-100">
               {gateSwapped ? "SONA CAT?" : "SONA CAT"}
             </div>
           </motion.button>
@@ -923,15 +923,15 @@ export default function DiaAgainPage() {
           )}
 
           {stageWon && !allStagesCleared && (
-            <div className="absolute inset-0 z-20 grid place-items-center bg-emerald-950/45 p-4">
+            <div className="absolute inset-0 z-20 grid place-items-center bg-violet-950/45 p-4">
               <div className="text-center">
-                <p className="text-center text-3xl font-black uppercase tracking-[0.2em] text-emerald-300">
+                <p className="text-center text-3xl font-black uppercase tracking-[0.2em] text-violet-300">
                   Mərhələ Keçildi
                 </p>
                 <button
                   type="button"
                   onClick={goToNextStage}
-                  className="mt-5 rounded-md border border-emerald-300/70 bg-emerald-600/25 px-5 py-2 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:bg-emerald-600/40"
+                  className="mt-5 rounded-md border border-violet-300/70 bg-violet-600/25 px-5 py-2 text-sm font-bold uppercase tracking-[0.14em] text-violet-100 transition hover:bg-violet-600/40"
                 >
                   Növbəti mini mərhələ
                 </button>
@@ -985,3 +985,5 @@ export default function DiaAgainPage() {
     </main>
   );
 }
+
+

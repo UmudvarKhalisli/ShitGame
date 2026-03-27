@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -346,7 +346,7 @@ function StageRouter() {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-emerald-300">Admin test rejimi aktivdir</p>
+                <p className="text-sm font-semibold text-violet-300">Admin test rejimi aktivdir</p>
                 <button
                   type="button"
                   onClick={handleAdminLogout}
@@ -372,7 +372,7 @@ function StageRouter() {
               <button
                 type="button"
                 onClick={handleAdminUnlockCurrent}
-                className="w-full rounded-md bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-500"
+                className="w-full rounded-md bg-violet-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-violet-500"
               >
                 Cari mərhələni tamamlanmış et
               </button>
@@ -389,7 +389,7 @@ function StageRouter() {
           <p className="mb-2 text-xs font-semibold text-zinc-100">🍺 Ayıqlıq:</p>
           <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
             <div
-              className="h-full bg-emerald-500 transition-[width] duration-300"
+              className="h-full bg-violet-500 transition-[width] duration-300"
               style={{ width: `${gameState.sobriety}%` }}
             />
           </div>
@@ -541,3 +541,5 @@ export default function HomePage() {
     </ChaosControllerProvider>
   );
 }
+
+

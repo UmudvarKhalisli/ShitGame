@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -75,7 +75,7 @@ const OPTION_COLOR_CLASSES = [
   "border-cyan-500/70 bg-cyan-500/10",
   "border-fuchsia-500/70 bg-fuchsia-500/10",
   "border-amber-500/70 bg-amber-500/10",
-  "border-emerald-500/70 bg-emerald-500/10",
+  "border-violet-500/70 bg-violet-500/10",
 ] as const;
 
 function shuffle<T>(items: T[]) {
@@ -398,3 +398,5 @@ export default function Stage6_Quiz({
     </section>
   );
 }
+
+

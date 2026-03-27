@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type ChangeEvent, useMemo, useRef, useState } from "react";
 
@@ -104,7 +104,7 @@ export default function Stage3_Terms({
       {flashColor && (
         <div
           className={`pointer-events-none fixed inset-0 z-40 ${
-            flashColor === "red" ? "bg-red-500/45" : "bg-emerald-500/35"
+            flashColor === "red" ? "bg-red-500/45" : "bg-violet-500/35"
           }`}
         />
       )}
@@ -145,7 +145,7 @@ export default function Stage3_Terms({
         type="button"
         onClick={handleAccept}
         disabled={isLoading}
-        className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl bg-violet-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
       >
         Qəbul Et
       </button>
@@ -153,7 +153,7 @@ export default function Stage3_Terms({
       <div className="space-y-2">
         <div className="h-4 w-full overflow-hidden rounded-full bg-zinc-800">
           <div
-            className="h-full bg-emerald-500 transition-[width] duration-100"
+            className="h-full bg-violet-500 transition-[width] duration-100"
             style={{ width: `${progress || (isScrolledToBottom ? 100 : 0)}%` }}
           />
         </div>
@@ -166,3 +166,5 @@ export default function Stage3_Terms({
     </section>
   );
 }
+
+

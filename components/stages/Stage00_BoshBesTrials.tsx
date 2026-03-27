@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -92,7 +92,7 @@ export default function Stage00_BoshBesTrials({
   }, [step]);
 
   return (
-    <section className="relative w-full max-w-4xl overflow-hidden rounded-xl border border-[#2a5a2a] bg-[#060c06]/95 p-8 text-[#00f010] shadow-[0_0_35px_rgba(0,240,16,0.18)]">
+    <section className="relative w-full max-w-4xl overflow-hidden rounded-xl border border-[#2a5a2a] bg-[#060c06]/95 p-8 text-[#F1F0FF] shadow-[0_0_35px_rgba(124,58,237,0.18)]">
       <h2 className="text-center text-4xl font-black tracking-[0.15em]">BOŞ-BEŞ MİSSİYASI</h2>
 
       {step === "illusion" && (
@@ -142,7 +142,7 @@ export default function Stage00_BoshBesTrials({
                 }
               }}
               placeholder="Yaz..."
-              className="w-full border border-[#2e5d2e] bg-[#061006] px-3 py-2 text-[#00f010] outline-none"
+              className="w-full border border-[#2e5d2e] bg-[#061006] px-3 py-2 text-[#F1F0FF] outline-none"
             />
 
             <p className="mt-3 text-sm text-[#9fce9f]">Yazdıqların boşdur, eynilə həyatın kimi.</p>
@@ -217,3 +217,5 @@ export default function Stage00_BoshBesTrials({
     </section>
   );
 }
+
+

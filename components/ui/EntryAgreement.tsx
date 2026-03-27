@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
@@ -174,3 +174,4 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
     </AnimatePresence>
   );
 }
+

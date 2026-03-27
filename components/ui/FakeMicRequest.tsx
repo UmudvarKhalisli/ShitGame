@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -182,7 +182,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                   {waveBars.map((bar) => (
                     <motion.div
                       key={bar}
-                      className="w-2 rounded bg-emerald-400/80"
+                      className="w-2 rounded bg-violet-400/80"
                       animate={{ scaleY: [0.4, 1.2, 0.45] }}
                       transition={{
                         duration: 0.8,
@@ -211,7 +211,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                   <div className="h-3 overflow-hidden rounded-full bg-zinc-800">
                     <div
                       className={`h-full transition-[width] duration-75 ${
-                        volume >= 78 ? "bg-emerald-500" : "bg-amber-400"
+                        volume >= 78 ? "bg-violet-500" : "bg-amber-400"
                       }`}
                       style={{ width: `${volume}%` }}
                     />
@@ -227,7 +227,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                   <p className="text-xs text-zinc-400">Stabillik göstəricisi: {confidence}% (100% olmalıdır)</p>
                 </div>
 
-                {detectedText && <p className="text-sm font-semibold text-emerald-400">{detectedText}</p>}
+                {detectedText && <p className="text-sm font-semibold text-violet-400">{detectedText}</p>}
               </>
             )}
           </div>
@@ -256,3 +256,5 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
     </div>
   );
 }
+
+

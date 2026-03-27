@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -98,7 +98,7 @@ export default function TheRoaster() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="rounded-md border border-zinc-600 bg-zinc-950/95 px-4 py-3 text-center text-sm text-emerald-300 shadow-[0_0_14px_rgba(34,197,94,0.3)]"
+            className="rounded-md border border-zinc-600 bg-zinc-950/95 px-4 py-3 text-center text-sm text-violet-300 shadow-[0_0_14px_rgba(34,197,94,0.3)]"
             style={{ fontFamily: "'Share Tech Mono', monospace" }}
           >
             {typedText}
@@ -108,3 +108,5 @@ export default function TheRoaster() {
     </div>
   );
 }
+
+

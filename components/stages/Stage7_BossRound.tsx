@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -531,7 +531,7 @@ export default function Stage7_BossRound({
             const verdict = feedback[index];
             const stateClass =
               verdict === "correct"
-                ? "border-emerald-500 bg-emerald-500/20 text-emerald-300"
+                ? "border-violet-500 bg-violet-500/20 text-violet-300"
                 : verdict === "misplaced"
                   ? "border-amber-400 bg-amber-400/20 text-amber-300"
                   : verdict === "wrong"
@@ -595,7 +595,7 @@ export default function Stage7_BossRound({
                 initial={{ scale: 0.7, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.45 }}
-                className="text-3xl font-black text-emerald-300 sm:text-5xl"
+                className="text-3xl font-black text-violet-300 sm:text-5xl"
               >
                 SƏN QAZANDIN... Bu dəfə əsl həqiqətən.
               </motion.h2>
@@ -606,3 +606,5 @@ export default function Stage7_BossRound({
     </section>
   );
 }
+
+

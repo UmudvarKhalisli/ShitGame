@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -301,3 +301,4 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
     </div>
   );
 }
+

@@ -2,19 +2,31 @@
 
 :root {
   color-scheme: dark;
-  --bg-primary: #0a0a0a;
+  --bg-primary: #03030a;
+  --accent-primary: #7c3aed;
+  --accent-secondary: #a855f7;
   --accent-purple: #7c3aed;
   --accent-cyan: #06b6d4;
   --accent-red: #ef4444;
-  --text-primary: #00f010;
+  --text-primary: #f1f0ff;
   --text-muted: #6b7280;
 }
 
 body {
   min-height: 100vh;
-  background: #0a0a0a;
-  color: #00f010;
+  background: #03030a;
+  color: #f1f0ff;
   position: relative;
+}
+
+h1,
+h2,
+h3,
+h4,
+.glitch-title,
+.title {
+  font-family: "Exo 2", sans-serif;
+  font-weight: 800;
 }
 
 body::after {
@@ -28,8 +40,8 @@ body::after {
       to bottom,
       rgba(0, 0, 0, 0) 0px,
       rgba(0, 0, 0, 0) 2px,
-      rgba(0, 240, 16, 0.09) 3px,
-      rgba(0, 240, 16, 0.09) 4px
+      rgba(124, 58, 237, 0.09) 3px,
+      rgba(124, 58, 237, 0.09) 4px
     ),
     linear-gradient(rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
   mix-blend-mode: screen;
@@ -39,14 +51,14 @@ body::after {
 button {
   border-radius: 0 !important;
   box-shadow:
-    0 0 10px rgba(0, 240, 16, 0.45),
-    inset 0 0 4px rgba(0, 240, 16, 0.22);
+    0 0 10px rgba(124, 58, 237, 0.45),
+    inset 0 0 4px rgba(6, 182, 212, 0.22);
 }
 
 button:hover {
   box-shadow:
-    0 0 16px rgba(0, 240, 16, 0.7),
-    inset 0 0 6px rgba(0, 240, 16, 0.35);
+    0 0 16px rgba(124, 58, 237, 0.7),
+    inset 0 0 6px rgba(6, 182, 212, 0.35);
 }
 
 html,
@@ -89,7 +101,7 @@ body * {
 .chaos-card {
   position: relative;
   background: #080818;
-  border-color: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.3);
   transition:
     border-color 0.24s ease,
     box-shadow 0.24s ease,

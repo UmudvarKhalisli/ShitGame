@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
@@ -268,3 +268,4 @@ export default function Stage1_Welcome({
     </section>
   );
 }
+

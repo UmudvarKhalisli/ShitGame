@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -43,7 +43,7 @@ export default function LandingPage() {
         <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-6">
           <span
             className="text-2xl text-[var(--accent-purple)]"
-            style={{ fontFamily: "'Bebas Neue', sans-serif", textShadow: "0 0 12px rgba(124,58,237,0.4)" }}
+            style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 800, textShadow: "0 0 12px rgba(124,58,237,0.4)" }}
           >
             ƏSƏB BÖLMƏSİ
           </span>
@@ -75,7 +75,7 @@ export default function LandingPage() {
             animate="visible"
             transition={{ delay: 0.15, duration: 0.45, ease: "easeOut" }}
             className="leading-none"
-            style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "96px", color: "#F1F0FF" }}
+            style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 800, fontSize: "96px", color: "#F1F0FF" }}
           >
             ƏSƏB
           </motion.h1>
@@ -86,7 +86,7 @@ export default function LandingPage() {
             animate="visible"
             transition={{ delay: 0.3, duration: 0.45, ease: "easeOut" }}
             className="glitch-title -mt-2 leading-none"
-            style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "96px", color: "#7C3AED" }}
+            style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 800, fontSize: "96px", color: "#7C3AED" }}
           >
             BÖLMƏSİ
           </motion.h2>
@@ -120,7 +120,7 @@ export default function LandingPage() {
               >
                 <div
                   className="text-[36px] leading-none text-[var(--accent-cyan)]"
-                  style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                  style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 800 }}
                 >
                   {stat.value}
                 </div>
@@ -147,7 +147,8 @@ export default function LandingPage() {
                 onClick={() => router.push("/game")}
                 className="cta-pulse rounded-[6px] border-[1.5px] border-[var(--accent-purple)] bg-transparent px-14 py-4 text-[18px] tracking-[0.35em] text-[#C084FC] transition-all duration-300 hover:bg-[rgba(124,58,237,0.15)] hover:tracking-[0.45em] hover:shadow-[0_0_28px_rgba(124,58,237,0.58)]"
                 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "'Exo 2', sans-serif",
+                  fontWeight: 800,
                   boxShadow: "0 0 20px rgba(124,58,237,0.4)",
                 }}
               >
@@ -167,7 +168,7 @@ export default function LandingPage() {
           <div className="mb-10 flex flex-col items-center">
             <h3
               className="text-[42px] leading-none text-[var(--text-primary)]"
-              style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+              style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 800 }}
             >
               Sizi Nə Gözləyir?
             </h3>
@@ -179,8 +180,8 @@ export default function LandingPage() {
               <article key={feature.title} className="chaos-card rounded-xl border p-6">
                 <div className="text-[32px] leading-none">{feature.icon}</div>
                 <h4
-                  className="mt-4 text-[20px] tracking-[0.15em] text-[var(--text-primary)]"
-                  style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                  className="mt-4 text-[20px] tracking-[0.15em] text-[#A855F7]"
+                  style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 800 }}
                 >
                   {feature.title}
                 </h4>
@@ -201,3 +202,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

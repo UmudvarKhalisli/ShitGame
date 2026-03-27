@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion, useAnimationFrame } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -620,7 +620,7 @@ function InputPanel({
             feedback === "wrong"
               ? "border-rose-500 bg-rose-950/20"
               : feedback === "correct"
-                ? "border-emerald-500 bg-emerald-950/20"
+                ? "border-violet-500 bg-violet-950/20"
                 : "border-zinc-600 bg-zinc-950"
           }`}
           placeholder="Sözü yaz..."
@@ -996,10 +996,12 @@ export default function Stage_DarkSearch({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="pointer-events-none absolute inset-0 z-[124] bg-emerald-500/12"
+            className="pointer-events-none absolute inset-0 z-[124] bg-violet-500/12"
           />
         )}
       </AnimatePresence>
     </section>
   );
 }
+
+

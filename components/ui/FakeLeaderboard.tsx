@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import confetti from "canvas-confetti";
 import { jsPDF } from "jspdf";
@@ -27,7 +27,7 @@ const FALLBACK_ROWS: Omit<LeaderboardEntry, "rank" | "highlight">[] = [
 
 const SLANDER_LINE = "Mən boş adamam, vaxtımı bura xərcləyirəm";
 const TERMINAL_BTN =
-  "rounded-md border border-emerald-400/70 bg-emerald-700/20 px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] text-emerald-200 transition hover:border-red-400/70 hover:bg-red-700/20 hover:text-red-200";
+  "rounded-md border border-violet-400/70 bg-violet-700/20 px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] text-violet-200 transition hover:border-red-400/70 hover:bg-red-700/20 hover:text-red-200";
 const NAME_POOL = [
   "Aysel Q.",
   "Ramin Dev",
@@ -416,10 +416,10 @@ export default function FakeLeaderboard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative mx-auto w-full max-w-5xl space-y-5 rounded-2xl border border-zinc-800 bg-[#060906]/95 p-6 shadow-[0_0_40px_rgba(0,240,16,0.14)]"
+      className="relative mx-auto w-full max-w-5xl space-y-5 rounded-2xl border border-zinc-800 bg-[#060906]/95 p-6 shadow-[0_0_40px_rgba(124,58,237,0.14)]"
     >
       <div className="space-y-2 text-center">
-        <h2 className="glitch-title text-5xl font-black text-[#00f010]">LEADERBOARD // FINAL LOG</h2>
+        <h2 className="glitch-title text-5xl font-black text-[#F1F0FF]">LEADERBOARD // FINAL LOG</h2>
         <p className="text-sm text-zinc-300">
           {safeName}, sistem səni unutmadı. Sadəcə təsadüfi sıraya saldı.
         </p>
@@ -427,13 +427,13 @@ export default function FakeLeaderboard({
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-zinc-700 bg-zinc-900/70 p-3 text-sm text-zinc-200">
-          Cəhd: <span className="font-bold text-[#00f010]">{displayAttempts}</span>
+          Cəhd: <span className="font-bold text-[#F1F0FF]">{displayAttempts}</span>
         </div>
         <div className="rounded-lg border border-zinc-700 bg-zinc-900/70 p-3 text-sm text-zinc-200">
-          Sinir Hüceyrəsi: <span className="font-bold text-[#00f010]">{displayCells}</span>
+          Sinir Hüceyrəsi: <span className="font-bold text-[#F1F0FF]">{displayCells}</span>
         </div>
         <div className="rounded-lg border border-zinc-700 bg-zinc-900/70 p-3 text-sm text-zinc-200">
-          IQ itkisi: <span className="font-bold text-[#00f010]">{displayIqLoss}</span>
+          IQ itkisi: <span className="font-bold text-[#F1F0FF]">{displayIqLoss}</span>
         </div>
       </div>
 
@@ -453,7 +453,7 @@ export default function FakeLeaderboard({
         <div className="rounded-lg border border-zinc-700 bg-zinc-900/80 p-3">
           <p className="mb-2 text-xs text-zinc-300">Diplom hazırlanır... {certificateProgress}%</p>
           <div className="h-3 w-full overflow-hidden rounded bg-zinc-800">
-            <div className="h-full bg-emerald-500 transition-all duration-200" style={{ width: `${certificateProgress}%` }} />
+            <div className="h-full bg-violet-500 transition-all duration-200" style={{ width: `${certificateProgress}%` }} />
           </div>
         </div>
       )}
@@ -479,7 +479,7 @@ export default function FakeLeaderboard({
             {rows.map((entry) => (
               <tr
                 key={entry.id}
-                className={entry.highlight ? "bg-emerald-500/15 text-emerald-100" : "bg-zinc-900 text-zinc-200"}
+                className={entry.highlight ? "bg-violet-500/15 text-violet-100" : "bg-zinc-900 text-zinc-200"}
               >
                 <td className="px-3 py-2 font-semibold">{entry.rank}</td>
                 <td className="px-3 py-2">{entry.playerName}</td>
@@ -522,9 +522,9 @@ export default function FakeLeaderboard({
 
       {callPhase === "incoming" && (
         <div className="fixed inset-0 z-[175] flex items-center justify-center bg-black p-4">
-          <div className="w-full max-w-lg space-y-4 rounded-xl border border-emerald-400/60 bg-zinc-950 p-5 text-center">
+          <div className="w-full max-w-lg space-y-4 rounded-xl border border-violet-400/60 bg-zinc-950 p-5 text-center">
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-400">Incoming Video Call</p>
-            <h3 className="text-2xl font-black text-emerald-200">💩 Boss</h3>
+            <h3 className="text-2xl font-black text-violet-200">💩 Boss</h3>
             <div className="flex justify-center gap-3">
               <button type="button" className={TERMINAL_BTN} onClick={triggerFakeCallResult}>
                 Qəbul Et
@@ -549,14 +549,14 @@ export default function FakeLeaderboard({
 
       {callPhase === "goodbye" && (
         <div className="fixed inset-0 z-[181] flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(16,72,45,0.35),rgba(0,0,0,0.96)_55%)] p-4">
-          <div className="w-full max-w-2xl rounded-xl border border-emerald-500/40 bg-zinc-950/95 p-6 text-center shadow-[0_0_45px_rgba(16,185,129,0.2)]">
-            <h3 className="text-3xl font-black text-emerald-200">Oyunun Sonu</h3>
+          <div className="w-full max-w-2xl rounded-xl border border-violet-500/40 bg-zinc-950/95 p-6 text-center shadow-[0_0_45px_rgba(16,185,129,0.2)]">
+            <h3 className="text-3xl font-black text-violet-200">Oyunun Sonu</h3>
             <p className="mt-3 text-sm text-zinc-300">
               Sən bu dəfə sistemə uduzmadın, sadəcə onu bezdirdin. Final log saxlanıldı.
             </p>
             <button
               type="button"
-              className="mt-5 rounded-md border border-emerald-400/70 bg-emerald-700/20 px-5 py-2 text-sm font-bold uppercase tracking-[0.12em] text-emerald-200 transition hover:bg-emerald-700/30"
+              className="mt-5 rounded-md border border-violet-400/70 bg-violet-700/20 px-5 py-2 text-sm font-bold uppercase tracking-[0.12em] text-violet-200 transition hover:bg-violet-700/30"
               onClick={() => setCallPhase("idle")}
             >
               Siyahıya Qayıt
@@ -571,3 +571,5 @@ export default function FakeLeaderboard({
     </motion.div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -320,7 +320,7 @@ export default function Stage9_ExitDoorChaos({
           <button
             type="button"
             onClick={start}
-            className="rounded-md border border-emerald-400/60 bg-emerald-600/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-200"
+            className="rounded-md border border-violet-400/60 bg-violet-600/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-200"
           >
             Start
           </button>
@@ -355,3 +355,5 @@ export default function Stage9_ExitDoorChaos({
     </section>
   );
 }
+
+

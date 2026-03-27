@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -370,7 +370,7 @@ export default function Stage5_Memory({
       {flashOverlay && (
         <div
           className={`pointer-events-none fixed inset-0 z-40 ${
-            flashOverlay === "red" ? "bg-red-500/35" : "bg-emerald-500/30"
+            flashOverlay === "red" ? "bg-red-500/35" : "bg-violet-500/30"
           }`}
         />
       )}
@@ -447,3 +447,5 @@ export default function Stage5_Memory({
     </section>
   );
 }
+
+

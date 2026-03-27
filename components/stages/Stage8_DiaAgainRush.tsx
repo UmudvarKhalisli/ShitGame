@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -604,7 +604,7 @@ export default function Stage8_DiaAgainRush({
           <button
             type="button"
             onClick={startRun}
-            className="rounded-md border border-emerald-400/60 bg-emerald-600/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-200"
+            className="rounded-md border border-violet-400/60 bg-violet-600/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-200"
           >
             Start
           </button>
@@ -655,7 +655,7 @@ export default function Stage8_DiaAgainRush({
         ))}
 
         <div
-          className="absolute border border-emerald-300/70 bg-emerald-500/30"
+          className="absolute border border-violet-300/70 bg-violet-500/30"
           style={{ left: doorView.x, top: doorView.y, width: doorView.w, height: doorView.h }}
         >
         </div>
@@ -684,3 +684,5 @@ export default function Stage8_DiaAgainRush({
     </section>
   );
 }
+
+

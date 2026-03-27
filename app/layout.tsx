@@ -13,11 +13,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Noto+Sans:wght@300;400;500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700;800&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="bg-zinc-950 text-zinc-100" style={{ fontFamily: "'Noto Sans', sans-serif" }}>
+      <body className="bg-zinc-950 text-zinc-100" style={{ fontFamily: "Inter, sans-serif" }}>
         {children}
       </body>
     </html>

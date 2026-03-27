@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useState } from "react";
@@ -172,7 +172,7 @@ export default function Stage2_Name({
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-emerald-600 px-4 py-4 text-lg font-semibold text-white transition hover:bg-emerald-500"
+          className="w-full rounded-xl bg-violet-600 px-4 py-4 text-lg font-semibold text-white transition hover:bg-violet-500"
         >
           Davam Et →
         </button>
@@ -180,3 +180,5 @@ export default function Stage2_Name({
     </section>
   );
 }
+
+

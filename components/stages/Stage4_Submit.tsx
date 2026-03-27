@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -180,7 +180,7 @@ export default function Stage4_Submit({
           <button
             type="button"
             onClick={handleUltimateSubmit}
-            className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-emerald-500"
+            className="rounded-xl bg-violet-600 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-violet-500"
           >
             Hər şeyi Sil və Göndər
           </button>
@@ -191,3 +191,5 @@ export default function Stage4_Submit({
     </>
   );
 }
+
+
