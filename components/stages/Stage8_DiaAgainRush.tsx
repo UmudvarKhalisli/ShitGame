@@ -8,9 +8,10 @@ const FLOOR_Y = WORLD_HEIGHT - 24;
 const PLAYER_SIZE = 24;
 const START_X = 24;
 const START_Y = FLOOR_Y - PLAYER_SIZE;
+const PLATFORM_SNAP_TOLERANCE = 2.4;
 
 const PLATFORMS = [
-  { x: 112, y: 252, w: 130, h: 12 },
+  { x: 104, y: 252, w: 154, h: 12 },
   { x: 286, y: 224, w: 120, h: 12 },
   { x: 454, y: 192, w: 106, h: 12 },
   { x: 600, y: 166, w: 86, h: 12 },
@@ -119,7 +120,7 @@ export default function Stage8_DiaAgainRush({
       if (started && !won && !dead) {
         const player = playerRef.current;
         const baseSpeed = phase === "heavy" ? 4 : 4.8;
-        const jump = phase === "heavy" ? -8.8 : -16.4;
+        const jump = phase === "heavy" ? -9.5 : -16.4;
         const gravity = phase === "heavy" ? 0.9 : 0.62;
 
         const xDir = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
@@ -146,8 +147,12 @@ export default function Stage8_DiaAgainRush({
           const nextBottom = nextY + PLAYER_SIZE;
           const fallingOnto = player.vy >= 0 && prevBottom <= platform.y && nextBottom >= platform.y;
           const overlapX = nextX + PLAYER_SIZE > platform.x && nextX < platform.x + platform.w;
+          const standingOnTop =
+            player.vy >= 0 &&
+            overlapX &&
+            Math.abs(prevBottom - platform.y) <= PLATFORM_SNAP_TOLERANCE;
 
-          if (fallingOnto && overlapX) {
+          if ((fallingOnto && overlapX) || standingOnTop) {
             nextY = platform.y - PLAYER_SIZE;
             player.vy = 0;
             nextOnGround = true;
