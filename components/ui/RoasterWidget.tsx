@@ -23,17 +23,19 @@ const mistakeRoasts = [
   "Siçanı sındırdın, yoxsa beynini?",
 ];
 
-const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, string> = {
-  1: "Düymə qaçır, sən də qaçırsan 🏃",
-  2: "Adını da unudubsan görəsən • siçan itə bilər ;) (bug deyil)",
-  3: "99%... 99%... hələ 99%... tanış gəlir?",
-  4: "Popup bağlamaq istəyirsən? Çox şirin arzudur",
-  5: "Qaranlıq oyunu başladı. İşıq var, amma etibar yoxdur",
-  6: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
-  7: "Məntiq var, amma beynin artıq ona inanmır",
-  8: "Boss fight-a çatdın. İndi beyin səni test edir",
-  9: "Yeni level gəldi, amma barmaqların hələ köhnə rejimdədir",
-  10: "SONA ÇAT qapısı sənə çatdırmaz. Sən onu aldatmalısan",
+const stageRoasts: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12, string> = {
+  1: "Boş-Beşə girdin, vaxt da sənə güldü ⏳",
+  2: "5 düymə gördün, birini də görmədin",
+  3: "Düymə qaçır, sən də qaçırsan 🏃",
+  4: "Adını da unudubsan görəsən • siçan itə bilər ;) (bug deyil)",
+  5: "99%... 99%... hələ 99%... tanış gəlir?",
+  6: "Popup bağlamaq istəyirsən? Çox şirin arzudur",
+  7: "Qaranlıq oyunu başladı. İşıq var, amma etibar yoxdur",
+  8: "Yaddaş oyunu başladı: rəngə yox, panikaya baxırsan",
+  9: "Məntiq var, amma beynin artıq ona inanmır",
+  10: "Boss fight-a çatdın. İndi beyin səni test edir",
+  11: "Yeni level gəldi, amma barmaqların hələ köhnə rejimdədir",
+  12: "SONA ÇAT qapısı sənə çatdırmaz. Sən onu aldatmalısan",
 };
 
 const NORMAL_ROAST_COOLDOWN_MS = 8000;

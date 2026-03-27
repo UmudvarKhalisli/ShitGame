@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { chaosController } from "@/hooks/chaosController";
 
 export interface GameState {
-  currentStage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | "complete";
+  currentStage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | "complete";
   playerName: string;
   attempts: number;
   chaosLevel: number;
@@ -138,9 +138,13 @@ export function ChaosProvider({ children }: { children: React.ReactNode }) {
                             ? 9
                             : prev.currentStage === 9
                               ? 10
-                              : "complete";
+                            : prev.currentStage === 10
+                              ? 11
+                              : prev.currentStage === 11
+                                ? 12
+                                : "complete";
 
-          const startsDrunkMode = prev.currentStage === 2 && nextStage === 3;
+          const startsDrunkMode = prev.currentStage === 4 && nextStage === 5;
           const nextDrunkMode = prev.isDrunkBrowserActive || startsDrunkMode;
           const nextSobriety = nextDrunkMode
             ? Math.min(100, (startsDrunkMode ? 15 : prev.sobriety) + 10)
@@ -151,7 +155,7 @@ export function ChaosProvider({ children }: { children: React.ReactNode }) {
             currentStage: nextStage,
             chaosLevel: nextStage === "complete" ? prev.chaosLevel : Number(nextStage),
             isBSODActive:
-              prev.currentStage === 2 && nextStage === 3
+              prev.currentStage === 4 && nextStage === 5
                 ? Math.random() < 0.25 || prev.isBSODActive
                 : prev.isBSODActive,
             isSocialThreatActive:
@@ -159,7 +163,7 @@ export function ChaosProvider({ children }: { children: React.ReactNode }) {
             isDrunkBrowserActive: nextDrunkMode,
             sobriety: nextSobriety,
             isMicRequestCompleted:
-              nextStage === 2 ? false : prev.isMicRequestCompleted,
+              nextStage === 4 ? false : prev.isMicRequestCompleted,
           };
         }),
       acceptEntry: () =>

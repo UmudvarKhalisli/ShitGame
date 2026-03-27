@@ -2,6 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 
+import Stage00_BoshBesTrials from "@/components/stages/Stage00_BoshBesTrials";
+import Stage0_BoshBesIntro from "@/components/stages/Stage0_BoshBesIntro";
 import Stage1_Welcome from "@/components/stages/Stage1_Welcome";
 import Stage2_Name from "@/components/stages/Stage2_Name";
 import Stage3_Terms from "@/components/stages/Stage3_Terms";
@@ -46,46 +48,54 @@ function StageRouter() {
   const [currentStageAttempts, setCurrentStageAttempts] = useState(0);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const rapidClickRef = useRef({ count: 0, lastClickAt: 0 });
-  const TOTAL_STAGES = 10;
+  const TOTAL_STAGES = 12;
 
-  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, { soft: string; hard: string }> = {
+  const stageHintMap: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12, { soft: string; hard: string }> = {
     1: {
+      soft: "Düymə qaçırsa, məkanın mərkəzini nəzarətdə saxla.",
+      hard: "Kursoru birbaşa düyməyə yox, qaçacağı istiqamətə sür.",
+    },
+    2: {
+      soft: "5 düyməyə aldanma, küncləri də yoxla.",
+      hard: "A: gizli düymə, B: yazı içəridə qalmır, C: timer 1-dən sonra da uzanır.",
+    },
+    3: {
       soft: "Düyməyə yox, hərəkət ritminə fikir ver. Eyni qayda ilə həmişə qaçmır.",
       hard: "Düymə qaçanda bir tərəfi sıxışdır və kənara qaçış yolunu bağla.",
     },
-    2: {
+    4: {
       soft: "Bəzən ən sadə cavab ən gec qəbul olunur. Tələsmə, ardıcıl yoxla.",
       hard: "Adı bir dəfə yox, tam eyni şəkildə yenidən daxil et; boşluq və böyük-kiçik hərf fərqinə bax.",
     },
-    3: {
+    5: {
       soft: "Burada məqsəd razılaşmaq deyil, düzgün anda səbir göstərməkdir.",
       hard: "Şərtləri sonuna qədər sürüşdür, sonra checkbox və təsdiqi ardıcıllıqla et.",
     },
-    4: {
+    6: {
       soft: "Popup-lara qarşı güc yox, ardıcıllıq işləyir.",
       hard: "Əvvəl diqqəti yayındıran pəncərələri bağla, əsas submit düyməsinə ən sonda qayıt.",
     },
-    5: {
+    7: {
       soft: "Qaranlıqda hərfləri ovla. Söz görünmür, hərf görünür.",
       hard: "Fənəri hərflərə yaxın tut, əvvəlcə hərfləri topla, sonra sözü yığ.",
     },
-    6: {
+    8: {
       soft: "Rənglər aldadır. Mərkəz nöqtə düymənin kimliyidir.",
       hard: "Yalnız düymə indeksini yadda saxla (yerini/rəngini yox). 3→4→5 ardıcıllığına fokuslan.",
     },
-    7: {
+    9: {
       soft: "Sual məzmununa inan, vizuala yox. Düz cavab var.",
       hard: "Q2-də mövqeyə yox, dəyərə bax. Q5-də ən böyük və sol-mərkəzdə olanı seç.",
     },
-    8: {
+    10: {
       soft: "Qaydanı gör, sonra klik et. Hər raund ayrı oyun kimidir.",
       hard: "R1 normal, R2 tərsinə, R3 təkrarlananlar, R4 ilk+son, R5 istənilən 3 simvol.",
     },
-    9: {
+    11: {
       soft: "Bu raundda jump fizikası dəyişir. Ritmi izləməyə çalış.",
       hard: "İlk hissədə aşağı jump, sonra hiper jump+tərs idarəetmə gəlir. Hərəkəti əvvəlcədən planla.",
     },
-    10: {
+    12: {
       soft: "Qapı səni aldadacaq. Tam üstünə qaçma, bucaqla yaxınlaş.",
       hard: "Qapını küncə sıxışdıranda yox olub əks tərəfdə çıxır. Teleport cooldown anını tut.",
     },
@@ -155,7 +165,7 @@ function StageRouter() {
   };
 
   const handleStageComplete = () => {
-    if (gameState.currentStage === 3) {
+    if (gameState.currentStage === 1 || gameState.currentStage === 2 || gameState.currentStage === 5) {
       setGateMessage("");
       setIsStageReadyToAdvance(false);
       advanceStage();
@@ -241,7 +251,7 @@ function StageRouter() {
     setIsAdmin(false);
   };
 
-  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | "complete") => {
+  const handleAdminSetStage = (stage: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | "complete") => {
     acceptEntry();
     completeMicRequest();
     setStage(stage);
@@ -263,26 +273,39 @@ function StageRouter() {
   if (gameState.currentStage === "complete") {
     stageNode = <FakeLeaderboard playerName={gameState.playerName} attempts={gameState.attempts} />;
   } else if (gameState.currentStage === 1) {
-    stageNode = <Stage1_Welcome onFail={handleStageFail} onComplete={handleStageComplete} />;
+    stageNode = <Stage0_BoshBesIntro onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 2) {
+    stageNode = (
+      <Stage00_BoshBesTrials
+        onComplete={handleStageComplete}
+        onFailToStart={() => {
+          handleStageFail();
+          setStage(1);
+          setGateMessage("Saxta düymə seçildi. Yenidən başlanğıca qayıtdın.");
+        }}
+      />
+    );
+  } else if (gameState.currentStage === 3) {
+    stageNode = <Stage1_Welcome onFail={handleStageFail} onComplete={handleStageComplete} />;
+  } else if (gameState.currentStage === 4) {
     stageNode = gameState.isMicRequestCompleted ? (
       <Stage2_Name onFail={handleStageFail} onComplete={handleStageComplete} />
     ) : (
       <FakeMicRequest onComplete={completeMicRequest} />
     );
-  } else if (gameState.currentStage === 3) {
-    stageNode = <Stage3_Terms onFail={handleStageFail} onComplete={handleStageComplete} />;
-  } else if (gameState.currentStage === 4) {
-    stageNode = <Stage4_Submit onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 5) {
-    stageNode = <Stage_DarkSearch onFail={handleStageFail} onComplete={advanceStage} />;
+    stageNode = <Stage3_Terms onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 6) {
-    stageNode = <Stage5_Memory onFail={handleStageFail} onComplete={handleStageComplete} />;
+    stageNode = <Stage4_Submit onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 7) {
-    stageNode = <Stage6_Quiz onFail={handleStageFail} onComplete={handleStageComplete} />;
+    stageNode = <Stage_DarkSearch onFail={handleStageFail} onComplete={advanceStage} />;
   } else if (gameState.currentStage === 8) {
-    stageNode = <Stage7_BossRound onFail={handleStageFail} onComplete={advanceStage} />;
+    stageNode = <Stage5_Memory onFail={handleStageFail} onComplete={handleStageComplete} />;
   } else if (gameState.currentStage === 9) {
+    stageNode = <Stage6_Quiz onFail={handleStageFail} onComplete={handleStageComplete} />;
+  } else if (gameState.currentStage === 10) {
+    stageNode = <Stage7_BossRound onFail={handleStageFail} onComplete={advanceStage} />;
+  } else if (gameState.currentStage === 11) {
     stageNode = <Stage8_DiaAgainRush onFail={handleStageFail} onComplete={advanceStage} />;
   } else {
     stageNode = <Stage9_ExitDoorChaos onFail={handleStageFail} onComplete={advanceStage} />;
@@ -338,7 +361,7 @@ function StageRouter() {
                   <button
                     key={String(stage)}
                     type="button"
-                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | "complete")}
+                    onClick={() => handleAdminSetStage(stage as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | "complete")}
                     className="rounded-md border border-zinc-600 bg-zinc-950 px-2 py-2 text-xs font-bold hover:bg-zinc-800"
                   >
                     {stage === "complete" ? "Leaderboard" : `Stage ${stage}`}
@@ -359,9 +382,9 @@ function StageRouter() {
       )}
 
       {gameState.isDrunkBrowserActive &&
-        gameState.currentStage !== 5 &&
-        gameState.currentStage !== 6 &&
-        gameState.currentStage !== 8 && (
+        gameState.currentStage !== 7 &&
+        gameState.currentStage !== 8 &&
+        gameState.currentStage !== 10 && (
         <div className="fixed left-4 top-4 z-[110] w-[220px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 shadow-xl backdrop-blur">
           <p className="mb-2 text-xs font-semibold text-zinc-100">🍺 Ayıqlıq:</p>
           <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
@@ -482,12 +505,13 @@ function ChaosApp() {
         ? "drunk-level-2"
         : "drunk-level-3";
   const isPlainVisualStage =
-    gameState.currentStage === 3 ||
     gameState.currentStage === 5 ||
     gameState.currentStage === 6 ||
+    gameState.currentStage === 7 ||
     gameState.currentStage === 8 ||
-    gameState.currentStage === 9 ||
-    gameState.currentStage === 10;
+    gameState.currentStage === 10 ||
+    gameState.currentStage === 11 ||
+    gameState.currentStage === 12;
   const isEffectActive =
     gameState.isDrunkBrowserActive && gameState.sobriety < 100 && !isPlainVisualStage;
 
