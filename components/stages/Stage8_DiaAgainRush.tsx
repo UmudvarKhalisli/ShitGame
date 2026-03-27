@@ -184,7 +184,7 @@ export default function Stage8_DiaAgainRush({
   const isRound4Mercy = round.id === 4 && round4ApproachCount >= 24;
 
   const playerRef = useRef<Player>({ x: START_X, y: START_Y, vx: 0, vy: 0, onGround: true });
-  const keysRef = useRef({ left: false, right: false, up: false });
+  const keysRef = useRef({ left: false, right: false, up: false, down: false });
   const rafRef = useRef<number | null>(null);
   const invertTimerRef = useRef<number | null>(null);
   const autoStartNextRoundRef = useRef(false);
@@ -263,7 +263,7 @@ export default function Stage8_DiaAgainRush({
     setHazardView([]);
     hazardSpawnAtRef.current = 0;
 
-    keysRef.current = { left: false, right: false, up: false };
+    keysRef.current = { left: false, right: false, up: false, down: false };
     playerRef.current = { x: START_X, y: START_Y, vx: 0, vy: 0, onGround: true };
     setPlayerView({ x: START_X, y: START_Y });
 
@@ -332,6 +332,9 @@ export default function Stage8_DiaAgainRush({
       if (key === "arrowup" || key === "w" || key === " ") {
         keysRef.current.up = true;
       }
+      if (key === "arrowdown" || key === "s") {
+        keysRef.current.down = true;
+      }
     };
 
     const onKeyUp = (event: KeyboardEvent) => {
@@ -344,6 +347,9 @@ export default function Stage8_DiaAgainRush({
       }
       if (key === "arrowup" || key === "w" || key === " ") {
         keysRef.current.up = false;
+      }
+      if (key === "arrowdown" || key === "s") {
+        keysRef.current.down = false;
       }
     };
 
@@ -361,14 +367,21 @@ export default function Stage8_DiaAgainRush({
         const player = playerRef.current;
         const now = Date.now();
 
-        const xDir = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
-        const movement = controlsInverted ? -xDir : xDir;
+        const xDirRaw = (keysRef.current.right ? 1 : 0) - (keysRef.current.left ? 1 : 0);
+        const yDirRaw = (keysRef.current.down ? 1 : 0) - (keysRef.current.up ? 1 : 0);
+        const movement = controlsInverted ? -xDirRaw : xDirRaw;
+        const verticalIntent = controlsInverted ? -yDirRaw : yDirRaw;
 
         player.vx = movement * round.moveSpeed + (round.windX ?? 0);
 
-        if (keysRef.current.up && player.onGround) {
+        if (verticalIntent < 0 && player.onGround) {
           player.vy = round.jump;
           player.onGround = false;
+        }
+
+        // Down intent increases fall speed; with inverted controls this maps to opposite key.
+        if (verticalIntent > 0 && !player.onGround) {
+          player.vy = Math.min(14, player.vy + 0.42);
         }
 
         player.vy = Math.min(14, player.vy + round.gravity);

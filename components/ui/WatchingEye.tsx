@@ -40,68 +40,64 @@ export default function WatchingEye() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed right-6 top-4 z-[130]">
-      <div
-        className="relative h-[120px] w-[170px] border border-red-400/70 bg-red-950/70 shadow-[0_0_22px_rgba(239,68,68,0.65)]"
-        style={{
-          clipPath:
-            "polygon(0% 12%, 16% 0%, 62% 0%, 84% 8%, 100% 28%, 100% 90%, 86% 100%, 18% 100%, 0% 84%, 4% 54%)",
-        }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_24%,rgba(255,255,255,0.22),transparent_45%)]" />
+    <div className="pointer-events-none fixed right-4 top-2 z-[130]">
+      <div className="relative h-[170px] w-[230px]">
+        <svg viewBox="0 0 230 170" className="absolute inset-0 h-full w-full drop-shadow-[0_0_18px_rgba(239,68,68,0.45)]">
+          <path
+            d="M18 82 C40 46, 80 26, 115 28 C150 30, 188 50, 212 84 C186 116, 151 136, 114 138 C76 140, 37 120, 18 82 Z"
+            fill="#161214"
+            stroke="#120a0b"
+            strokeWidth="4"
+          />
 
-        <div className="absolute -bottom-10 left-4 h-11 w-2 rounded-full bg-gradient-to-b from-red-400/80 via-red-500/85 to-red-900/10 eye-blood-drop" />
-        <div className="absolute -bottom-8 left-14 h-8 w-1.5 rounded-full bg-gradient-to-b from-red-300/80 via-red-500/80 to-red-900/10 eye-blood-drop eye-blood-drop-delayed" />
-        <div className="absolute -bottom-12 right-8 h-12 w-2 rounded-full bg-gradient-to-b from-red-400/85 via-red-600/85 to-red-900/10 eye-blood-drop eye-blood-drop-slow" />
+          <path d="M36 56 l8 -18 l8 16 l8 -17 l7 15 l8 -14 l8 15 l8 -15 l7 16 l8 -16 l9 17 l8 -16 l9 18" fill="none" stroke="#1e1415" strokeWidth="4" strokeLinecap="round" />
 
-        <div className="absolute left-1/2 top-1/2 h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-zinc-300 bg-white shadow-[0_0_16px_rgba(255,255,255,0.38)]">
+          <ellipse cx="116" cy="84" rx="50" ry="42" fill="#f7f7f7" stroke="#202020" strokeWidth="6" />
+          <ellipse cx="116" cy="84" rx="36" ry="30" fill="none" stroke="#8f8f8f" strokeWidth="2" strokeDasharray="2 6" />
+
+          <path d="M70 114 C98 124, 136 124, 163 112" fill="none" stroke="#cf1212" strokeWidth="8" strokeLinecap="round" />
+
+          <path
+            d="M162 112 C170 114, 176 122, 176 132 C176 146, 166 157, 152 157 C138 157, 129 147, 129 133 C129 122, 136 114, 146 112 C149 132, 151 145, 152 160"
+            fill="#ef2a2a"
+            stroke="#8a1010"
+            strokeWidth="3"
+            className="tear-drop"
+          />
+        </svg>
+
+        <div ref={eyeRef} className="absolute left-1/2 top-1/2 h-[92px] w-[92px] -translate-x-1/2 -translate-y-1/2 rounded-full">
           <div
-            ref={eyeRef}
-            className="absolute left-1/2 top-1/2 h-[56px] w-[56px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          >
-            <div
-              className="absolute left-1/2 top-1/2 h-[24px] w-[24px] rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.7)] transition-transform duration-75"
-              style={{
-                transform: `translate(calc(-50% + ${pupilOffset.x}px), calc(-50% + ${pupilOffset.y}px))`,
-              }}
-            />
-          </div>
+            className="absolute left-1/2 top-1/2 h-[26px] w-[26px] rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.8)] transition-transform duration-75"
+            style={{
+              transform: `translate(calc(-50% + ${pupilOffset.x}px), calc(-50% + ${pupilOffset.y}px))`,
+            }}
+          />
         </div>
       </div>
 
       <style jsx>{`
-        .eye-blood-drop {
-          animation: eye-blood-drip 2.8s ease-in-out infinite;
-          transform-origin: top center;
-          filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
+        .tear-drop {
+          transform-origin: 152px 112px;
+          animation: tear-pulse 2.8s ease-in-out infinite;
         }
 
-        .eye-blood-drop-delayed {
-          animation-delay: 0.9s;
-          animation-duration: 3.1s;
-        }
-
-        .eye-blood-drop-slow {
-          animation-delay: 0.45s;
-          animation-duration: 3.5s;
-        }
-
-        @keyframes eye-blood-drip {
+        @keyframes tear-pulse {
           0% {
-            opacity: 0.25;
-            transform: translateY(-8px) scaleY(0.35);
+            transform: scaleY(0.72);
+            opacity: 0.75;
           }
-          25% {
-            opacity: 0.95;
-            transform: translateY(0px) scaleY(1);
+          35% {
+            transform: scaleY(1.04);
+            opacity: 0.96;
           }
-          68% {
-            opacity: 0.82;
-            transform: translateY(6px) scaleY(1.1);
+          72% {
+            transform: scaleY(1.15);
+            opacity: 0.88;
           }
           100% {
-            opacity: 0.18;
-            transform: translateY(18px) scaleY(0.25);
+            transform: scaleY(0.78);
+            opacity: 0.78;
           }
         }
       `}</style>
