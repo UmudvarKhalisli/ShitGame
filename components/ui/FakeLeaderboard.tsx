@@ -271,7 +271,16 @@ export default function FakeLeaderboard({
 
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
     pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
-    pdf.save("bos-bes-diplom.pdf");
+
+    const blob = pdf.output("blob");
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "bos-bes-diplom.pdf";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   useEffect(() => {
@@ -401,8 +410,12 @@ export default function FakeLeaderboard({
         setCertificateProgress(99);
         const holdId = window.setTimeout(() => {
           setCertificateProgress(100);
-          generateCertificatePdf();
-          setStatusText("Diplom sistem tərəfindən təsdiq edildi.");
+          try {
+            generateCertificatePdf();
+            setStatusText("Diplom sistem tərəfindən təsdiq edildi.");
+          } catch {
+            setStatusText("Diplom yaradılarkən xəta baş verdi. Yenidən cəhd et.");
+          }
           setCertificateOpen(false);
           setCertificateProgress(0);
         }, 3000);
@@ -459,14 +472,24 @@ export default function FakeLeaderboard({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => setIsSlanderOpen(true)} className={TERMINAL_BTN}>
+      <div className="relative z-[12001] flex flex-wrap gap-2 pointer-events-auto">
+        <button
+          type="button"
+          onClick={() => setIsSlanderOpen(true)}
+          onPointerDown={() => setIsSlanderOpen(true)}
+          className={TERMINAL_BTN}
+        >
           Müəllifə Şikayət Et
         </button>
-        <button type="button" onClick={startCertificateFlow} className={TERMINAL_BTN}>
+        <button type="button" onClick={startCertificateFlow} onPointerDown={startCertificateFlow} className={TERMINAL_BTN}>
           Rəsmi Diplomunu Al
         </button>
-        <button type="button" onClick={() => setCallPhase("incoming")} className={TERMINAL_BTN}>
+        <button
+          type="button"
+          onClick={() => setCallPhase("incoming")}
+          onPointerDown={() => setCallPhase("incoming")}
+          className={TERMINAL_BTN}
+        >
           Dərdimi Kimə Deyim?
         </button>
       </div>
@@ -517,7 +540,7 @@ export default function FakeLeaderboard({
       {statusText && <p className="text-xs text-amber-300">{statusText}</p>}
 
       {isSlanderOpen && (
-        <div className="fixed inset-0 z-[170] flex items-center justify-center bg-black/80 p-4">
+        <div className="fixed inset-0 z-[12010] flex items-center justify-center bg-black/80 p-4">
           <div className="w-full max-w-xl space-y-3 rounded-lg border border-zinc-700 bg-zinc-950 p-4">
             <h3 className="text-lg font-black text-zinc-100">Şikayət Masası</h3>
             <textarea
@@ -543,7 +566,7 @@ export default function FakeLeaderboard({
       )}
 
       {callPhase === "incoming" && (
-        <div className="fixed inset-0 z-[175] flex items-center justify-center bg-black p-4">
+        <div className="fixed inset-0 z-[12011] flex items-center justify-center bg-black p-4">
           <div className="w-full max-w-lg space-y-4 rounded-xl border border-violet-400/60 bg-zinc-950 p-5 text-center">
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-400">Incoming Video Call</p>
             <h3 className="text-2xl font-black text-violet-200">💩 Boss</h3>
@@ -560,7 +583,7 @@ export default function FakeLeaderboard({
       )}
 
       {callPhase === "signal" && (
-        <div className="fixed inset-0 z-[180] flex items-center justify-center bg-black/95 text-white">
+        <div className="fixed inset-0 z-[12012] flex items-center justify-center bg-black/95 text-white">
           <div className="max-w-2xl space-y-3 px-6 text-center">
             <p className="text-6xl">📶</p>
             <p className="text-2xl font-bold">Zəng bağlandı, siqnal qaldı.</p>
@@ -570,7 +593,7 @@ export default function FakeLeaderboard({
       )}
 
       {callPhase === "goodbye" && (
-        <div className="fixed inset-0 z-[181] flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(16,72,45,0.35),rgba(0,0,0,0.96)_55%)] p-4">
+        <div className="fixed inset-0 z-[12013] flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(16,72,45,0.35),rgba(0,0,0,0.96)_55%)] p-4">
           <div className="w-full max-w-2xl rounded-xl border border-violet-500/40 bg-zinc-950/95 p-6 text-center shadow-[0_0_45px_rgba(16,185,129,0.2)]">
             <h3 className="text-3xl font-black text-violet-200">Oyunun Sonu</h3>
             <p className="mt-3 text-sm text-zinc-300">
