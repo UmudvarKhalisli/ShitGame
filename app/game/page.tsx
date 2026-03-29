@@ -526,7 +526,9 @@ function ChaosApp() {
       >
         <StageRouter />
       </main>
-      <WatchingEye />
+      <div className="hidden sm:block">
+        <WatchingEye />
+      </div>
       <TheRoaster />
     </>
   );
