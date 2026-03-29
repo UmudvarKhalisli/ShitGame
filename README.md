@@ -1,44 +1,41 @@
-# BoshBesh Site
+# "Bos-Bes" - Bir Anti-UX Eksperimenti
 
-Deliberately frustrating but addictive web experience built with Next.js (App Router), React, TypeScript, and Tailwind CSS.
+LinkedIn-da hamı produktivlikdən danışır, biz isə vaxtı necə "peşəkarcasına" boşa xərcləməyi araşdırdıq... 💩🔥
 
-## Available scripts
+Bir müddətdir üzərində işlədiyimiz (mən və bir neçə AI agenti) maraqlı bir layihəni təqdim edirik: **Bos-Bes**.
 
-- `npm run dev`
+## Bu layihədə nə etdik?
+
+Məqsədimiz sadəcə kod yazmaq deyildi. İstifadəçi psixologiyasını, səbir limitlərini və **Anti-UX** (qəsdən əsəb pozan dizayn) prinsiplərini sınaqdan keçirdik.
+Proses boyu həm araşdırma apardıq, həm də AI agentləri ilə ən "xaotik" ssenariləri dizayn edib koda çevirdik.
+
+## Prosesin pərdəarxası
+
+- **Araşdırma və İnkişaf:** "İstifadəçini necə çaşdırmaq olar?" sualına fokuslandıq.
+- **Tech Stack:** Next.js, Framer Motion, Supabase.
+- **Deployment:** Vercel üzərində canlı test.
+- **Agent Collaboration:** Kod optimallaşdırması və mürəkkəb animasiyalarda AI alətlərindən yararlanıldı.
+
+## Vacib Qeyd
+
+Bu layihə əsasən **PC + Mouse** üçün nəzərdə tutulub.
+Telefonla daxil olmağa çalışdıqda sistem sizi uyğun mesajla geri çevirəcək.
+Çünki bu oyunda əsl xaos barmaqla yox, siçan hərəkəti ilə yaşanır.
+
+## Lokal işlətmək üçün
+
+```bash
+npm run dev
+```
+
+Digər komandalar:
+
 - `npm run build`
 - `npm run start`
 - `npm run lint`
 
-## Admin-only stage testing mode
+## Canlı Link
 
-This project now includes a hidden stage testing panel that is locked with a server-side key.
+https://boshbesh.vercel.app/
 
-### How it works
-
-- Press `Ctrl + Shift + U` to open the hidden admin prompt.
-- Enter the admin key.
-- If valid, you can jump to any stage (`1..5` or `Leaderboard`) and mark the current stage as completed for fast testing.
-- Other users still play normal step-by-step flow unless they know the key.
-
-### Required env variable
-
-- `ADMIN_BYPASS_KEY`
-
-Copy `.env.example` to `.env.local` for local development and set a strong secret.
-
-## Deploying to Vercel + Supabase
-
-### Vercel env vars
-
-Add these in Vercel Project Settings → Environment Variables:
-
-- `ADMIN_BYPASS_KEY`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (only for server-side API usage)
-
-### Supabase notes
-
-- Keep `SUPABASE_SERVICE_ROLE_KEY` server-only (never expose in client code).
-- Keep Row Level Security (RLS) enabled on your tables.
-- Use `NEXT_PUBLIC_*` only for values safe to expose in browser.
+Səbrinə güvənənlər daxil olsun. Sonda rəsmi "Bos-Bes Diplomunu" alan olsa, paylaşsın.
