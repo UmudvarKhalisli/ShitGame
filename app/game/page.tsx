@@ -479,7 +479,7 @@ function StageRouter() {
       </AnimatePresence>
 
       {gameState.currentStage !== "complete" && activeStageHint && (
-        <div className="fixed right-3 top-3 z-[118] sm:right-4 sm:top-4">
+        <div className="fixed right-3 top-1/2 z-[118] -translate-y-1/2 sm:right-4">
           <div className="flex flex-col items-end gap-2">
             <button
               type="button"
