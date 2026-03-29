@@ -108,10 +108,13 @@ export default function Stage6_Quiz({
   const [q3Rotations, setQ3Rotations] = useState<Record<string, number>>({});
   const [q4Offsets, setQ4Offsets] = useState<Record<string, { x: number; y: number }>>({});
   const [optionColorOrder, setOptionColorOrder] = useState([0, 1, 2, 3]);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
 
   const hasCounterGlitchedRef = useRef(false);
   const hasShownQ5HintRef = useRef(false);
   const q4HoverTimersRef = useRef<Record<string, number>>({});
+  const q4TouchHoldTimersRef = useRef<Record<string, number>>({});
+  const q4TouchReadyRef = useRef<Set<string>>(new Set());
 
   const question = QUESTIONS[questionIndex];
 
@@ -120,11 +123,32 @@ export default function Stage6_Quiz({
   }, []);
 
   useEffect(() => {
+    const touchReadySet = q4TouchReadyRef.current;
+
     return () => {
       Object.values(q4HoverTimersRef.current).forEach((timerId) => {
         window.clearTimeout(timerId);
       });
       q4HoverTimersRef.current = {};
+
+      Object.values(q4TouchHoldTimersRef.current).forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      q4TouchHoldTimersRef.current = {};
+      touchReadySet.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    syncPointerMode();
+    mediaQuery.addEventListener("change", syncPointerMode);
+    return () => {
+      mediaQuery.removeEventListener("change", syncPointerMode);
     };
   }, []);
 
@@ -151,6 +175,7 @@ export default function Stage6_Quiz({
 
     if (question.id === 4) {
       setQ4Offsets({});
+      q4TouchReadyRef.current.clear();
     }
 
     if (question.id === 5 && !hasShownQ5HintRef.current) {
@@ -261,6 +286,16 @@ export default function Stage6_Quiz({
       return;
     }
 
+    if (question.id === 4 && isCoarsePointer && option.isCorrect) {
+      if (!q4TouchReadyRef.current.has(option.id)) {
+        triggerQ4RunAway(option.id);
+        setStatusText("Telefon rejimi: düzgün cavabı 0.7s basıb saxla, sonra seç.");
+        return;
+      }
+
+      q4TouchReadyRef.current.delete(option.id);
+    }
+
     if (!option.isCorrect) {
       handleWrongAnswer();
       return;
@@ -310,6 +345,31 @@ export default function Stage6_Quiz({
   const handleQ4HoverEnd = (optionId: string) => {
     window.clearTimeout(q4HoverTimersRef.current[optionId]);
     delete q4HoverTimersRef.current[optionId];
+  };
+
+  const handleQ4TouchStart = (optionId: string) => {
+    if (!isCoarsePointer || question.id !== 4 || isLocked) {
+      return;
+    }
+
+    window.clearTimeout(q4TouchHoldTimersRef.current[optionId]);
+    q4TouchHoldTimersRef.current[optionId] = window.setTimeout(() => {
+      q4TouchReadyRef.current.add(optionId);
+      setStatusText("Hazırdır: indi buraxıb seçə bilərsən.");
+    }, 700);
+  };
+
+  const handleQ4TouchEnd = (optionId: string) => {
+    if (!isCoarsePointer || question.id !== 4 || isLocked) {
+      return;
+    }
+
+    window.clearTimeout(q4TouchHoldTimersRef.current[optionId]);
+    delete q4TouchHoldTimersRef.current[optionId];
+
+    if (!q4TouchReadyRef.current.has(optionId)) {
+      triggerQ4RunAway(optionId);
+    }
   };
 
   const renderQ5OptionClass = (optionId: string) => {
@@ -368,6 +428,9 @@ export default function Stage6_Quiz({
                 onClick={() => handleOptionClick(option)}
                 onMouseEnter={() => handleQ4HoverStart(option.id)}
                 onMouseLeave={() => handleQ4HoverEnd(option.id)}
+                onTouchStart={() => handleQ4TouchStart(option.id)}
+                onTouchEnd={() => handleQ4TouchEnd(option.id)}
+                onTouchCancel={() => handleQ4TouchEnd(option.id)}
                 whileTap={{ scale: 0.96 }}
                 animate={{
                   x: q4Offset.x,
