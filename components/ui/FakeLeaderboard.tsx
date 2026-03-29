@@ -168,6 +168,7 @@ export default function FakeLeaderboard({
   const [rows, setRows] = useState<LeaderboardEntry[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
   const [statusText, setStatusText] = useState("");
+  const [toastText, setToastText] = useState("");
 
   const [displayAttempts, setDisplayAttempts] = useState(0);
   const [displayCells, setDisplayCells] = useState(0);
@@ -180,6 +181,7 @@ export default function FakeLeaderboard({
   const [certificateOpen, setCertificateOpen] = useState(false);
   const [certificateProgress, setCertificateProgress] = useState(0);
   const certificateTimerRef = useRef<number | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   const [callPhase, setCallPhase] = useState<"idle" | "incoming" | "signal" | "goodbye">("idle");
 
@@ -468,7 +470,13 @@ export default function FakeLeaderboard({
         body: JSON.stringify({ playerName: safeName, message: slanderText }),
       });
 
-      setStatusText("Şikayətiniz zibil qutusuna çatdırıldı.");
+      setToastText("Şikayətiniz zibil qutusuna çatdırıldı.");
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+      toastTimerRef.current = window.setTimeout(() => {
+        setToastText("");
+      }, 2600);
       setIsSlanderOpen(false);
       setSlanderText("");
     } catch {
@@ -518,6 +526,9 @@ export default function FakeLeaderboard({
     return () => {
       if (certificateTimerRef.current !== null) {
         window.clearTimeout(certificateTimerRef.current);
+      }
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current);
       }
     };
   }, []);
@@ -628,6 +639,17 @@ export default function FakeLeaderboard({
       </div>
 
       {statusText && <p className="text-xs text-amber-300">{statusText}</p>}
+
+      {toastText && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="fixed left-1/2 top-6 z-[12020] w-[min(92vw,520px)] -translate-x-1/2 rounded-lg border border-emerald-500/60 bg-zinc-900/95 px-4 py-3 text-center text-sm font-semibold text-emerald-300 shadow-xl"
+        >
+          {toastText}
+        </motion.div>
+      )}
 
       {isSlanderOpen && (
         <div className="fixed inset-0 z-[12010] flex items-center justify-center bg-black/80 p-4">
