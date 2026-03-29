@@ -456,14 +456,16 @@ function StageRouter() {
       </AnimatePresence>
 
       {gameState.currentStage !== "complete" && activeStageHint && (
-        <div className="fixed bottom-4 left-1/2 z-[118] w-[min(92vw,320px)] -translate-x-1/2 sm:bottom-auto sm:left-auto sm:right-4 sm:top-1/2 sm:w-auto sm:translate-x-0 sm:-translate-y-1/2">
-          <div className="flex flex-col items-stretch gap-2 sm:items-end">
+        <div className="fixed right-3 top-3 z-[118] sm:right-4 sm:top-4">
+          <div className="flex flex-col items-end gap-2">
             <button
               type="button"
               onClick={() => setIsHelpOpen((prev) => !prev)}
-              className="rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-2 text-sm font-bold text-zinc-100 shadow-lg transition hover:bg-zinc-800"
+              aria-label="Kömək panelini aç"
+              title="Kömək"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/95 text-sm font-black text-zinc-100 shadow-lg transition hover:bg-zinc-800"
             >
-              Kömək
+              İ
             </button>
 
             <AnimatePresence>
@@ -473,7 +475,7 @@ function StageRouter() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 text-sm text-zinc-200 shadow-xl sm:w-[290px]"
+                  className="w-[min(92vw,290px)] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 text-sm text-zinc-200 shadow-xl"
                 >
                   <p className="font-semibold text-zinc-100">Mərhələ {stageNumber} kömək paneli</p>
                   <p className="mt-1 text-xs text-zinc-400">Bu mərhələ cəhd sayı: {currentStageAttempts}</p>
