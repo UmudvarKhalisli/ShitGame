@@ -1,6 +1,6 @@
-# "Bos-Bes" - Bir Anti-UX Eksperimenti
+# "Bos-Bes" - Vaxtınızı boşa xərcləməyə hazırsınız?
 
-LinkedIn-da hamı produktivlikdən danışır, biz isə vaxtı necə "peşəkarcasına" boşa xərcləməyi araşdırdıq... 💩🔥
+Hamı produktivlikdən danışır, biz isə vaxtı necə "peşəkarcasına" boşa xərcləməyi araşdırdıq... 💩🔥
 
 Bir müddətdir üzərində işlədiyimiz (mən və bir neçə AI agenti) maraqlı bir layihəni təqdim edirik: **Bos-Bes**.
 
