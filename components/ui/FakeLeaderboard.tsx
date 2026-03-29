@@ -27,7 +27,7 @@ const FALLBACK_ROWS: Omit<LeaderboardEntry, "rank" | "highlight">[] = [
 
 const SLANDER_LINE = "Mən boş adamam, vaxtımı bura xərcləyirəm";
 const TERMINAL_BTN =
-  "rounded-md border-2 border-violet-400 bg-violet-600/35 px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] text-violet-100 shadow-[0_0_14px_rgba(124,58,237,0.45)] transition hover:border-red-400 hover:bg-red-700/35 hover:text-red-100";
+  "flex items-center justify-center gap-2 rounded-lg border border-violet-400/80 bg-gradient-to-b from-violet-600/35 to-violet-700/25 px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-violet-100 shadow-[0_0_14px_rgba(124,58,237,0.35)] transition-all duration-200 hover:-translate-y-[1px] hover:border-fuchsia-300 hover:from-violet-500/45 hover:to-violet-600/35 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] active:translate-y-0";
 const NAME_POOL = [
   "Aysel Q.",
   "Ramin Dev",
@@ -558,25 +558,28 @@ export default function FakeLeaderboard({
 
       <div className="relative z-[12001] space-y-2 rounded-xl border border-zinc-700 bg-zinc-900/70 p-3 pointer-events-auto">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-300">Terminal Komandaları</p>
-        <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <button
           type="button"
           onClick={() => setIsSlanderOpen(true)}
           onPointerDown={() => setIsSlanderOpen(true)}
-          className={`${TERMINAL_BTN} shrink-0 whitespace-nowrap`}
+          className={`${TERMINAL_BTN} w-full`}
         >
-          Müəllifə Şikayət Et
+          <span aria-hidden>📨</span>
+          <span>Müəllifə Şikayət Et</span>
         </button>
-        <button type="button" onClick={startCertificateFlow} onPointerDown={startCertificateFlow} className={`${TERMINAL_BTN} shrink-0 whitespace-nowrap`}>
-          Rəsmi Diplomunu Al
+        <button type="button" onClick={startCertificateFlow} onPointerDown={startCertificateFlow} className={`${TERMINAL_BTN} w-full`}>
+          <span aria-hidden>📜</span>
+          <span>Rəsmi Diplomunu Al</span>
         </button>
         <button
           type="button"
           onClick={() => setCallPhase("incoming")}
           onPointerDown={() => setCallPhase("incoming")}
-          className={`${TERMINAL_BTN} shrink-0 whitespace-nowrap`}
+          className={`${TERMINAL_BTN} w-full`}
         >
-          Dərdimi Kimə Deyim?
+          <span aria-hidden>☎️</span>
+          <span>Dərdimi Kimə Deyim?</span>
         </button>
         </div>
       </div>
