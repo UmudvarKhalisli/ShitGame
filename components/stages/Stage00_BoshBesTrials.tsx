@@ -24,11 +24,13 @@ export default function Stage00_BoshBesTrials({
   const [typedCount, setTypedCount] = useState(0);
   const [timerText, setTimerText] = useState("5");
   const [timerDone, setTimerDone] = useState(false);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
 
   const nextIdRef = useRef(1);
   const failAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const illusionButtons = useMemo(() => Array.from({ length: 5 }, (_, i) => i + 1), []);
+  const requiredTypedCount = isCoarsePointer ? 8 : 12;
 
   const triggerHardFail = () => {
     if (!failAudioRef.current) {
@@ -65,6 +67,25 @@ export default function Stage00_BoshBesTrials({
       setFalling((prev) => prev.filter((item) => item.id !== id));
     }, 1600);
   };
+
+  const dropRandomChar = () => {
+    const alphabet = "ASDFGHJKL0123456789";
+    const char = alphabet[Math.floor(Math.random() * alphabet.length)] ?? "A";
+    dropChar(char);
+  };
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    syncPointerMode();
+    mediaQuery.addEventListener("change", syncPointerMode);
+    return () => {
+      mediaQuery.removeEventListener("change", syncPointerMode);
+    };
+  }, []);
 
   useEffect(() => {
     if (step !== "timer") {
@@ -146,6 +167,17 @@ export default function Stage00_BoshBesTrials({
             />
 
             <p className="mt-3 text-sm text-[#9fce9f]">Yazdıqların boşdur, eynilə həyatın kimi.</p>
+            <p className="mt-1 text-xs text-[#8ac58a]">Progress: {typedCount}/{requiredTypedCount}</p>
+
+            {isCoarsePointer && (
+              <button
+                type="button"
+                onClick={dropRandomChar}
+                className="mt-3 border border-[#2f6a2f] bg-[#0b1a0b] px-3 py-2 text-xs font-bold"
+              >
+                Telefonda simvol at
+              </button>
+            )}
 
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <AnimatePresence>
@@ -168,7 +200,7 @@ export default function Stage00_BoshBesTrials({
             <button
               type="button"
               onClick={() => setStep("timer")}
-              disabled={typedCount < 12}
+              disabled={typedCount < requiredTypedCount}
               className="absolute bottom-4 right-4 border border-[#2f6a2f] bg-[#0b1a0b] px-4 py-2 text-sm font-bold disabled:opacity-35"
             >
               Davam Et

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { motion } from "framer-motion";
-import { type MouseEvent, useEffect, useRef, useState } from "react";
+import { type MouseEvent, type TouchEvent, useEffect, useRef, useState } from "react";
 
 const START_LABELS = ["Başla", "Məni Tutma", "Boş Ver", "Get İşinlə Məşğul Ol"];
 
@@ -23,6 +23,8 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
   const [buttonText, setButtonText] = useState(START_LABELS[0]);
   const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 });
   const [timerValue, setTimerValue] = useState<TimerTick>({ minute: 12, second: 37 });
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const [mobileCatchCount, setMobileCatchCount] = useState(0);
 
   const moveButtonRandomly = () => {
     const area = areaRef.current;
@@ -43,12 +45,20 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
 
   useEffect(() => {
     const initId = window.setTimeout(moveButtonRandomly, 20);
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+    syncPointerMode();
+    mediaQuery.addEventListener("change", syncPointerMode);
 
     const onResize = () => moveButtonRandomly();
     window.addEventListener("resize", onResize);
 
     return () => {
       window.removeEventListener("resize", onResize);
+      mediaQuery.removeEventListener("change", syncPointerMode);
       window.clearTimeout(initId);
     };
   }, []);
@@ -76,7 +86,7 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
     };
   }, []);
 
-  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+  const handlePointerChase = (clientX: number, clientY: number) => {
     const area = areaRef.current;
     const button = buttonRef.current;
 
@@ -87,11 +97,51 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
     const rect = area.getBoundingClientRect();
     const centerX = rect.left + buttonPos.x + button.offsetWidth / 2;
     const centerY = rect.top + buttonPos.y + button.offsetHeight / 2;
-    const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+    const distance = Math.hypot(clientX - centerX, clientY - centerY);
 
     if (distance < 150) {
       moveButtonRandomly();
     }
+  };
+
+  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    handlePointerChase(event.clientX, event.clientY);
+  };
+
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    const firstTouch = event.touches[0];
+    if (!firstTouch) {
+      return;
+    }
+
+    handlePointerChase(firstTouch.clientX, firstTouch.clientY);
+  };
+
+  const handleButtonTouchStart = (event: TouchEvent<HTMLButtonElement>) => {
+    if (!isCoarsePointer) {
+      return;
+    }
+
+    event.preventDefault();
+    const requiredTouches = 3;
+    setMobileCatchCount((prev) => {
+      const next = prev + 1;
+      if (next >= requiredTouches) {
+        onComplete();
+        return 0;
+      }
+
+      moveButtonRandomly();
+      return next;
+    });
+  };
+
+  const handleButtonClick = () => {
+    if (isCoarsePointer) {
+      return;
+    }
+
+    onComplete();
   };
 
   return (
@@ -106,6 +156,9 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
         <div className="mt-2 text-xs uppercase tracking-[0.25em] text-[#d76464]">Boş-Beş</div>
         <h1 className="glitch-title text-6xl font-black tracking-[0.24em] text-[#ff3131] sm:text-7xl">BOŞ-BEŞ</h1>
         <p className="text-sm text-[#d09090]">Vaxtın çoxdur? Gəl bir az da biz xərcləyək.</p>
+        {isCoarsePointer && (
+          <p className="text-xs font-semibold text-[#f4a7a7]">Telefon rejimi: düyməni tutmaq üçün 3 dəfə yaxınlaşıb toxun ({mobileCatchCount}/3).</p>
+        )}
 
         <div className="mt-1 flex items-center gap-3 text-[#cf7f7f]">
           <div className="hourglass" aria-hidden>
@@ -118,12 +171,14 @@ export default function Stage0_BoshBesIntro({ onComplete }: { onComplete: () => 
         <div
           ref={areaRef}
           onMouseMove={handleMouseMove}
-          className="relative mt-4 h-[330px] w-full overflow-hidden rounded-lg border border-[#331010] bg-[#090909]/80"
+          onTouchMove={handleTouchMove}
+          className="relative mt-4 h-[330px] w-full touch-none overflow-hidden rounded-lg border border-[#331010] bg-[#090909]/80"
         >
           <motion.button
             ref={buttonRef}
             type="button"
-            onClick={onComplete}
+            onTouchStart={handleButtonTouchStart}
+            onClick={handleButtonClick}
             animate={{ x: buttonPos.x, y: buttonPos.y }}
             transition={{ type: "spring", stiffness: 300, damping: 16 }}
             className="absolute left-0 top-0 border border-[#a93131] bg-[#2c0909] px-6 py-3 text-lg font-bold uppercase text-[#ff7d7d]"

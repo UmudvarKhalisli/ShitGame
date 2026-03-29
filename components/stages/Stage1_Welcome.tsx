@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type MouseEvent, useEffect, useRef, useState } from "react";
+import { type MouseEvent, type TouchEvent, useEffect, useRef, useState } from "react";
 
 type FailurePhase = "idle" | "static" | "bsod" | "recovered";
 
@@ -15,6 +15,8 @@ export default function Stage1_Welcome({
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [buttonRotation, setButtonRotation] = useState(0);
   const [failurePhase, setFailurePhase] = useState<FailurePhase>("idle");
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const [mobileCatchCount, setMobileCatchCount] = useState(0);
   const playAreaRef = useRef<HTMLDivElement | null>(null);
   const catchButtonRef = useRef<HTMLButtonElement | null>(null);
   const staticTimerRef = useRef<number | null>(null);
@@ -57,8 +59,42 @@ export default function Stage1_Welcome({
     setButtonPosition({ x: nextX, y: nextY });
   };
 
+  const applyInverseMove = (clientX: number, clientY: number) => {
+    if (failurePhase !== "idle") {
+      return;
+    }
+
+    const container = playAreaRef.current;
+    const button = catchButtonRef.current;
+
+    if (!container || !button) {
+      return;
+    }
+
+    const rect = container.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    const relativeY = clientY - rect.top;
+
+    const inverseX = container.clientWidth - relativeX - button.offsetWidth / 2;
+    const inverseY = container.clientHeight - relativeY - button.offsetHeight / 2;
+
+    const jitterX = (Math.random() - 0.5) * 26;
+    const jitterY = (Math.random() - 0.5) * 20;
+    const nextPosition = clampPosition(inverseX + jitterX, inverseY + jitterY);
+
+    setButtonPosition(nextPosition);
+    setButtonRotation((prev) => prev + 20 + Math.random() * 35);
+  };
+
   useEffect(() => {
     const initId = window.setTimeout(() => moveButton(), 0);
+
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+    syncPointerMode();
+    mediaQuery.addEventListener("change", syncPointerMode);
 
     const handleResize = () => {
       setButtonPosition((prev) => clampPosition(prev.x, prev.y));
@@ -100,34 +136,22 @@ export default function Stage1_Welcome({
         buzzAudioRef.current.pause();
         buzzAudioRef.current.currentTime = 0;
       }
+
+      mediaQuery.removeEventListener("change", syncPointerMode);
     };
   }, []);
 
   const handleInverseMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (failurePhase !== "idle") {
+    applyInverseMove(event.clientX, event.clientY);
+  };
+
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    const firstTouch = event.touches[0];
+    if (!firstTouch) {
       return;
     }
 
-    const container = playAreaRef.current;
-    const button = catchButtonRef.current;
-
-    if (!container || !button) {
-      return;
-    }
-
-    const rect = container.getBoundingClientRect();
-    const relativeX = event.clientX - rect.left;
-    const relativeY = event.clientY - rect.top;
-
-    const inverseX = container.clientWidth - relativeX - button.offsetWidth / 2;
-    const inverseY = container.clientHeight - relativeY - button.offsetHeight / 2;
-
-    const jitterX = (Math.random() - 0.5) * 26;
-    const jitterY = (Math.random() - 0.5) * 20;
-    const nextPosition = clampPosition(inverseX + jitterX, inverseY + jitterY);
-
-    setButtonPosition(nextPosition);
-    setButtonRotation((prev) => prev + 20 + Math.random() * 35);
+    applyInverseMove(firstTouch.clientX, firstTouch.clientY);
   };
 
   const handleEscape = () => {
@@ -145,6 +169,7 @@ export default function Stage1_Welcome({
       return;
     }
 
+    setMobileCatchCount(0);
     setFailurePhase("static");
     void staticAudioRef.current?.play().catch(() => {
       return;
@@ -171,22 +196,52 @@ export default function Stage1_Welcome({
     }, 3000);
   };
 
+  const handleTouchCatch = (event: TouchEvent<HTMLButtonElement>) => {
+    if (!isCoarsePointer || failurePhase !== "idle") {
+      return;
+    }
+
+    event.preventDefault();
+
+    const requiredTouches = 3;
+    setMobileCatchCount((prev) => {
+      const next = prev + 1;
+      if (next >= requiredTouches) {
+        setButtonRotation((rot) => rot + 40);
+        handleCatch();
+        return 0;
+      }
+
+      onFail();
+      moveButton();
+      setButtonRotation((rot) => rot + 120);
+      return next;
+    });
+  };
+
   const glyphLine = "ᚠ⟁₪⫷⧖Жꙮ卐⟟ѪⵣⴹฬψฬѮ⧉ⴵѬ";
 
   return (
     <section className="relative w-full max-w-4xl space-y-5 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center shadow-xl">
       <h1 className="text-3xl font-bold text-zinc-100">Xoş Gəlmisən, Bas Görək</h1>
-      <p className="text-sm text-zinc-300">Zona böyüdü: kursor tərsinə aldadır, düymə də fırlanıb qaçır — çətindir, amma mümkündür.</p>
+      <p className="text-sm text-zinc-300">
+        Zona böyüdü: kursor tərsinə aldadır, düymə də fırlanıb qaçır — çətindir, amma mümkündür.
+      </p>
+      {isCoarsePointer && (
+        <p className="text-xs font-semibold text-amber-300">Telefon rejimi: düyməni tutmaq üçün 3 dəfə təqib et ({mobileCatchCount}/3).</p>
+      )}
 
       <div
         ref={playAreaRef}
         onMouseMove={handleInverseMove}
-        className="relative mx-auto h-[420px] w-full max-w-[960px] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900/70"
+        onTouchMove={handleTouchMove}
+        className="relative mx-auto h-[420px] w-full max-w-[960px] touch-none overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900/70"
       >
         <motion.button
           ref={catchButtonRef}
           type="button"
           onMouseEnter={handleEscape}
+          onTouchStart={handleTouchCatch}
           onClick={handleCatch}
           disabled={failurePhase !== "idle"}
           animate={{ x: buttonPosition.x, y: buttonPosition.y, rotate: buttonRotation }}

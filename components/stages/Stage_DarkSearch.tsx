@@ -671,6 +671,7 @@ export default function Stage_DarkSearch({
   const [flashAllLetters, setFlashAllLetters] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const initialPlayCountRef = useRef<number | null>(null);
 
   const stageStartRef = useRef<number>(Date.now());
@@ -710,17 +711,46 @@ export default function Stage_DarkSearch({
 
   const { letters, realLetters, fakeLetters, viewport } = useLetterPositions(wordPick.word, fakeChars);
 
-  const canOfferSkip = wrongAttempts >= 20;
+  const canOfferSkip = wrongAttempts >= (isCoarsePointer ? 12 : 20);
   const canSkipByCondition = canOfferSkip && skipPenaltyAccepted && safeUpper(skipCodeInput) === "KEÇİR MƏNİ";
   const synonymHint = WORD_SYNONYM_HINTS[safeUpper(wordPick.word)] ?? "Məna ipucu: gizli anlayış";
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    syncPointerMode();
+    mediaQuery.addEventListener("change", syncPointerMode);
+    return () => {
+      mediaQuery.removeEventListener("change", syncPointerMode);
+    };
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       setMouse({ x: event.clientX, y: event.clientY });
     };
 
+    const handleTouchMove = (event: TouchEvent) => {
+      const firstTouch = event.touches[0];
+      if (!firstTouch) {
+        return;
+      }
+
+      setMouse({ x: firstTouch.clientX, y: firstTouch.clientY });
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchstart", handleTouchMove, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchstart", handleTouchMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
   }, []);
 
   useEffect(() => {
@@ -921,6 +951,12 @@ export default function Stage_DarkSearch({
       <div className="absolute left-1/2 top-5 z-[121] -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-900/75 px-3 py-2 text-xs font-semibold text-zinc-100">
         ⏱ {elapsedSeconds}s
       </div>
+
+      {isCoarsePointer && (
+        <div className="absolute bottom-4 left-1/2 z-[121] -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-900/85 px-3 py-2 text-xs font-semibold text-cyan-200">
+          Telefon rejimi: işığı barmaqla hərəkət etdir.
+        </div>
+      )}
 
       {letters.map((letter) => {
         const distCursor = distance(letter.x, letter.y, mouse.x, mouse.y);
