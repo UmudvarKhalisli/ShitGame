@@ -2,18 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-const SESSION_KEY = "mobile_desktop_nudge_hidden";
-
 export default function MobileDesktopNudge() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
-      return;
-    }
-
-    const alreadyHidden = window.sessionStorage.getItem(SESSION_KEY) === "1";
-    if (alreadyHidden) {
       return;
     }
 
@@ -24,13 +17,6 @@ export default function MobileDesktopNudge() {
 
     setIsVisible(true);
   }, []);
-
-  const handleClose = () => {
-    if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(SESSION_KEY, "1");
-    }
-    setIsVisible(false);
-  };
 
   if (!isVisible) {
     return null;
@@ -48,16 +34,7 @@ export default function MobileDesktopNudge() {
         <p className="mt-2 text-sm font-semibold text-amber-300">
           Komputerden ac, sonra de ki: Bu ne oyundu, niye cixa bilmirəm? :D
         </p>
-
-        <div className="mt-5 flex gap-2">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-sm font-bold text-zinc-100 hover:bg-zinc-800"
-          >
-            Oldu, yenede baxim
-          </button>
-        </div>
+        <p className="mt-5 text-xs text-zinc-500">Giris telefon ucun baglidir. Oyuna davam ucun PC istifade et.</p>
       </div>
     </div>
   );
