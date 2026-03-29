@@ -208,6 +208,10 @@ export default function Stage8_DiaAgainRush({
     }
   };
 
+  const setControl = (key: "left" | "right" | "up" | "down", pressed: boolean) => {
+    keysRef.current[key] = pressed;
+  };
+
   const spawnLaughStickers = () => {
     const faces = ["😂", "🤣", "😹", "😆", "😈"];
     const next = Array.from({ length: 7 }, (_, index) => ({
@@ -627,59 +631,105 @@ export default function Stage8_DiaAgainRush({
 
       <p className="text-xs text-zinc-300">{status}</p>
 
-      <div className="relative mx-auto overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#0f172a,#101827)]" style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}>
-        <div className="absolute left-0 bg-zinc-700/80" style={{ top: FLOOR_Y, width: WORLD_WIDTH, height: WORLD_HEIGHT - FLOOR_Y }} />
-
-        {round.platforms.map((platform) => {
-          const isFake = platform.id === round.fakePlatformId;
-          const y = isFake ? platform.y + fakeDrop : platform.y;
-          const hidden = isFake && fakeDrop > 8;
-
-          return (
-          <div
-            key={`${platform.x}-${platform.y}`}
-            className={`absolute rounded-sm border ${
-              isFake && fakeBroken ? "border-rose-300/70 bg-rose-500/35" : "border-cyan-300/60 bg-cyan-500/30"
-            }`}
-            style={{ left: platform.x, top: y, width: platform.w, height: platform.h, opacity: hidden ? 0 : 1 }}
-          />
-          );
-        })}
-
-        {hazardView.map((hazard) => (
-          <div
-            key={hazard.id}
-            className="absolute rounded-sm border border-orange-300/70 bg-orange-400/80 shadow-[0_0_10px_rgba(251,146,60,0.7)]"
-            style={{ left: hazard.x, top: hazard.y, width: hazard.size, height: hazard.size }}
-          />
-        ))}
-
+      <div className="mx-auto w-full overflow-x-auto pb-1">
         <div
-          className="absolute border border-violet-300/70 bg-violet-500/30"
-          style={{ left: doorView.x, top: doorView.y, width: doorView.w, height: doorView.h }}
+          className="relative mx-auto min-w-[760px] overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#0f172a,#101827)]"
+          style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}
         >
-        </div>
+          <div className="absolute left-0 bg-zinc-700/80" style={{ top: FLOOR_Y, width: WORLD_WIDTH, height: WORLD_HEIGHT - FLOOR_Y }} />
 
-        <div
-          className="absolute rounded-[4px] border border-amber-200 bg-amber-300 shadow-[0_0_14px_rgba(253,224,71,0.55)]"
-          style={{ left: playerView.x, top: playerView.y, width: PLAYER_SIZE, height: PLAYER_SIZE }}
-        />
+          {round.platforms.map((platform) => {
+            const isFake = platform.id === round.fakePlatformId;
+            const y = isFake ? platform.y + fakeDrop : platform.y;
+            const hidden = isFake && fakeDrop > 8;
 
-        {dead && laughStickers.map((sticker) => (
-          <span
-            key={sticker.id}
-            className="pointer-events-none absolute select-none"
-            style={{
-              left: `${sticker.x}%`,
-              top: `${sticker.y}%`,
-              transform: `translate(-50%, -50%) rotate(${sticker.rotate}deg)`,
-              fontSize: `${sticker.size}px`,
-              textShadow: "0 0 10px rgba(255,255,255,0.45)",
-            }}
+            return (
+              <div
+                key={`${platform.x}-${platform.y}`}
+                className={`absolute rounded-sm border ${
+                  isFake && fakeBroken ? "border-rose-300/70 bg-rose-500/35" : "border-cyan-300/60 bg-cyan-500/30"
+                }`}
+                style={{ left: platform.x, top: y, width: platform.w, height: platform.h, opacity: hidden ? 0 : 1 }}
+              />
+            );
+          })}
+
+          {hazardView.map((hazard) => (
+            <div
+              key={hazard.id}
+              className="absolute rounded-sm border border-orange-300/70 bg-orange-400/80 shadow-[0_0_10px_rgba(251,146,60,0.7)]"
+              style={{ left: hazard.x, top: hazard.y, width: hazard.size, height: hazard.size }}
+            />
+          ))}
+
+          <div
+            className="absolute border border-violet-300/70 bg-violet-500/30"
+            style={{ left: doorView.x, top: doorView.y, width: doorView.w, height: doorView.h }}
           >
-            {sticker.face}
-          </span>
-        ))}
+          </div>
+
+          <div
+            className="absolute rounded-[4px] border border-amber-200 bg-amber-300 shadow-[0_0_14px_rgba(253,224,71,0.55)]"
+            style={{ left: playerView.x, top: playerView.y, width: PLAYER_SIZE, height: PLAYER_SIZE }}
+          />
+
+          {dead && laughStickers.map((sticker) => (
+            <span
+              key={sticker.id}
+              className="pointer-events-none absolute select-none"
+              style={{
+                left: `${sticker.x}%`,
+                top: `${sticker.y}%`,
+                transform: `translate(-50%, -50%) rotate(${sticker.rotate}deg)`,
+                fontSize: `${sticker.size}px`,
+                textShadow: "0 0 10px rgba(255,255,255,0.45)",
+              }}
+            >
+              {sticker.face}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 md:hidden">
+        <div className="col-start-2">
+          <button
+            type="button"
+            onTouchStart={() => setControl("up", true)}
+            onTouchEnd={() => setControl("up", false)}
+            onTouchCancel={() => setControl("up", false)}
+            className="w-full rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+          >
+            Yuxarı
+          </button>
+        </div>
+        <button
+          type="button"
+          onTouchStart={() => setControl("left", true)}
+          onTouchEnd={() => setControl("left", false)}
+          onTouchCancel={() => setControl("left", false)}
+          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+        >
+          Sol
+        </button>
+        <button
+          type="button"
+          onTouchStart={() => setControl("down", true)}
+          onTouchEnd={() => setControl("down", false)}
+          onTouchCancel={() => setControl("down", false)}
+          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+        >
+          Aşağı
+        </button>
+        <button
+          type="button"
+          onTouchStart={() => setControl("right", true)}
+          onTouchEnd={() => setControl("right", false)}
+          onTouchCancel={() => setControl("right", false)}
+          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+        >
+          Sağ
+        </button>
       </div>
     </section>
   );

@@ -316,8 +316,8 @@ function StageRouter() {
   const isHardHintUnlocked = currentStageAttempts >= 20;
 
   return (
-    <div className="w-full max-w-3xl space-y-6">
-      <div className="sticky top-4 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm font-semibold text-zinc-100 backdrop-blur">
+    <div className="w-full max-w-3xl space-y-4 sm:space-y-6">
+      <div className="sticky top-2 z-40 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-zinc-100 backdrop-blur sm:top-4 sm:px-4 sm:py-3 sm:text-sm">
         Mərhələ {stageNumber}/{TOTAL_STAGES} | Cəhd: {gameState.attempts} | 😤
       </div>
 
@@ -385,7 +385,7 @@ function StageRouter() {
         gameState.currentStage !== 7 &&
         gameState.currentStage !== 8 &&
         gameState.currentStage !== 10 && (
-        <div className="fixed left-4 top-4 z-[110] w-[220px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 shadow-xl backdrop-blur">
+        <div className="fixed left-1/2 top-3 z-[110] w-[min(92vw,220px)] -translate-x-1/2 rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 shadow-xl backdrop-blur sm:left-4 sm:top-4 sm:w-[220px] sm:translate-x-0">
           <p className="mb-2 text-xs font-semibold text-zinc-100">🍺 Ayıqlıq:</p>
           <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
             <div
@@ -448,7 +448,7 @@ function StageRouter() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2 }}
-            className="fixed left-1/2 top-24 z-[120] -translate-x-1/2 rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-3 text-sm font-semibold text-zinc-100 shadow-xl"
+            className="fixed left-1/2 top-20 z-[120] w-[min(92vw,460px)] -translate-x-1/2 rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-3 text-center text-sm font-semibold text-zinc-100 shadow-xl sm:top-24 sm:text-left"
           >
             Sayt özünü sağaltdı. Davam et. 💪
           </motion.div>
@@ -456,8 +456,8 @@ function StageRouter() {
       </AnimatePresence>
 
       {gameState.currentStage !== "complete" && activeStageHint && (
-        <div className="fixed right-4 top-1/2 z-[118] -translate-y-1/2">
-          <div className="flex flex-col items-end gap-2">
+        <div className="fixed bottom-4 left-1/2 z-[118] w-[min(92vw,320px)] -translate-x-1/2 sm:bottom-auto sm:left-auto sm:right-4 sm:top-1/2 sm:w-auto sm:translate-x-0 sm:-translate-y-1/2">
+          <div className="flex flex-col items-stretch gap-2 sm:items-end">
             <button
               type="button"
               onClick={() => setIsHelpOpen((prev) => !prev)}
@@ -473,7 +473,7 @@ function StageRouter() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="w-[290px] rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 text-sm text-zinc-200 shadow-xl"
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900/95 p-3 text-sm text-zinc-200 shadow-xl sm:w-[290px]"
                 >
                   <p className="font-semibold text-zinc-100">Mərhələ {stageNumber} kömək paneli</p>
                   <p className="mt-1 text-xs text-zinc-400">Bu mərhələ cəhd sayı: {currentStageAttempts}</p>
@@ -518,7 +518,7 @@ function ChaosApp() {
   return (
     <>
       <main
-        className={`mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center p-6 ${
+        className={`mx-auto flex min-h-[100svh] w-full max-w-4xl items-center justify-center p-3 sm:p-6 ${
           isPlainVisualStage ? "stage5-cursor-visible" : ""
         } ${
           isEffectActive ? `drunk-browser-active ${intensityClass}` : ""

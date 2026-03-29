@@ -51,6 +51,10 @@ export default function Stage9_ExitDoorChaos({
     timeoutsRef.current = [];
   };
 
+  const setControl = (key: "left" | "right" | "up" | "down", pressed: boolean) => {
+    keysRef.current[key] = pressed;
+  };
+
   const stopMusic = useCallback(() => {
     if (musicIntervalRef.current !== null) {
       window.clearInterval(musicIntervalRef.current);
@@ -337,20 +341,66 @@ export default function Stage9_ExitDoorChaos({
       <p className="text-xs text-zinc-300">{status}</p>
       <p className="text-xs font-semibold text-rose-200">Tutuş: {catchCount}/{REQUIRED_CATCHES}</p>
 
-      <div className="relative mx-auto overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#131521,#101826)]" style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}>
+      <div className="mx-auto w-full overflow-x-auto pb-1">
         <div
-          className="absolute rounded-[4px] border border-amber-200 bg-amber-300 shadow-[0_0_14px_rgba(253,224,71,0.55)]"
-          style={{ left: playerView.x, top: playerView.y, width: PLAYER_SIZE, height: PLAYER_SIZE }}
-        />
-
-        <motion.div
-          className="absolute border border-rose-300/80 bg-rose-500/20"
-          animate={{ x: doorView.x, y: doorView.y, scale: doorScale }}
-          transition={{ type: "spring", stiffness: 260, damping: 20, mass: 0.55 }}
-          style={{ left: 0, top: 0, width: doorView.width, height: doorView.height, transformOrigin: "center center" }}
+          className="relative mx-auto min-w-[760px] overflow-hidden rounded-xl border border-zinc-700 bg-[linear-gradient(180deg,#131521,#101826)]"
+          style={{ width: WORLD_WIDTH, height: WORLD_HEIGHT }}
         >
-          <p className="pt-2 text-center text-xs font-black uppercase tracking-[0.2em] text-rose-200">QAPI</p>
-        </motion.div>
+          <div
+            className="absolute rounded-[4px] border border-amber-200 bg-amber-300 shadow-[0_0_14px_rgba(253,224,71,0.55)]"
+            style={{ left: playerView.x, top: playerView.y, width: PLAYER_SIZE, height: PLAYER_SIZE }}
+          />
+
+          <motion.div
+            className="absolute border border-rose-300/80 bg-rose-500/20"
+            animate={{ x: doorView.x, y: doorView.y, scale: doorScale }}
+            transition={{ type: "spring", stiffness: 260, damping: 20, mass: 0.55 }}
+            style={{ left: 0, top: 0, width: doorView.width, height: doorView.height, transformOrigin: "center center" }}
+          >
+            <p className="pt-2 text-center text-xs font-black uppercase tracking-[0.2em] text-rose-200">QAPI</p>
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 md:hidden">
+        <div className="col-start-2">
+          <button
+            type="button"
+            onTouchStart={() => setControl("up", true)}
+            onTouchEnd={() => setControl("up", false)}
+            onTouchCancel={() => setControl("up", false)}
+            className="w-full rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+          >
+            Yuxarı
+          </button>
+        </div>
+        <button
+          type="button"
+          onTouchStart={() => setControl("left", true)}
+          onTouchEnd={() => setControl("left", false)}
+          onTouchCancel={() => setControl("left", false)}
+          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+        >
+          Sol
+        </button>
+        <button
+          type="button"
+          onTouchStart={() => setControl("down", true)}
+          onTouchEnd={() => setControl("down", false)}
+          onTouchCancel={() => setControl("down", false)}
+          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+        >
+          Aşağı
+        </button>
+        <button
+          type="button"
+          onTouchStart={() => setControl("right", true)}
+          onTouchEnd={() => setControl("right", false)}
+          onTouchCancel={() => setControl("right", false)}
+          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+        >
+          Sağ
+        </button>
       </div>
     </section>
   );
