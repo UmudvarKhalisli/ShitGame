@@ -18,36 +18,12 @@ export default function MobileDesktopNudge() {
     setIsVisible(true);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !isVisible) {
-      return;
-    }
-
-    const { body, documentElement } = document;
-    const prevBodyOverflow = body.style.overflow;
-    const prevBodyOverscroll = body.style.overscrollBehavior;
-    const prevHtmlOverflow = documentElement.style.overflow;
-    const prevHtmlOverscroll = documentElement.style.overscrollBehavior;
-
-    body.style.overflow = "hidden";
-    body.style.overscrollBehavior = "none";
-    documentElement.style.overflow = "hidden";
-    documentElement.style.overscrollBehavior = "none";
-
-    return () => {
-      body.style.overflow = prevBodyOverflow;
-      body.style.overscrollBehavior = prevBodyOverscroll;
-      documentElement.style.overflow = prevHtmlOverflow;
-      documentElement.style.overscrollBehavior = prevHtmlOverscroll;
-    };
-  }, [isVisible]);
-
   if (!isVisible) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-[1300] flex h-[100dvh] items-center justify-center overflow-hidden overscroll-none bg-black/95 p-4 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[12050] flex h-[100dvh] items-center justify-center bg-black p-4">
       <div className="w-full max-w-md rounded-none border-x-2 border-b-2 border-t-8 border-red-600 bg-zinc-950 p-10 font-mono text-zinc-100 shadow-[0_0_80px_rgba(220,38,38,0.3)]">
         <p className="animate-pulse text-[10px] font-black uppercase tracking-[0.4em] text-red-600">
           Critical System Error: 0xBOS-BES
