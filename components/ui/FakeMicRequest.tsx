@@ -17,6 +17,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
   const [volume, setVolume] = useState(0);
   const [detectedText, setDetectedText] = useState("");
   const [confidence, setConfidence] = useState(0);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
 
   const activatingTimerRef = useRef<number | null>(null);
   const roastTimerRef = useRef<number | null>(null);
@@ -52,6 +53,19 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
   }, []);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    syncPointerMode();
+    mediaQuery.addEventListener("change", syncPointerMode);
+    return () => {
+      mediaQuery.removeEventListener("change", syncPointerMode);
+    };
+  }, []);
+
+  useEffect(() => {
     if (phase !== "listening") {
       return;
     }
@@ -61,31 +75,33 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
     setConfidence(0);
     setDetectedText("");
 
-    const handleMouseMove = (event: MouseEvent) => {
-      const now = Date.now();
+    const processPointerMove = (x: number, y: number, isTouchInput: boolean) => {
+      const currentTimestamp = Date.now();
       const previous = lastPointerRef.current;
-      lastPointerRef.current = { x: event.clientX, y: event.clientY, timestamp: now };
+      lastPointerRef.current = { x, y, timestamp: currentTimestamp };
 
       if (!previous || detectedRef.current) {
         return;
       }
 
-      const deltaX = event.clientX - previous.x;
-      const deltaY = event.clientY - previous.y;
+      const deltaX = x - previous.x;
+      const deltaY = y - previous.y;
       const distance = Math.hypot(deltaX, deltaY);
-      const deltaTime = Math.max(1, now - previous.timestamp);
+      const deltaTime = Math.max(1, currentTimestamp - previous.timestamp);
 
       const speed = distance / deltaTime;
-      const currentVolume = Math.max(2, Math.min(100, Math.round(speed * 60)));
+      const sensitivity = isTouchInput ? 72 : 60;
+      const currentVolume = Math.max(2, Math.min(100, Math.round(speed * sensitivity)));
       setVolume(currentVolume);
 
-      distanceHistoryRef.current.push({ timestamp: now, distance });
+      distanceHistoryRef.current.push({ timestamp: currentTimestamp, distance });
       distanceHistoryRef.current = distanceHistoryRef.current.filter(
-        (chunk) => now - chunk.timestamp <= 4500,
+        (chunk) => currentTimestamp - chunk.timestamp <= 4500,
       );
 
       const totalDistance = distanceHistoryRef.current.reduce((sum, chunk) => sum + chunk.distance, 0);
-      if (currentVolume >= 78) {
+      const activeThreshold = isTouchInput ? 62 : 78;
+      if (currentVolume >= activeThreshold) {
         confidenceRef.current = Math.min(100, confidenceRef.current + deltaTime * 0.09);
       } else {
         confidenceRef.current = Math.max(0, confidenceRef.current - deltaTime * 0.05);
@@ -93,7 +109,8 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
 
       setConfidence(Math.round(confidenceRef.current));
 
-      const enoughDistance = totalDistance >= 1200;
+      const requiredDistance = isTouchInput ? 760 : 1200;
+      const enoughDistance = totalDistance >= requiredDistance;
       const enoughControl = confidenceRef.current >= 100;
 
       if (enoughDistance && enoughControl) {
@@ -109,10 +126,25 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
       }
     };
 
+    const handleMouseMove = (event: MouseEvent) => {
+      processPointerMove(event.clientX, event.clientY, false);
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const firstTouch = event.touches[0];
+      if (!firstTouch) {
+        return;
+      }
+
+      processPointerMove(firstTouch.clientX, firstTouch.clientY, true);
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchstart", handleTouchMove, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
 
     roastTimerRef.current = window.setTimeout(() => {
-      chaosController.triggerRoast("Qışqırmaqdan qorxursan? Siçanı hərəkət elə heç olmasa 🤦");
+      chaosController.triggerRoast("Qışqırmaqdan qorxursan? Siçanı ya da barmağını sürətli hərəkət elə 🤦");
     }, 15000);
 
     decayTimerRef.current = window.setInterval(() => {
@@ -126,6 +158,8 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchstart", handleTouchMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       if (roastTimerRef.current !== null) {
         window.clearTimeout(roastTimerRef.current);
         roastTimerRef.current = null;
@@ -148,7 +182,8 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
     }, 2000);
   };
 
-  const zoneText = volume >= 78 ? "Yaşıl zona" : "Sakit zona";
+  const activeThreshold = isCoarsePointer ? 62 : 78;
+  const zoneText = volume >= activeThreshold ? "Yaşıl zona" : "Sakit zona";
 
   const waveBars = useMemo(() => Array.from({ length: 9 }, (_, index) => index), []);
 
@@ -199,6 +234,12 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                   🎤 Qışqır: &apos;BAŞLA!&apos; deyə səslən
                 </p>
 
+                {isCoarsePointer && (
+                  <p className="text-xs font-semibold text-cyan-300">
+                    Telefon rejimi: ekran üzərində barmağını sürətli swipe et.
+                  </p>
+                )}
+
                 <motion.p
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 0.9, repeat: Number.POSITIVE_INFINITY }}
@@ -211,7 +252,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                   <div className="h-3 overflow-hidden rounded-full bg-zinc-800">
                     <div
                       className={`h-full transition-[width] duration-75 ${
-                        volume >= 78 ? "bg-violet-500" : "bg-amber-400"
+                        volume >= activeThreshold ? "bg-violet-500" : "bg-amber-400"
                       }`}
                       style={{ width: `${volume}%` }}
                     />
