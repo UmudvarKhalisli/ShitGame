@@ -723,7 +723,7 @@ export default function FakeLeaderboard({
       )}
 
       <footer className="pt-3 text-center text-[10px] text-zinc-500 animate-pulse">
-        Bu saytı hazırlayarkən heç bir proqramçının əsəbi yerində qalmayıb.
+        Bu saytı hazırlayarkən proqramçının əsəbi yerində qalmayıb.
       </footer>
     </motion.div>
   );
