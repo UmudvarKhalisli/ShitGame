@@ -101,7 +101,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
               : { scale: 1 }
           }
           transition={{ duration: 0.7, ease: "easeInOut" }}
-          className="relative min-h-screen w-screen overflow-y-auto border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
+          className="relative min-h-[100svh] w-screen overflow-y-auto border border-zinc-300/20 bg-zinc-950/95 shadow-2xl"
         >
           <div className="pointer-events-none absolute inset-0 opacity-10">
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-22deg] text-[28px] font-black tracking-[0.2em] text-rose-400">
@@ -111,7 +111,7 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
 
           {isDramaticExit && <div className="pointer-events-none absolute inset-0 bg-red-500/40" />}
 
-          <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col space-y-5 p-6 sm:p-8">
+          <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-5xl flex-col space-y-5 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-8">
             <header className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-4">
               <h2 className="text-center text-lg font-extrabold text-rose-300 sm:text-xl">
                 ⚠ DİQQƏT: PSİXOLOJİ SAĞLAMLIQ VƏ CİHAZ TƏHLÜKƏSİZLİYİ XƏBƏRDARLIĞI
@@ -149,21 +149,23 @@ export default function EntryAgreement({ onAccept }: { onAccept: (fullName: stri
               {nameError && <p className="mt-2 text-xs text-rose-400">{nameError}</p>}
             </div>
 
-            <button
-              type="button"
-              disabled={!canSubmit}
-              onClick={handleAccept}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-extrabold tracking-wide text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
-            >
-              {isSigning ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent" />
-                  İmzalanır...
-                </>
-              ) : (
-                actionText
-              )}
-            </button>
+            <div className="sticky bottom-0 z-20 -mx-4 border-t border-zinc-800/80 bg-zinc-950/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:static sm:mx-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0 sm:backdrop-blur-0">
+              <button
+                type="button"
+                disabled={!canSubmit}
+                onClick={handleAccept}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-extrabold tracking-wide text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+              >
+                {isSigning ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent" />
+                    İmzalanır...
+                  </>
+                ) : (
+                  actionText
+                )}
+              </button>
+            </div>
 
             <p className="text-center text-xs text-zinc-500">
               © 2026 Əsəb Bölməsi MMC. Bütün əsəblər qorunur.
