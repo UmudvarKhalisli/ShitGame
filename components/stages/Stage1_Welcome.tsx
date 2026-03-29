@@ -224,7 +224,7 @@ export default function Stage1_Welcome({
     <section className="relative w-full max-w-4xl space-y-5 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-8 text-center shadow-xl">
       <h1 className="text-3xl font-bold text-zinc-100">Xoş Gəlmisən, Bas Görək</h1>
       <p className="text-sm text-zinc-300">
-        Zona böyüdü: kursor tərsinə aldadır, düymə də fırlanıb qaçır — çətindir, amma mümkündür.
+        Düymə fırlanıb qaçır? Hə! — çətindir, amma mümkündür.
       </p>
       {isCoarsePointer && (
         <p className="text-xs font-semibold text-amber-300">Telefon rejimi: düyməni tutmaq üçün 10 dəfə təqib et ({mobileCatchCount}/10).</p>
@@ -298,7 +298,7 @@ export default function Stage1_Welcome({
                 ⚠ OYUN SİMULYASİYASI • ƏSƏB BÖLMƏSİ TEST SƏHNƏSİ
               </div>
               <div className="text-[120px] leading-none">:(</div>
-              <p className="text-2xl font-semibold">Sistem kritik xətaya düşdü.</p>
+              <p className="text-2xl font-semibold">Sistem kritik xətaya düşdü? Yox təbii ki, biraz gözləmək lazımdır.</p>
               <p className="text-sm opacity-90">{glyphLine.repeat(4)}</p>
               <p className="text-sm opacity-80">⟁⧖⫷ 卐 ѪѬ ⟟⟒ⵣ ⴹ {glyphLine.repeat(2)}</p>
               <p className="text-sm opacity-75">𖠋 𖢻 𖤍 ꙮ ⊬ ⊭ {glyphLine.repeat(2)}</p>

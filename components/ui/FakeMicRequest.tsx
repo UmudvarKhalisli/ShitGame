@@ -257,7 +257,7 @@ export default function FakeMicRequest({ onComplete }: { onComplete: () => void 
                       style={{ width: `${volume}%` }}
                     />
                   </div>
-                  <p className="text-xs text-zinc-400">Səs ölçeri: {zoneText}</p>
+                  <p className="text-xs text-zinc-400">Səs ölçən: {zoneText}</p>
 
                   <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
                     <div
