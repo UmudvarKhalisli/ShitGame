@@ -27,7 +27,7 @@ const FALLBACK_ROWS: Omit<LeaderboardEntry, "rank" | "highlight">[] = [
 
 const SLANDER_LINE = "Mən boş adamam, vaxtımı bura xərcləyirəm";
 const TERMINAL_BTN =
-  "rounded-md border border-violet-400/70 bg-violet-700/20 px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] text-violet-200 transition hover:border-red-400/70 hover:bg-red-700/20 hover:text-red-200";
+  "rounded-md border-2 border-violet-400 bg-violet-600/35 px-4 py-2 text-sm font-bold uppercase tracking-[0.12em] text-violet-100 shadow-[0_0_14px_rgba(124,58,237,0.45)] transition hover:border-red-400 hover:bg-red-700/35 hover:text-red-100";
 const NAME_POOL = [
   "Aysel Q.",
   "Ramin Dev",
@@ -472,7 +472,9 @@ export default function FakeLeaderboard({
         </div>
       </div>
 
-      <div className="relative z-[12001] flex flex-wrap gap-2 pointer-events-auto">
+      <div className="relative z-[12001] space-y-2 rounded-xl border border-zinc-700 bg-zinc-900/70 p-3 pointer-events-auto">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-300">Terminal Komandaları</p>
+        <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => setIsSlanderOpen(true)}
@@ -492,6 +494,7 @@ export default function FakeLeaderboard({
         >
           Dərdimi Kimə Deyim?
         </button>
+        </div>
       </div>
 
       {certificateOpen && (

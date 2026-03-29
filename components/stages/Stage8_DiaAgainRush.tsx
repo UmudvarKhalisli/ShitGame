@@ -128,8 +128,8 @@ const ROUNDS: RoundConfig[] = [
   },
   {
     id: 5,
-    title: "Raund 5/5: Final Qarışıqlıq",
-    note: "Ağır jump + tərs idarə + qaçan qapı eyni anda.",
+    title: "Raund 5/5: Tam Xaos",
+    note: "Hər şey qarışır: tərsinə kontrol, qaçan qapı, düşən bloklar... Hər şey var, sağ qal!",
     moveSpeed: 4.3,
     jump: -9.4,
     gravity: 0.94,
@@ -201,6 +201,9 @@ export default function Stage8_DiaAgainRush({
   const hazardSpawnAtRef = useRef(0);
   const hazardIdRef = useRef(0);
   const fullscreenAttemptedRef = useRef(false);
+  const round5TeleportCountRef = useRef(0);
+  const round5TeleportLimitRef = useRef(0);
+  const round5StopNoticeRef = useRef(false);
 
   const clearTimers = () => {
     if (invertTimerRef.current !== null) {
@@ -299,6 +302,16 @@ export default function Stage8_DiaAgainRush({
     hazardRef.current = [];
     setHazardView([]);
     hazardSpawnAtRef.current = 0;
+
+    if (round.id === 5) {
+      round5TeleportCountRef.current = 0;
+      round5TeleportLimitRef.current = 20 + Math.floor(Math.random() * 6);
+      round5StopNoticeRef.current = false;
+    } else {
+      round5TeleportCountRef.current = 0;
+      round5TeleportLimitRef.current = 0;
+      round5StopNoticeRef.current = false;
+    }
 
     keysRef.current = { left: false, right: false, up: false, down: false };
     playerRef.current = { x: START_X, y: START_Y, vx: 0, vy: 0, onGround: true };
@@ -542,8 +555,29 @@ export default function Stage8_DiaAgainRush({
           }
 
           if (distance < effectiveTeleportDistance && distance > minTeleportDistance) {
-            doorCooldownUntilRef.current = now + teleportCooldown;
-            randomizeDoor(nextX, nextY);
+            if (round.id === 5) {
+              if (round5TeleportCountRef.current >= round5TeleportLimitRef.current) {
+                if (!round5StopNoticeRef.current) {
+                  round5StopNoticeRef.current = true;
+                  setStatus(`${round.title}: Qapı yoruldu, artıq qaçmır. İndi tut!`);
+                }
+              } else {
+                round5TeleportCountRef.current += 1;
+                doorCooldownUntilRef.current = now + teleportCooldown;
+                randomizeDoor(nextX, nextY);
+
+                if (
+                  round5TeleportCountRef.current >= round5TeleportLimitRef.current &&
+                  !round5StopNoticeRef.current
+                ) {
+                  round5StopNoticeRef.current = true;
+                  setStatus(`${round.title}: ${round5TeleportLimitRef.current} dəfə qaçdı, indi dayanır. Tut!`);
+                }
+              }
+            } else {
+              doorCooldownUntilRef.current = now + teleportCooldown;
+              randomizeDoor(nextX, nextY);
+            }
           }
         }
 

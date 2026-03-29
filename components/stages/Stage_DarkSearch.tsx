@@ -997,7 +997,7 @@ export default function Stage_DarkSearch({
       />
 
       {canOfferSkip && (
-        <div className="fixed bottom-[128px] left-1/2 z-[123] w-[min(92vw,560px)] -translate-x-1/2 rounded-xl border border-amber-500/40 bg-zinc-900/90 p-3 text-zinc-100 shadow-xl">
+        <div className="fixed bottom-[186px] left-1/2 z-[123] w-[min(92vw,560px)] -translate-x-1/2 rounded-xl border border-amber-500/40 bg-zinc-900/90 p-3 text-zinc-100 shadow-xl sm:bottom-[148px]">
           <p className="text-xs text-amber-300">20 cəhddən sonra xüsusi keçid açıldı. Şərti qəbul etsən növbəti mərhələyə keçə bilərsən.</p>
           <p className="mt-2 text-xs text-cyan-200">İpucu (yaxın sinonim): {synonymHint}</p>
           <label className="mt-2 flex items-center gap-2 text-xs text-zinc-300">
