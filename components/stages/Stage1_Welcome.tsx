@@ -203,12 +203,11 @@ export default function Stage1_Welcome({
 
     event.preventDefault();
 
-    const requiredTouches = 3;
+    const requiredTouches = 10;
     setMobileCatchCount((prev) => {
       const next = prev + 1;
       if (next >= requiredTouches) {
-        setButtonRotation((rot) => rot + 40);
-        handleCatch();
+        onComplete();
         return 0;
       }
 
@@ -228,7 +227,7 @@ export default function Stage1_Welcome({
         Zona böyüdü: kursor tərsinə aldadır, düymə də fırlanıb qaçır — çətindir, amma mümkündür.
       </p>
       {isCoarsePointer && (
-        <p className="text-xs font-semibold text-amber-300">Telefon rejimi: düyməni tutmaq üçün 3 dəfə təqib et ({mobileCatchCount}/3).</p>
+        <p className="text-xs font-semibold text-amber-300">Telefon rejimi: düyməni tutmaq üçün 10 dəfə təqib et ({mobileCatchCount}/10).</p>
       )}
 
       <div
