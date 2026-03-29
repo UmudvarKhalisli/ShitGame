@@ -30,24 +30,23 @@ export default function MobileDesktopNudge() {
         </p>
 
         <h2 className="mt-6 text-3xl font-black uppercase leading-tight text-white">
-          Telefonla bura <br /> girmek? <span className="text-red-600">Gulmeli idi...</span>
+          Telefonla bura <br /> girmək? <span className="text-red-600">Gülməli idi...</span>
         </h2>
 
         <p className="mt-8 text-sm leading-relaxed text-zinc-400">
-          Senin o balaca ekranin ve yavas sensorun bizim xaos paketimizi qaldira bilmez. Bu saytin kodlari senin
-          telefonunun prosessorunu eride biler. Bura barmaqla toxunmaq ucun yox, sicanla (mouse) doyusmek ucundur.
+          Sənin o balaca ekranın və yavaş sensorun bizim xaos paketimizi qaldıra bilməz. Bu saytın kodları sənin telefonunun prosessorunu əridə bilər. Bura barmaqla toxunmaq üçün yox, siçanla (mouse) döyüşmək üçündür.
         </p>
 
         <div className="mt-8 border-l-4 border-red-900 bg-red-950/20 py-3 pl-4">
           <p className="text-sm font-bold uppercase tracking-tighter text-red-500">
-            Get ozune bir komputer tap, sicanini gotur ve subut et ki, ne qeder dozumlusen.
+            Get özünə bir kompüter tap, siçanını götür və sübut et ki, nə qədər dözümlüsən.
           </p>
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-2 opacity-30">
           <div className="h-[1px] w-full bg-red-900" />
           <span className="text-[9px] italic uppercase tracking-widest text-zinc-600">
-            &quot;Bu sayti hazirlayarken hec bir proqramcinin esebi yerinde qalmayib.&quot;
+            &quot;Bu saytı hazırlayarkən proqramçının əsəbi yerində qalmayıb.&quot;
           </span>
         </div>
       </div>
