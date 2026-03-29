@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BoshBesh icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a14" />
+      <stop offset="100%" stop-color="#14060a" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="12" fill="url(#bg)" />
+  <rect x="8" y="8" width="48" height="48" rx="10" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.9" />
+
+  <path d="M10 24 L56 24" stroke="#ef4444" stroke-width="1.2" opacity="0.35" />
+  <path d="M10 40 L56 40" stroke="#7c3aed" stroke-width="1.2" opacity="0.3" />
+
+  <ellipse cx="32" cy="32" rx="17" ry="11" fill="none" stroke="url(#glow)" stroke-width="3.2" />
+  <ellipse cx="32" cy="32" rx="8" ry="8" fill="#0b0b12" stroke="#ef4444" stroke-width="1.8" />
+  <circle cx="32" cy="32" r="3.2" fill="#ef4444" />
+  <circle cx="29.5" cy="29.5" r="1.1" fill="#fca5a5" opacity="0.85" />
+
+  <path d="M18 17 l5 -3" stroke="#ef4444" stroke-width="2" />
+  <path d="M41 47 l6 2" stroke="#7c3aed" stroke-width="2" />
+</svg>
