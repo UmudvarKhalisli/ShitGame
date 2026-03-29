@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import MobileDesktopNudge from "@/components/ui/MobileDesktopNudge";
+import MobileDesktopNudge from "../components/ui/MobileDesktopNudge";
 
 export const metadata: Metadata = {
   title: "BoshBesh",
