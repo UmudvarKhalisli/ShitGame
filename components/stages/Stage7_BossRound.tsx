@@ -443,7 +443,7 @@ export default function Stage7_BossRound({
               transition={{ duration: 1.1, ease: "easeOut" }}
               className="text-center text-4xl font-black text-amber-300 sm:text-6xl"
             >
-              SON MƏRHƏLƏ 👑
+              SON MƏRHƏLƏ? Yox Var Hələ 👑
             </motion.h1>
           </motion.div>
         )}
