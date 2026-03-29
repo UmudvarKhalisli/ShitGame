@@ -23,18 +23,33 @@ export default function MobileDesktopNudge() {
   }
 
   return (
-    <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-950/95 p-5 text-zinc-100 shadow-2xl">
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Diqqet, Esb Testi</p>
-        <h2 className="mt-2 text-2xl font-black text-rose-300">Bu sayt telefonla tam acilmir :)</h2>
-        <p className="mt-3 text-sm leading-6 text-zinc-300">
-          Burasi siçanla esebleri yoxlamaq ucun duzeldilib. Telefon versiyasi sadece trailer kimidir,
-          tam xaos paketi PC + mouse ile acilir.
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-black/95 p-4 backdrop-blur-xl">
+      <div className="w-full max-w-md rounded-none border-x-2 border-b-2 border-t-8 border-red-600 bg-zinc-950 p-10 font-mono text-zinc-100 shadow-[0_0_80px_rgba(220,38,38,0.3)]">
+        <p className="animate-pulse text-[10px] font-black uppercase tracking-[0.4em] text-red-600">
+          Critical System Error: 0xBOS-BES
         </p>
-        <p className="mt-2 text-sm font-semibold text-amber-300">
-          Komputerden ac, sonra de ki: Bu ne oyundu, niye cixa bilmirəm? :D
+
+        <h2 className="mt-6 text-3xl font-black uppercase leading-tight text-white">
+          Telefonla bura <br /> girmek? <span className="text-red-600">Gulmeli idi...</span>
+        </h2>
+
+        <p className="mt-8 text-sm leading-relaxed text-zinc-400">
+          Senin o balaca ekranin ve yavas sensorun bizim xaos paketimizi qaldira bilmez. Bu saytin kodlari senin
+          telefonunun prosessorunu eride biler. Bura barmaqla toxunmaq ucun yox, sicanla (mouse) doyusmek ucundur.
         </p>
-        <p className="mt-5 text-xs text-zinc-500">Giris telefon ucun baglidir. Oyuna davam ucun PC istifade et.</p>
+
+        <div className="mt-8 border-l-4 border-red-900 bg-red-950/20 py-3 pl-4">
+          <p className="text-sm font-bold uppercase tracking-tighter text-red-500">
+            Get ozune bir komputer tap, sicanini gotur ve subut et ki, ne qeder dozumlusen.
+          </p>
+        </div>
+
+        <div className="mt-10 flex flex-col items-center justify-center gap-2 opacity-30">
+          <div className="h-[1px] w-full bg-red-900" />
+          <span className="text-[9px] italic uppercase tracking-widest text-zinc-600">
+            &quot;Bu sayti hazirlayarken hec bir proqramcinin esebi yerinde qalmayib.&quot;
+          </span>
+        </div>
       </div>
     </div>
   );
