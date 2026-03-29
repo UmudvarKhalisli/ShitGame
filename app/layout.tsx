@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import MobileDesktopNudge from "@/components/ui/MobileDesktopNudge";
 
 export const metadata: Metadata = {
   title: "BoshBesh",
@@ -18,6 +19,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-zinc-950 text-zinc-100" style={{ fontFamily: "Inter, sans-serif" }}>
+        <MobileDesktopNudge />
         {children}
       </body>
     </html>
