@@ -486,9 +486,10 @@ function StageRouter() {
               onClick={() => setIsHelpOpen((prev) => !prev)}
               aria-label="Kömək panelini aç"
               title="Kömək"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/95 text-sm font-black text-zinc-100 shadow-lg transition hover:bg-zinc-800"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/95 text-sm font-black text-zinc-100 shadow-lg transition hover:bg-zinc-800 sm:h-auto sm:w-auto sm:rounded-xl sm:px-4 sm:py-2"
             >
-              İ
+              <span className="sm:hidden">İ</span>
+              <span className="hidden sm:inline">Kömək</span>
             </button>
 
             <AnimatePresence>
