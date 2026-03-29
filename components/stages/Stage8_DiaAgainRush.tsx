@@ -200,6 +200,7 @@ export default function Stage8_DiaAgainRush({
   const hazardRef = useRef<FallingHazard[]>([]);
   const hazardSpawnAtRef = useRef(0);
   const hazardIdRef = useRef(0);
+  const fullscreenAttemptedRef = useRef(false);
 
   const clearTimers = () => {
     if (invertTimerRef.current !== null) {
@@ -208,8 +209,38 @@ export default function Stage8_DiaAgainRush({
     }
   };
 
+  const tryEnterFullscreen = () => {
+    if (typeof window === "undefined" || fullscreenAttemptedRef.current) {
+      return;
+    }
+
+    const isPhoneLike = window.matchMedia("(pointer: coarse)").matches;
+    if (!isPhoneLike || document.fullscreenElement) {
+      return;
+    }
+
+    const root = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void> | void;
+    };
+
+    const requestFullscreen = root.requestFullscreen?.bind(root) ?? root.webkitRequestFullscreen?.bind(root);
+    if (!requestFullscreen) {
+      return;
+    }
+
+    fullscreenAttemptedRef.current = true;
+    void Promise.resolve(requestFullscreen()).catch(() => {
+      fullscreenAttemptedRef.current = false;
+    });
+  };
+
   const setControl = (key: "left" | "right" | "up" | "down", pressed: boolean) => {
     keysRef.current[key] = pressed;
+  };
+
+  const handleControlTouchStart = (key: "left" | "right" | "up" | "down") => {
+    tryEnterFullscreen();
+    setControl(key, true);
   };
 
   const spawnLaughStickers = () => {
@@ -313,6 +344,7 @@ export default function Stage8_DiaAgainRush({
   };
 
   const startRun = () => {
+    tryEnterFullscreen();
     setupRound(true);
   };
 
@@ -325,6 +357,10 @@ export default function Stage8_DiaAgainRush({
     autoStartNextRoundRef.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundIndex]);
+
+  useEffect(() => {
+    tryEnterFullscreen();
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -695,40 +731,40 @@ export default function Stage8_DiaAgainRush({
         <div className="col-start-2">
           <button
             type="button"
-            onTouchStart={() => setControl("up", true)}
+            onTouchStart={() => handleControlTouchStart("up")}
             onTouchEnd={() => setControl("up", false)}
             onTouchCancel={() => setControl("up", false)}
-            className="w-full rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+            className="h-10 w-full select-none rounded-lg border border-zinc-600 bg-zinc-900/85 text-lg font-black text-zinc-100"
           >
-            Yuxarı
+            ↑
           </button>
         </div>
         <button
           type="button"
-          onTouchStart={() => setControl("left", true)}
+          onTouchStart={() => handleControlTouchStart("left")}
           onTouchEnd={() => setControl("left", false)}
           onTouchCancel={() => setControl("left", false)}
-          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+          className="h-10 select-none rounded-lg border border-zinc-600 bg-zinc-900/85 text-lg font-black text-zinc-100"
         >
-          Sol
+          ←
         </button>
         <button
           type="button"
-          onTouchStart={() => setControl("down", true)}
+          onTouchStart={() => handleControlTouchStart("down")}
           onTouchEnd={() => setControl("down", false)}
           onTouchCancel={() => setControl("down", false)}
-          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+          className="h-10 select-none rounded-lg border border-zinc-600 bg-zinc-900/85 text-lg font-black text-zinc-100"
         >
-          Aşağı
+          ↓
         </button>
         <button
           type="button"
-          onTouchStart={() => setControl("right", true)}
+          onTouchStart={() => handleControlTouchStart("right")}
           onTouchEnd={() => setControl("right", false)}
           onTouchCancel={() => setControl("right", false)}
-          className="rounded-lg border border-zinc-600 bg-zinc-900/85 px-3 py-3 text-sm font-black text-zinc-100"
+          className="h-10 select-none rounded-lg border border-zinc-600 bg-zinc-900/85 text-lg font-black text-zinc-100"
         >
-          Sağ
+          →
         </button>
       </div>
     </section>
