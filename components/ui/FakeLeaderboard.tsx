@@ -279,7 +279,7 @@ export default function FakeLeaderboard({
     ctx.textAlign = "center";
     ctx.fillStyle = "#6f1d1b";
     ctx.font = "700 74px 'Times New Roman', Georgia, serif";
-    ctx.fillText("BOS-BES RƏSMİ DİPLOM", canvas.width / 2, 300);
+    ctx.fillText("BOSH-BESH RƏSMİ DİPLOM", canvas.width / 2, 300);
 
     ctx.fillStyle = "#6d5840";
     ctx.font = "600 30px Georgia, 'Times New Roman', serif";
