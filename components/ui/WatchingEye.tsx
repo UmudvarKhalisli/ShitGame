@@ -207,7 +207,7 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
               y: stressLevel >= 6 ? { repeat: Number.POSITIVE_INFINITY, duration: 0.08 } : { duration: 0.2 },
               rotate: { duration: 0.16 },
             }}
-            className="fixed right-12 top-12 z-[100] flex h-36 w-36 items-center justify-center"
+            className="fixed bottom-4 right-3 z-[100] flex h-20 w-20 items-center justify-center sm:bottom-auto sm:right-12 sm:top-12 sm:h-36 sm:w-36"
           >
             <BloodDrip x="25%" delay={0} width={3} bloodColor={theme.blood} />
             <BloodDrip x="55%" delay={1.2} width={5} bloodColor={theme.blood} />
@@ -227,21 +227,21 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Number.POSITIVE_INFINITY, duration: 7 - stressLevel * 0.5, ease: "linear" }}
-                className="absolute h-32 w-32 rounded-full border-[2px] border-dashed border-red-600/25 opacity-50"
+                className="absolute h-16 w-16 rounded-full border-[2px] border-dashed border-red-600/25 opacity-50 sm:h-32 sm:w-32"
               />
               <motion.div
                 animate={{ rotate: -360 }}
                 transition={{ repeat: Number.POSITIVE_INFINITY, duration: 10 - stressLevel * 0.45, ease: "linear" }}
-                className="absolute h-24 w-24 rounded-full border border-red-500/25"
+                className="absolute h-12 w-12 rounded-full border border-red-500/25 sm:h-24 sm:w-24"
               />
 
               <motion.div
-                className="relative flex h-16 w-16 items-center justify-center rounded-full border border-red-900/40 bg-black shadow-[0_0_20px_black]"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-red-900/40 bg-black shadow-[0_0_20px_black] sm:h-16 sm:w-16"
                 style={{ x: clampedPupilX, y: clampedPupilY }}
               >
-                <div className="absolute left-3 top-3 h-4 w-4 rounded-full bg-red-500/10 blur-[2px]" />
+                <div className="absolute left-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500/10 blur-[2px] sm:left-3 sm:top-3 sm:h-4 sm:w-4" />
                 {stressLevel > 5 && (
-                  <span className="select-none text-[7px] font-black uppercase tracking-tighter text-red-600/60">
+                  <span className="select-none text-[6px] font-black uppercase tracking-tighter text-red-600/60 sm:text-[7px]">
                     BOS-BES
                   </span>
                 )}
@@ -267,9 +267,9 @@ export default function WatchingEye({ missClicks, onExplode }: WatchingEyeProps)
             initial={{ y: 0, rotate: 0, opacity: 1 }}
             animate={{ y: 2000, rotate: 1080, opacity: 0 }}
             transition={{ duration: 2, ease: "easeIn" }}
-            className="fixed right-12 top-12 flex h-36 w-36 items-center justify-center"
+            className="fixed bottom-4 right-3 flex h-20 w-20 items-center justify-center sm:bottom-auto sm:right-12 sm:top-12 sm:h-36 sm:w-36"
           >
-            <div className="flex h-full w-full items-center justify-center rounded-full border-2 border-red-600 bg-red-950 text-7xl shadow-[0_0_120px_#ff0000]">
+            <div className="flex h-full w-full items-center justify-center rounded-full border-2 border-red-600 bg-red-950 text-4xl shadow-[0_0_120px_#ff0000] sm:text-7xl">
               🩸
             </div>
           </motion.div>
