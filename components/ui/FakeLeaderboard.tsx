@@ -232,42 +232,126 @@ export default function FakeLeaderboard({
       throw new Error("Canvas konteksti açıla bilmədi.");
     }
 
-    ctx.fillStyle = "#07120f";
+    ctx.fillStyle = "#f4f1ea";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "#00f010";
-    ctx.lineWidth = 6;
-    ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+    // Light texture noise so parchment does not look flat.
+    for (let i = 0; i < 1500; i += 1) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const alpha = 0.02 + Math.random() * 0.035;
+      ctx.fillStyle = `rgba(120, 97, 63, ${alpha})`;
+      ctx.fillRect(x, y, 2, 2);
+    }
 
-    ctx.fillStyle = "#004a1e";
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, 150, 72, 0, Math.PI * 2);
-    ctx.fill();
+    const gold = "#c8a96b";
+    const deepGold = "#8f6d30";
+    ctx.strokeStyle = gold;
+    ctx.lineWidth = 8;
+    ctx.strokeRect(52, 52, canvas.width - 104, canvas.height - 104);
 
-    ctx.fillStyle = "#00f010";
-    ctx.font = "700 32px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
+    ctx.strokeStyle = deepGold;
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(72, 72, canvas.width - 144, canvas.height - 144);
+
+    const drawCornerOrnament = (x: number, y: number, sx: number, sy: number) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(sx, sy);
+      ctx.strokeStyle = gold;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(40, 6, 78, 40, 86, 88);
+      ctx.moveTo(12, 38);
+      ctx.quadraticCurveTo(44, 24, 62, 62);
+      ctx.moveTo(38, 12);
+      ctx.quadraticCurveTo(24, 44, 62, 62);
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    drawCornerOrnament(88, 88, 1, 1);
+    drawCornerOrnament(canvas.width - 88, 88, -1, 1);
+    drawCornerOrnament(88, canvas.height - 88, 1, -1);
+    drawCornerOrnament(canvas.width - 88, canvas.height - 88, -1, -1);
+
     ctx.textAlign = "center";
-    ctx.fillText("BB", canvas.width / 2, 162);
+    ctx.fillStyle = "#6f1d1b";
+    ctx.font = "700 74px 'Times New Roman', Georgia, serif";
+    ctx.fillText("BOS-BES RƏSMİ DİPLOM", canvas.width / 2, 300);
 
-    ctx.font = "800 56px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
-    ctx.fillText("BOS-BES RƏSMİ DİPLOM", canvas.width / 2, 330);
+    ctx.fillStyle = "#6d5840";
+    ctx.font = "600 30px Georgia, 'Times New Roman', serif";
+    ctx.fillText("Səbir və xaos qarşısında rəsmi dözümlülük sənədi", canvas.width / 2, 356);
 
     ctx.textAlign = "left";
-    ctx.font = "700 42px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
-    ctx.fillText(`Ad: ${safeName}`, 130, 540);
-    ctx.fillText(`Cəhd: ${attempts}`, 130, 630);
-    ctx.fillText(`Vaxt: ${toTime(finalScore.totalTimeSeconds)}`, 130, 720);
+    ctx.fillStyle = "#2f2721";
+    ctx.font = "700 42px Georgia, 'Times New Roman', serif";
+    ctx.fillText(`Ad Soyad: ${safeName}`, 130, 540);
+    ctx.fillText(`Cəhd sayı: ${attempts}`, 130, 630);
+    ctx.fillText(`Toplam vaxt: ${toTime(finalScore.totalTimeSeconds)}`, 130, 720);
     ctx.fillText(`Səbir Səviyyəsi: ${patienceLevel}`, 130, 810);
 
-    ctx.font = "500 33px 'Exo 2', 'Inter', 'Segoe UI', sans-serif";
-    ctx.fillText("Bu sənəd yalnız ciddi vaxt itkisindən sonra verilir.", 130, 980);
-    ctx.fillText("Sistem təsdiqi: BOŞ-BEŞ Arxiv Qovluğu", 130, 1065);
+    ctx.font = "500 31px Georgia, 'Times New Roman', serif";
+    ctx.fillStyle = "#4e3e33";
+    ctx.fillText("Bu sənəd, dağılmayan əsəb sisteminin simvolik təsdiqidir.", 130, 965);
+    ctx.fillText("Arxiv qeydi: BOŞ-BEŞ Təsnifat Komissiyası", 130, 1038);
 
-    ctx.fillStyle = "#84b488";
-    ctx.font = "500 24px 'Inter', 'Segoe UI', sans-serif";
-    ctx.fillText("www.bos-bes.local", 130, 1600);
-    ctx.textAlign = "right";
-    ctx.fillText("Issued: 2026", canvas.width - 130, 1600);
+    // Signature area
+    ctx.strokeStyle = "#6d5840";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(150, 1320);
+    ctx.lineTo(500, 1320);
+    ctx.moveTo(730, 1320);
+    ctx.lineTo(1080, 1320);
+    ctx.stroke();
+
+    ctx.fillStyle = "#2f2721";
+    ctx.font = "600 30px Georgia, 'Times New Roman', serif";
+    ctx.fillText("Səbir Komissiyası", 180, 1365);
+    ctx.fillText("Xaos Departamenti", 760, 1365);
+
+    ctx.fillStyle = "#4b3f35";
+    ctx.font = "italic 52px 'Brush Script MT', 'Segoe Script', cursive";
+    ctx.fillText("A. Səbrizadə", 182, 1302);
+    ctx.fillText("X. Qarışıqlı", 765, 1302);
+
+    // Red circular stamp at bottom-right
+    const stampX = canvas.width - 220;
+    const stampY = canvas.height - 265;
+    ctx.save();
+    ctx.translate(stampX, stampY);
+    ctx.rotate(-0.15);
+    ctx.strokeStyle = "#b91c1c";
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.arc(0, 0, 110, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 92, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = "#b91c1c";
+    ctx.font = "700 19px Georgia, 'Times New Roman', serif";
+    ctx.textAlign = "center";
+    ctx.fillText("BOŞ-BEŞ TƏSDİQİ", 0, -8);
+    ctx.font = "700 54px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
+    ctx.fillText("💩", 0, 54);
+    ctx.restore();
+
+    // Footer legal disclaimer
+    ctx.fillStyle = "#5c5147";
+    ctx.font = "500 20px Georgia, 'Times New Roman', serif";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      "Bu sənəd hüquqi qüvvəyə malik deyil, eynilə itirdiyiniz vaxt kimi.",
+      canvas.width / 2,
+      canvas.height - 92,
+    );
 
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
     pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 210, 297, undefined, "FAST");
@@ -474,23 +558,23 @@ export default function FakeLeaderboard({
 
       <div className="relative z-[12001] space-y-2 rounded-xl border border-zinc-700 bg-zinc-900/70 p-3 pointer-events-auto">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-300">Terminal Komandaları</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
         <button
           type="button"
           onClick={() => setIsSlanderOpen(true)}
           onPointerDown={() => setIsSlanderOpen(true)}
-          className={TERMINAL_BTN}
+          className={`${TERMINAL_BTN} shrink-0 whitespace-nowrap`}
         >
           Müəllifə Şikayət Et
         </button>
-        <button type="button" onClick={startCertificateFlow} onPointerDown={startCertificateFlow} className={TERMINAL_BTN}>
+        <button type="button" onClick={startCertificateFlow} onPointerDown={startCertificateFlow} className={`${TERMINAL_BTN} shrink-0 whitespace-nowrap`}>
           Rəsmi Diplomunu Al
         </button>
         <button
           type="button"
           onClick={() => setCallPhase("incoming")}
           onPointerDown={() => setCallPhase("incoming")}
-          className={TERMINAL_BTN}
+          className={`${TERMINAL_BTN} shrink-0 whitespace-nowrap`}
         >
           Dərdimi Kimə Deyim?
         </button>
